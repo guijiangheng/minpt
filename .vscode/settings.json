@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "core": "cpp",
+        "stdexcept": "cpp",
+        "string": "cpp",
+        "algorithm": "cpp"
+    }
+}

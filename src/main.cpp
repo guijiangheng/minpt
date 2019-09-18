@@ -1,7 +1,11 @@
 #include <iostream>
+#include <minpt/math/vector.h>
+
 using namespace std;
+using namespace minpt;
 
 int main() {
-  std::cout << "hello world" << std::endl;
+  auto c = Vector3f(0, 1, 2);
+  cout << c.toString() << endl;
   return 0;
 }
