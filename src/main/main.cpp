@@ -1,11 +1,11 @@
 #include <iostream>
-#include <minpt/core/bitmap.h>
+#include <minpt/math/math.h>
 
 using namespace std;
 using namespace minpt;
 
 int main() {
-  Bitmap bitmap("./dragon.exr");
-  bitmap.save("./dragon-test.exr");
+  Bounds3f b(Vector3f(3), Vector3f(4));
+  std::cout << b.toString() << std::endl;
   return 0;
 }

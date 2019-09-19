@@ -41,8 +41,9 @@ set(
   include/minpt/common/common.h
   include/minpt/core/bitmap.h
   include/minpt/core/exception.h
-  include/minpt/math/color.h
   include/minpt/math/math.h
+  include/minpt/math/bounds.h
+  include/minpt/math/color.h
   include/minpt/math/vector.h
 )
 

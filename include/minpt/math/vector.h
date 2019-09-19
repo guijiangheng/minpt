@@ -5,9 +5,12 @@
 
 namespace minpt {
 
-template <typename _Scalar, int Dimension>
-class Vector : public Eigen::Matrix<_Scalar, Dimension, 1> {
+template <typename _Scalar, int _Dimension>
+class Vector : public Eigen::Matrix<_Scalar, _Dimension, 1> {
 public:
+  enum {
+    Dimension = _Dimension
+  };
   using Scalar = _Scalar;
   using Base = Eigen::Matrix<Scalar, Dimension, 1>;
 
