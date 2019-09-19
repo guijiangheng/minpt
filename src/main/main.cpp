@@ -1,11 +1,11 @@
 #include <iostream>
-#include <minpt/math/math.h>
+#include <minpt/core/ray.h>
 
 using namespace std;
 using namespace minpt;
 
 int main() {
-  Bounds3f b(Vector3f(3), Vector3f(4));
-  std::cout << b.toString() << std::endl;
+  Ray3f ray(Vector3f(3), Vector3f(1, 0, 0));
+  std::cout << ray.toString() << std::endl;
   return 0;
 }
