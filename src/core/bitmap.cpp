@@ -1,12 +1,13 @@
-#include <minpt/core/bitmap.h>
-#include <minpt/common/common.h>
-#include <minpt/core/exception.h>
 #include <ImfInputFile.h>
 #include <ImfOutputFile.h>
 #include <ImfChannelList.h>
 #include <ImfStringAttribute.h>
 #include <ImfVersion.h>
 #include <ImfIO.h>
+
+#include <minpt/core/bitmap.h>
+#include <minpt/core/exception.h>
+#include <minpt/common/common.h>
 
 namespace minpt {
 
