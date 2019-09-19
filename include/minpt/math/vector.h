@@ -3,7 +3,6 @@
 #include <tinyformat.h>
 #include <Eigen/Core>
 
-
 namespace minpt {
 
 template <typename _Scalar, int Dimension>
