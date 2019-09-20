@@ -53,6 +53,7 @@ set(
 set(
   MINPT_SRCS
   src/core/bitmap.cpp
+  src/core/mesh.cpp
 )
 
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})

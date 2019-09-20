@@ -27,6 +27,16 @@ public:
   Vector(Scalar x, Scalar y, Scalar z, Scalar w) : Base(x, y, z, w)
   { }
 
+  template <typename Derived>
+  Vector(const Eigen::MatrixBase<Derived>& p) : Base(p)
+  { }
+
+  template <typename Derived>
+  Vector& operator=(const Eigen::MatrixBase<Derived>& p) {
+    this->Base::operator=(p);
+    return *this;
+  }
+
   std::string toString() const {
     std::string ret;
     for (auto i = 0; i < Dimension; ++i) {

@@ -15,6 +15,16 @@ public:
   Color3f(float r, float g, float b) : Base(r, g, b)
   { }
 
+  template <typename Derived>
+  Color3f(const Eigen::ArrayBase<Derived>& p) : Base(p)
+  { }
+
+  template <typename Derived>
+  Color3f& operator=(const Eigen::ArrayBase<Derived>& c) {
+    this->Base::operator=(c);
+    return *this;
+  }
+
   float& r() {
     return x();
   }

@@ -1,15 +1,15 @@
 #include <iostream>
-#include <minpt/math/bounds.h>
+#include <Eigen/Geometry>
+#include <minpt/math/color.h>
+#include <minpt/math/vector.h>
 
 using namespace std;
 using namespace minpt;
 
 int main() {
-  Bounds3f b(Vector3f(-1), Vector3f(1));
-  Ray3f ray(Vector3f(0, 0, 2), Vector3f(0, 0, 1));
-  Vector3f invDir(1 / 0.0f, 1 / 0.0f, 1 / 1.0f);
-  int dirIsNeg[3] = { 0, 0, 0 };
-  auto intersect = b.intersect(ray, invDir, dirIsNeg);
-  std::cout << intersect << std::endl;
+  Vector3f a(1, 2, 3);
+  Vector3f b(2, 3, 4);
+  Vector3f c = a.cross(b);
+  std::cout << c.toString() << std::endl;
   return 0;
 }
