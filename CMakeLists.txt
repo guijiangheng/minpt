@@ -43,11 +43,13 @@ set(
   include/minpt/core/ray.h
   include/minpt/core/bitmap.h
   include/minpt/core/exception.h
+  include/minpt/core/mesh.h
 
   include/minpt/math/math.h
   include/minpt/math/bounds.h
   include/minpt/math/color.h
   include/minpt/math/vector.h
+  include/minpt/math/frame.h
 )
 
 set(

@@ -1,15 +1,13 @@
 #include <iostream>
-#include <Eigen/Geometry>
-#include <minpt/math/color.h>
-#include <minpt/math/vector.h>
+#include <minpt/math/frame.h>
 
 using namespace std;
 using namespace minpt;
 
 int main() {
-  Vector3f a(1, 2, 3);
-  Vector3f b(2, 3, 4);
-  Vector3f c = a.cross(b);
-  std::cout << c.toString() << std::endl;
+  Vector3f v = Eigen::Vector3f::Random();
+  std::cout << v.toString() << std::endl;
+  Frame f(v);
+  std::cout << f.toString() << std::endl;
   return 0;
 }
