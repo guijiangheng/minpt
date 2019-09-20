@@ -40,9 +40,10 @@ set(
   MINPT_HEADERS
   include/minpt/common/common.h
 
-  include/minpt/core/ray.h
-  include/minpt/core/bitmap.h
   include/minpt/core/exception.h
+  include/minpt/core/bitmap.h
+  include/minpt/core/ray.h
+  include/minpt/core/interaction.h
   include/minpt/core/mesh.h
 
   include/minpt/math/math.h
