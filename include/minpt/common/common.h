@@ -4,6 +4,8 @@
 
 namespace minpt {
 
+std::string indent(const std::string& string, int amount = 2);
+
 inline std::string toLower(const std::string& value) {
   std::string ret;
   ret.resize(value.size());

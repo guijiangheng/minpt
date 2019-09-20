@@ -1,6 +1,7 @@
 #pragma once
 
 #include <minpt/math/frame.h>
+#include <minpt/common/common.h>
 
 namespace minpt {
 
@@ -22,9 +23,9 @@ public:
       "  p = %s,\n"
       "  n = %s,\n"
       "  uv = %s,\n"
-      "  shFrame=%s\n"
+      "  shFrame = %s\n"
       "]",
-      p.toString(), n.toString(), uv.toString(), shFrame.toString()
+      p.toString(), n.toString(), uv.toString(), indent(shFrame.toString())
     );
   }
 
