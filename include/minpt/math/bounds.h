@@ -81,6 +81,16 @@ public:
     return (max.array() >= min.array()).all();
   }
 
+  PointType& operator[](int index) {
+    static_assert(index >= 0 && index <= 1);
+    return (&min)[index];
+  }
+
+  const PointType& operator[](int index) const {
+    static_assert(index >= 0 && index <= 1);
+    return (&min)[index];
+  }
+
   bool operator==(const BoundingBox& b) const {
     return min == b.min && max == b.max;
   }
