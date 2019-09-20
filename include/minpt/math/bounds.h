@@ -2,7 +2,7 @@
 
 #include <limits>
 #include <tinyformat.h>
-#include <minpt/math/vector.h>
+#include <minpt/core/ray.h>
 
 namespace minpt {
 
@@ -77,17 +77,33 @@ public:
     );
   }
 
+  bool intersect(const Ray3f& ray, const Vector3f& invDir, const int dirIsNeg[3]) const {
+    auto& b = *this;
+    auto tMin = (b[dirIsNeg[0]].x() - ray.o.x()) * invDir.x();
+    auto tMax = (b[1 - dirIsNeg[0]].x() - ray.o.x()) * invDir.x();
+    if (tMax <= 0 || tMin >= ray.tMax) return false;
+    tMin = std::max(tMin, 0.0f);
+    tMax = std::min(tMax, ray.tMax);
+    auto tyMin = (b[dirIsNeg[1]].y() - ray.o.y()) * invDir.y();
+    auto tyMax = (b[1 - dirIsNeg[1]].y() - ray.o.y()) * invDir.y();
+    if (tyMax <= tMin || tyMin >= tMax) return false;
+    tMin = std::max(tMin, tyMin);
+    tMax = std::min(tMax, tyMax);
+    auto tzMin = (b[dirIsNeg[2]].z() - ray.o.z()) * invDir.z();
+    auto tzMax = (b[1 - dirIsNeg[2]].z() - ray.o.z()) * invDir.z();
+    if (tzMin >= tMax || tzMax <= tMin) return false;
+    return true;
+  }
+
   bool isValid() const {
     return (max.array() >= min.array()).all();
   }
 
   PointType& operator[](int index) {
-    static_assert(index >= 0 && index <= 1);
     return (&min)[index];
   }
 
   const PointType& operator[](int index) const {
-    static_assert(index >= 0 && index <= 1);
     return (&min)[index];
   }
 

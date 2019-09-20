@@ -1,6 +1,6 @@
 #pragma once
 
-#include <minpt/math/math.h>
+#include <minpt/math/vector.h>
 
 namespace minpt {
 

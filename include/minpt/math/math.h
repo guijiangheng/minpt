@@ -1,9 +1,6 @@
 #pragma once
 
 #include <Eigen/Core>
-#include <minpt/math/bounds.h>
-#include <minpt/math/color.h>
-#include <minpt/math/vector.h>
 
 namespace minpt {
 
