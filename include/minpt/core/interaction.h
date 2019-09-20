@@ -1,7 +1,7 @@
 #pragma once
 
 #include <minpt/math/frame.h>
-#include <minpt/common/common.h>
+#include <minpt/utils/utils.h>
 
 namespace minpt {
 

@@ -1,5 +1,5 @@
 #include <sstream>
-#include <minpt/common/common.h>
+#include <minpt/utils/utils.h>
 
 namespace minpt {
 

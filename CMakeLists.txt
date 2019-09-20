@@ -38,10 +38,10 @@ add_definitions(${NANOGUI_EXTRA_DEFS})
 
 set(
   MINPT_HEADERS
-  include/minpt/common/common.h
+  include/minpt/utils/utils.h
+  include/minpt/utils/bitmap.h
+  include/minpt/utils/exception.h
 
-  include/minpt/core/exception.h
-  include/minpt/core/bitmap.h
   include/minpt/core/ray.h
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h
@@ -55,9 +55,9 @@ set(
 
 set(
   MINPT_SRCS
-  src/core/bitmap.cpp
+  src/utils/utils.cpp
+  src/utils/bitmap.cpp
   src/core/mesh.cpp
-  src/common/common.cpp
 )
 
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})
