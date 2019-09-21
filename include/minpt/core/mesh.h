@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <tinyformat.h>
 #include <minpt/math/math.h>
 #include <minpt/math/bounds.h>

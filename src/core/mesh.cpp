@@ -1,4 +1,3 @@
-#include <Eigen/Geometry>
 #include <minpt/core/mesh.h>
 
 namespace minpt {

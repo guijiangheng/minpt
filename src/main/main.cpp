@@ -1,11 +1,11 @@
 #include <iostream>
-#include <minpt/core/interaction.h>
+#include <minpt/utils/obj.h>
 
 using namespace std;
 using namespace minpt;
 
 int main() {
-  Interaction isect;
-  std::cout << isect.toString() << std::endl;
+  WavefrontOBJ obj("./sphere.obj");
+  std::cout << obj.toString() << std::endl;
   return 0;
 }

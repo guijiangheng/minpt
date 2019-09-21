@@ -58,6 +58,7 @@ set(
   src/utils/utils.cpp
   src/utils/bitmap.cpp
   src/core/mesh.cpp
+  src/utils/obj.cpp
 )
 
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})
