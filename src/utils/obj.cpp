@@ -43,6 +43,8 @@ WavefrontOBJ::WavefrontOBJ(const std::string& filename) {
   if (file.fail())
     throw Exception("Unable to open OBJ file \"%s\"!", filename);
 
+  name = filename;
+
   std::vector<Vector3f> positions;
   std::vector<Vector3f> normals;
   std::vector<Vector2f> uvs;
