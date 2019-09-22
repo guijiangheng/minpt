@@ -1,11 +1,11 @@
 #include <iostream>
-#include <minpt/utils/obj.h>
+#include <minpt/samplers/random.h>
 
 using namespace std;
 using namespace minpt;
 
 int main() {
-  WavefrontOBJ obj("sphere.obj");
-  std::cout << obj.toString() << std::endl;
+  RandomSampler sampler(512);
+  std::cout << sampler.toString() << std::endl;
   return 0;
 }

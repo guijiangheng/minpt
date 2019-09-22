@@ -45,6 +45,9 @@ set(
   include/minpt/core/ray.h
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h
+  include/minpt/core/sampler.h
+
+  include/minpt/samplers/random.h
 
   include/minpt/math/math.h
   include/minpt/math/bounds.h
