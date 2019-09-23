@@ -35,8 +35,8 @@ public:
 
   Bounds3f getBounds(uint32_t index) const {
     Bounds3f b(v.col(f(0, index)));
-    b.expandBy(v.col(f(1, index)));
-    return Bounds3f::merge(b, v.col(f(2, index)));
+    b.extend(v.col(f(1, index)));
+    return b.extend(v.col(f(2, index)));
   }
 
   Vector3f getCentroid(uint32_t index) const {
