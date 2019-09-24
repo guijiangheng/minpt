@@ -55,6 +55,7 @@ set(
   include/minpt/math/color.h
   include/minpt/math/vector.h
   include/minpt/math/frame.h
+  include/minpt/math/transform.h
 )
 
 set(
