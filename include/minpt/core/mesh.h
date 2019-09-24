@@ -18,35 +18,36 @@ namespace minpt {
  */
 class Mesh {
 public:
-  uint32_t getPrimitiveCount() const {
-    return (uint32_t)f.cols();
+  std::uint32_t getPrimitiveCount() const {
+    return (std::uint32_t)f.cols();
   }
 
-  uint32_t getVertexCount() const {
-    return (uint32_t)v.cols();
+  std::uint32_t getVertexCount() const {
+    return (std::uint32_t)v.cols();
   }
 
-  float getSurfaceArea(uint32_t index) const {
+  float getSurfaceArea(std::uint32_t index) const {
     Vector3f a = v.col(f(0, index));
     Vector3f b = v.col(f(1, index));
     Vector3f c = v.col(f(2, index));
     return Vector3f((a - b).cross(a - c)).norm() / 2;
   }
 
-  Bounds3f getBounds(uint32_t index) const {
-    Bounds3f b(v.col(f(0, index)));
-    b.extend(v.col(f(1, index)));
-    return b.extend(v.col(f(2, index)));
+  Bounds3f getBounds(std::uint32_t index) const {
+    auto& a = v.col(f(0, index));
+    auto& b = v.col(f(1, index));
+    Bounds3f box(a.cwiseMin(b), a.cwiseMax(b));
+    return box.extend(v.col(f(2, index)));
   }
 
-  Vector3f getCentroid(uint32_t index) const {
+  Vector3f getCentroid(std::uint32_t index) const {
     return (
       v.col(f(0, index)) +
       v.col(f(1, index)) +
       v.col(f(2, index))) / 3;
   }
 
-  bool intersect(uint32_t index, const Ray3f& ray) const;
+  bool intersect(std::uint32_t index, const Ray3f& ray) const;
 
   std::string toString() const {
     return tfm::format(

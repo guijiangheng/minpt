@@ -8,28 +8,16 @@ namespace minpt {
 class Color3f : public Eigen::Array3f {
 public:
   using Base = Eigen::Array3f;
+  using Base::Base;
 
-  Color3f(float value = 0.0f) : Base(value, value, value)
+  explicit Color3f(float value = 0.0f) noexcept : Base(value, value, value)
   { }
-
-  Color3f(float r, float g, float b) : Base(r, g, b)
-  { }
-
-  template <typename Derived>
-  Color3f(const Eigen::ArrayBase<Derived>& p) : Base(p)
-  { }
-
-  template <typename Derived>
-  Color3f& operator=(const Eigen::ArrayBase<Derived>& c) {
-    this->Base::operator=(c);
-    return *this;
-  }
 
   float& r() {
     return x();
   }
 
-  float r() const {
+  const float& r() const {
     return x();
   }
 
@@ -37,7 +25,7 @@ public:
     return y();
   }
 
-  float g() const {
+  const float& g() const {
     return y();
   }
 
@@ -45,11 +33,11 @@ public:
     return z();
   }
 
-  float b() const {
+  const float& b() const {
     return z();
   }
 
-  float getLuminance() const {
+  float luminance() const {
     return coeff(0) * 0.212671f + coeff(1) * 0.715160f + coeff(2) * 0.072169f;
   }
 

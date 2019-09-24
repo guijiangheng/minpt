@@ -11,7 +11,7 @@ public:
   using Base = Eigen::AlignedBox<Scalar, Dimension>;
   using VectorType = typename Base::VectorType;
 
-  using Base::AlignedBox;
+  using Base::Base;
   using Base::m_min;
   using Base::m_max;
 

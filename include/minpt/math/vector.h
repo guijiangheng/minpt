@@ -11,30 +11,14 @@ public:
   enum {
     Dimension = _Dimension
   };
+
   using Scalar = _Scalar;
   using Base = Eigen::Matrix<Scalar, Dimension, 1>;
 
-  Vector(Scalar value = (Scalar)0) {
+  using Base::Base;
+
+  explicit Vector(Scalar value = 0) noexcept {
     Base::setConstant(value);
-  }
-
-  Vector(Scalar x, Scalar y) : Base(x, y)
-  { }
-
-  Vector(Scalar x, Scalar y, Scalar z) : Base(x, y, z)
-  { }
-
-  Vector(Scalar x, Scalar y, Scalar z, Scalar w) : Base(x, y, z, w)
-  { }
-
-  template <typename Derived>
-  Vector(const Eigen::MatrixBase<Derived>& p) : Base(p)
-  { }
-
-  template <typename Derived>
-  Vector& operator=(const Eigen::MatrixBase<Derived>& p) {
-    this->Base::operator=(p);
-    return *this;
   }
 
   std::string toString() const {

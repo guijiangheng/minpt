@@ -33,8 +33,8 @@ std::vector<std::string> tokenize(const std::string& string, const std::string& 
 }
 
 filesystem::resolver* getFileResolver() {
-  static filesystem::resolver *resolver = new filesystem::resolver();
-  return resolver;
+  static auto resolver = filesystem::resolver();
+  return &resolver;
 }
 
 }
