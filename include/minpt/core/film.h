@@ -2,6 +2,7 @@
 
 #include <minpt/math/color.h>
 #include <minpt/math/bounds.h>
+#include <minpt/utils/utils.h>
 
 namespace minpt {
 
@@ -16,6 +17,16 @@ public:
     ) {
     auto diag = pixelBounds.diagonal();
     pixels.resize(diag.y(), diag.x());
+  }
+
+  std::string toString() const {
+    return tfm::format(
+      "Film[\n"
+      "  resolution = %s,\n"
+      "  pixelBounds = %s\n"
+      "]",
+      resolution.toString(), pixelBounds.toString()
+    );
   }
 
 public:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/LU>
-#include <minpt/math/math.h>
+#include <minpt/utils/utils.h>
 #include <minpt/core/ray.h>
 
 namespace minpt {
@@ -49,9 +49,7 @@ public:
   }
 
   std::string toString() const {
-    std::ostringstream oss;
-    oss << m.format(Eigen::IOFormat(4, 0, ", ", ",\n", "", "", "[", "]"));
-    return oss.str();
+    return minpt::toString(m);
   }
 
 public:

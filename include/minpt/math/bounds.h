@@ -66,7 +66,8 @@ public:
   std::string toString() const {
     return tfm::format(
       "BoundingBox[min=%s, max=%s]",
-      Vector3f(m_min).toString(), Vector3f(m_max).toString()
+      Vector<Scalar, Dimension>(m_min).toString(),
+      Vector<Scalar, Dimension>(m_max).toString()
     );
   }
 };

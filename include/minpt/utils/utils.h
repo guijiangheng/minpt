@@ -3,11 +3,18 @@
 #include <string>
 #include <vector>
 #include <filesystem/resolver.h>
+#include <minpt/math/math.h>
 #include <minpt/utils/exception.h>
 
 namespace minpt {
 
 std::string indent(const std::string& string, int amount = 2);
+
+inline std::string toString(const Matrix4f& m) {
+  std::ostringstream oss;
+  oss << m.format(Eigen::IOFormat(4, 0, ", ", ",\n", "", "", "[", "]"));
+  return oss.str();
+}
 
 inline int toInt(const std::string& string) {
   char* endPtr = nullptr;
