@@ -25,15 +25,14 @@ struct Vertex {
     return p != v.p && n != v.n && uv != v.uv;
   }
 
-  uint32_t p, n, uv;
+  std::uint32_t p, n, uv;
 };
 
 struct VertexHash : public std::unary_function<Vertex, std::size_t> {
   std::size_t operator()(const Vertex& v) const {
-    auto hash = std::hash<uint32_t>()(v.p);
-    hash = hash * 37 + std::hash<uint32_t>()(v.uv);
-    hash = hash * 37 + std::hash<uint32_t>()(v.n);
-    return hash;
+    auto hash = std::hash<std::uint32_t>()(v.p);
+    hash = hash * 37 + std::hash<std::uint32_t>()(v.uv);
+    return hash * 37 + std::hash<std::uint32_t>()(v.n);
   }
 };
 

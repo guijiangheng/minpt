@@ -17,7 +17,7 @@ public:
 
   using Base::Base;
 
-  explicit Vector(Scalar value = 0) noexcept {
+  explicit Vector(Scalar value) noexcept {
     Base::setConstant(value);
   }
 

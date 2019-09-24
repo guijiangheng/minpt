@@ -46,6 +46,7 @@ set(
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h
   include/minpt/core/sampler.h
+  include/minpt/core/film.h
 
   include/minpt/samplers/random.h
 
