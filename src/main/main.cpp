@@ -11,7 +11,7 @@ int main() {
        7, 8, 9, 10;
   m.setIdentity();
   m = Matrix4f::perspective(30, 0.01f, 1000.0f);
-  std::cout << Matrix4f::Identity().toString() << std::endl;
+  std::cout << Matrix4f::identity().toString() << std::endl;
   std::cout << m.toString() << std::endl;
   return 0;
 }

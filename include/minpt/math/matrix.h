@@ -36,7 +36,7 @@ public:
     );
   }
 
-  static Matrix4 Identity() {
+  static Matrix4 identity() {
     return Base::Identity();
   }
 

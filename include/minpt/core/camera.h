@@ -1,7 +1,7 @@
 #pragma once
 
 #include <minpt/core/film.h>
-#include <minpt/utils/utils.h>
+#include <minpt/math/matrix.h>
 
 namespace minpt {
 
@@ -49,8 +49,8 @@ public:
       "  rasterToCamera = %s,\n"
       "  film = %s\n"
       "]",
-      indent(minpt::toString(rasterToCamera), 2),
-      indent(film.toString(), 2)
+      indent(rasterToCamera.toString()),
+      indent(film.toString())
     );
   }
 
