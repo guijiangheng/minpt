@@ -5,6 +5,7 @@
 #include <tinyformat.h>
 #include <minpt/math/math.h>
 #include <minpt/math/bounds.h>
+#include <minpt/core/interaction.h>
 
 namespace minpt {
 
@@ -18,6 +19,8 @@ namespace minpt {
  */
 class Mesh {
 public:
+  virtual ~Mesh() = default;
+
   std::uint32_t getPrimitiveCount() const {
     return (std::uint32_t)f.cols();
   }
@@ -33,7 +36,7 @@ public:
     return Vector3f((a - b).cross(a - c)).norm() / 2;
   }
 
-  Bounds3f getBounds(std::uint32_t index) const {
+  Bounds3f getBoundingBox(std::uint32_t index) const {
     auto& a = v.col(f(0, index));
     auto& b = v.col(f(1, index));
     Bounds3f box(a.cwiseMin(b), a.cwiseMax(b));
@@ -49,6 +52,8 @@ public:
 
   bool intersect(std::uint32_t index, const Ray3f& ray) const;
 
+  bool intersect(std::uint32_t index, const Ray3f& ray, Interaction& isect) const;
+
   std::string toString() const {
     return tfm::format(
       "Mesh[\n"
@@ -62,7 +67,6 @@ public:
 
 protected:
   Mesh() = default;
-  virtual ~Mesh() = default;
 
 public:
   std::string name;

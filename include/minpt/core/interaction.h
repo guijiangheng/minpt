@@ -7,7 +7,7 @@ namespace minpt {
 
 class Interaction {
 public:
-  Interaction() noexcept = default;
+  Interaction() = default;
 
   Vector3f toLocal(const Vector3f& v) const {
     return shFrame.toLocal(v);

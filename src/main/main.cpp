@@ -1,19 +1,17 @@
 #include <iostream>
-#include <minpt/core/film.h>
-#include <minpt/math/transform.h>
+#include <minpt/math/matrix.h>
 
-using namespace std;
 using namespace minpt;
 
 int main() {
-  Transform t;
-  std::cout << t.toString() << std::endl;
-
-  Film film(Vector2i(512, 512));
-  std::cout << film.toString() << std::endl;
-
-  Bounds2i b;
-  std::cout << b.toString() << std::endl;
-
+  Matrix4f m;
+  m << 1, 2, 3, 4,
+       2, 3, 4, 5,
+       4, 5, 6, 7,
+       7, 8, 9, 10;
+  m.setIdentity();
+  m = Matrix4f::perspective(30, 0.01f, 1000.0f);
+  std::cout << Matrix4f::Identity().toString() << std::endl;
+  std::cout << m.toString() << std::endl;
   return 0;
 }

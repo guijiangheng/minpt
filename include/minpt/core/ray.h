@@ -33,7 +33,7 @@ public:
 public:
   VectorType o;
   VectorType d;
-  Scalar tMax;
+  mutable Scalar tMax;
 };
 
 using Ray2f = Ray<Vector2f>;
