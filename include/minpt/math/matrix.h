@@ -14,6 +14,7 @@ public:
   using Vector3Type = Vector<Scalar, 3>;
   using Ray3Type = Ray<Vector3Type>;
   using Base::Base;
+  using Base::operator*;
 
   Vector3Type applyV(const Vector3Type& v) const {
     return Base::template topLeftCorner<3, 3>() * v;

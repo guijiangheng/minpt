@@ -1,17 +1,16 @@
 #include <iostream>
-#include <minpt/math/matrix.h>
+#include <minpt/cameras/perspective.h>
 
 using namespace minpt;
 
 int main() {
-  Matrix4f m;
-  m << 1, 2, 3, 4,
-       2, 3, 4, 5,
-       4, 5, 6, 7,
-       7, 8, 9, 10;
-  m.setIdentity();
-  m = Matrix4f::perspective(30, 0.01f, 1000.0f);
-  std::cout << Matrix4f::identity().toString() << std::endl;
-  std::cout << m.toString() << std::endl;
+  Film film(Vector2i(512));
+  PerspectiveCamera camera(
+    Matrix4f::identity(),
+    film,
+    Bounds2f(Vector2f(-1.0f), Vector2f(1.0f)),
+    30.0f
+  );
+  std::cout << camera.toString() << std::endl;
   return 0;
 }

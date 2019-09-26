@@ -32,26 +32,16 @@ public:
     Film& film,
     const Matrix4f& cameraToScreen,
     const Bounds2f& screenWindow) noexcept : Camera(frame, film) {
+    auto scale =
+      Eigen::Array3f((float)film.resolution.x(), (float)film.resolution.y(), 1.0f) *
+      Eigen::Array3f(
+        1 / (screenWindow.max().x() - screenWindow.min().x()),
+        1 / (screenWindow.min().y() - screenWindow.max().y()), 1.0f);
     auto screenToRaster =
-      Eigen::DiagonalMatrix<float,3 >(
-        Vector3f((float)film.resolution.x(), (float)film.resolution.y(), 1) *
-        Vector3f(
-          1 / (screenWindow.max().x() - screenWindow.min().x()),
-          1 / (screenWindow.min().y() - screenWindow.max().y()), 1)) *
-      Eigen::Translation3f(-screenWindow.min().x(), -screenWindow.max().y(), 0);
-    auto cameraToRaster = screenToRaster * cameraToScreen;
-    rasterToCamera = cameraToScreen.inverse();
-  }
-
-  std::string toString() const override {
-    return tfm::format(
-      "PerspectiveCamera[\n"
-      "  rasterToCamera = %s,\n"
-      "  film = %s\n"
-      "]",
-      indent(rasterToCamera.toString()),
-      indent(film.toString())
-    );
+      Eigen::DiagonalMatrix<float, 3>(scale.x(), scale.y(), scale.z()) *
+      Eigen::Translation3f(-screenWindow.min().x(), -screenWindow.max().y(), 0.0f);
+    Matrix4f cameraToRaster = Matrix4f(screenToRaster.matrix()) * cameraToScreen;
+    rasterToCamera = cameraToRaster.inverse();
   }
 
 public:
