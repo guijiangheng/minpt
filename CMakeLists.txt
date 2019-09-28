@@ -48,6 +48,9 @@ set(
   include/minpt/core/sampler.h
   include/minpt/core/film.h
   include/minpt/core/camera.h
+  include/minpt/core/scene.h
+  include/minpt/core/integrator.h
+  include/minpt/core/accelerator.h
 
   include/minpt/samplers/random.h
 

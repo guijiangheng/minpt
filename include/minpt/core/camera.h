@@ -40,8 +40,7 @@ public:
     auto screenToRaster =
       Eigen::DiagonalMatrix<float, 3>(scale.x(), scale.y(), scale.z()) *
       Eigen::Translation3f(-screenWindow.min().x(), -screenWindow.max().y(), 0.0f);
-    Matrix4f cameraToRaster = Matrix4f(screenToRaster.matrix()) * cameraToScreen;
-    rasterToCamera = cameraToRaster.inverse();
+    rasterToCamera = (screenToRaster * cameraToScreen).inverse();
   }
 
 public:
