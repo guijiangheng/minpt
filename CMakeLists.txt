@@ -46,7 +46,6 @@ set(
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h
   include/minpt/core/sampler.h
-  include/minpt/core/film.h
   include/minpt/core/camera.h
   include/minpt/core/scene.h
   include/minpt/core/integrator.h

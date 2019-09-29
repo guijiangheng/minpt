@@ -55,6 +55,8 @@ public:
     accel->addMesh(mesh);
   }
 
+  void render() const;
+
   std::string toString() const {
     std::string string;
     for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {

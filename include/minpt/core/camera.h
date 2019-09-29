@@ -1,6 +1,5 @@
 #pragma once
 
-#include <minpt/core/film.h>
 #include <minpt/math/matrix.h>
 
 namespace minpt {
@@ -11,7 +10,8 @@ struct CameraSample {
 
 class Camera {
 public:
-  Camera(const Matrix4f& frame, Film& film) noexcept : frame(frame), film(film)
+  Camera(const Matrix4f& frame, const Vector2i& outputSize) noexcept
+    : frame(frame), outputSize(outputSize)
   { }
 
   virtual ~Camera() = default;
@@ -22,29 +22,7 @@ public:
 
 public:
   Matrix4f frame;
-  Film& film;
-};
-
-class ProjectiveCamera : public Camera {
-public:
-  ProjectiveCamera(
-    const Matrix4f& frame,
-    Film& film,
-    const Matrix4f& cameraToScreen,
-    const Bounds2f& screenWindow) noexcept : Camera(frame, film) {
-    auto scale =
-      Eigen::Array3f((float)film.resolution.x(), (float)film.resolution.y(), 1.0f) *
-      Eigen::Array3f(
-        1 / (screenWindow.max().x() - screenWindow.min().x()),
-        1 / (screenWindow.min().y() - screenWindow.max().y()), 1.0f);
-    auto screenToRaster =
-      Eigen::DiagonalMatrix<float, 3>(scale.x(), scale.y(), scale.z()) *
-      Eigen::Translation3f(-screenWindow.min().x(), -screenWindow.max().y(), 0.0f);
-    rasterToCamera = (screenToRaster * cameraToScreen).inverse();
-  }
-
-public:
-  Matrix4f rasterToCamera;
+  Vector2i outputSize;
 };
 
 }
