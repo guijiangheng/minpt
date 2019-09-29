@@ -1,3 +1,4 @@
+#include <minpt/math/math.h>
 #include <minpt/core/mesh.h>
 
 namespace minpt {
@@ -56,6 +57,35 @@ bool Mesh::intersect(uint32_t index, const Ray3f& ray, Interaction& isect) const
   isect.uv = Vector2f(u, v);
 
   return true;
+}
+
+void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
+  auto ia = f(0, index);
+  auto ib = f(1, index);
+  auto ic = f(2, index);
+
+  Vector3f a = v.col(f(0, index));
+  Vector3f b = v.col(f(1, index));
+  Vector3f c = v.col(f(2, index));
+  isect.p = barycentric(a, b, c, isect.uv);
+  isect.n = (b - a).cross(c - a).normalized();
+
+  if (n.size()) {
+    Vector3f na = v.col(ia);
+    Vector3f nb = v.col(ib);
+    Vector3f nc = v.col(ic);
+    Vector3f ns = barycentric(na, nb, nc, isect.uv).normalized();
+    isect.shFrame = Frame(ns);
+  } else {
+    isect.shFrame = Frame(isect.n);
+  }
+
+  if (uv.size()) {
+    Vector2f uva = uv.col(f(0, index));
+    Vector2f uvb = uv.col(f(1, index));
+    Vector2f uvc = uv.col(f(2, index));
+    isect.uv = barycentric(uva, uvb, uvc, isect.uv);
+  }
 }
 
 }

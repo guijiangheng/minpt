@@ -1,10 +1,12 @@
 #pragma once
 
+#include <minpt/core/ray.h>
 #include <minpt/math/color.h>
-#include <minpt/core/camera.h>
 #include <minpt/core/sampler.h>
 
 namespace minpt {
+
+class Scene;
 
 class Integrator {
 public:

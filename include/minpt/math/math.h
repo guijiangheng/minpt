@@ -26,4 +26,9 @@ constexpr float degrees(float rad) {
   return 180 / Pi * rad;
 }
 
+template <typename VectorType>
+VectorType barycentric(const VectorType& a, const VectorType& b, const VectorType& c, const Vector2f& uv) {
+  return (1 - uv.x() - uv.y()) * a + uv.x() * b + uv.y() * c;
+}
+
 }

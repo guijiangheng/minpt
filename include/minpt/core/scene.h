@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <minpt/core/camera.h>
+#include <minpt/core/sampler.h>
 #include <minpt/core/integrator.h>
 #include <minpt/core/accelerator.h>
 
@@ -8,7 +10,7 @@ namespace minpt {
 
 class Scene {
 public:
-  Scene(Camera* camera, Sampler* sampler, Integrator* integrator)
+  Scene(Camera* camera, Sampler* sampler, Integrator* integrator, Accelerator* accel)
     : camera(camera)
     , sampler(sampler)
     , integrator(integrator)
@@ -55,7 +57,7 @@ public:
     accel->addMesh(mesh);
   }
 
-  void render() const;
+  void render(const std::string& outputName) const;
 
   std::string toString() const {
     std::string string;

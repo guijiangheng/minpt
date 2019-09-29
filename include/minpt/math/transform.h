@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Eigen/LU>
-#include <minpt/utils/utils.h>
 #include <minpt/core/ray.h>
+#include <minpt/math/matrix.h>
 
 namespace minpt {
 
@@ -49,7 +49,7 @@ public:
   }
 
   std::string toString() const {
-    return minpt::toString(m);
+    return m.toString();
   }
 
 public:

@@ -54,6 +54,8 @@ public:
 
   bool intersect(std::uint32_t index, const Ray3f& ray, Interaction& isect) const;
 
+  void computeIntersection(std::uint32_t index, Interaction& isect) const;
+
   std::string toString() const {
     return tfm::format(
       "Mesh[\n"

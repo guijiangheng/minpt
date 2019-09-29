@@ -59,6 +59,10 @@ set(
   include/minpt/math/vector.h
   include/minpt/math/frame.h
   include/minpt/math/transform.h
+
+  include/minpt/accelerators/bvh.h
+
+  include/minpt/integrators/normals.h
 )
 
 set(
@@ -66,7 +70,9 @@ set(
   src/utils/utils.cpp
   src/utils/bitmap.cpp
   src/core/mesh.cpp
+  src/core/scene.cpp
   src/utils/obj.cpp
+  src/accelerators/bvh.cpp
 )
 
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})

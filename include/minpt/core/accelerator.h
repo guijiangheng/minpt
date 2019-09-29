@@ -37,11 +37,11 @@ public:
 
   virtual bool intersect(const Ray3f& ray) const = 0;
 
-  virtual bool intersect(const Ray3f& ray, Interaction& isect) = 0;
+  virtual bool intersect(const Ray3f& ray, Interaction& isect) const = 0;
 
   virtual std::string toString() const = 0;
 
-private:
+protected:
   std::vector<Mesh*> meshes;
   std::vector<std::uint32_t> indices;
   std::vector<std::uint32_t> primOffset;
