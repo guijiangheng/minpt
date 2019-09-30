@@ -19,6 +19,10 @@ public:
 
   virtual Ray3f generateRay(const CameraSample& sample) const = 0;
 
+  EClassType getClassType() const override {
+    return ECamera;
+  }
+
 public:
   Matrix4f frame;
   Vector2i outputSize;

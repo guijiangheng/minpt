@@ -33,6 +33,10 @@ public:
 
   virtual std::unique_ptr<Sampler> clone() const = 0;
 
+  EClassType getClassType() const override {
+    return ESampler;
+  }
+
 public:
   std::int64_t samplesPerPixel;
 

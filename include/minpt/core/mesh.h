@@ -55,6 +55,10 @@ public:
 
   void computeIntersection(std::uint32_t index, Interaction& isect) const;
 
+  EClassType getClassType() const override {
+    return EMesh;
+  }
+
   std::string toString() const override {
     return tfm::format(
       "Mesh[\n"

@@ -59,6 +59,10 @@ public:
 
   void render(const std::string& outputName) const;
 
+  EClassType getClassType() const override {
+    return EScene;
+  }
+
   std::string toString() const override {
     std::string string;
     for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {

@@ -13,6 +13,10 @@ public:
   virtual ~Integrator() = default;
 
   virtual Color3f li(const Ray3f& ray, const Scene&, Sampler& sampler) const = 0;
+
+  EClassType getClassType() const override {
+    return EIntegrator;
+  }
 };
 
 }
