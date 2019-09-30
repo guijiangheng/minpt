@@ -1,9 +1,5 @@
 #include <iostream>
-#include <minpt/integrators/normals.h>
-#include <minpt/samplers/random.h>
-#include <minpt/accelerators/bvh.h>
-#include <minpt/cameras/perspective.h>
-#include <minpt/utils/obj.h>
+#include <minpt/minpt.h>
 
 using namespace minpt;
 
@@ -21,11 +17,10 @@ int main() {
     Vector2i(768, 768),
     16.0f
   );
-  std::cout << camera->toString() << std::endl;
-  std::cout << mesh->toString() << std::endl;
   Scene scene(camera, sampler, integrator, accel);
   scene.addMesh(mesh);
   scene.activate();
   scene.render("bunny.exr");
+  std::cout << scene.toString() << std::endl;
   return 0;
 }

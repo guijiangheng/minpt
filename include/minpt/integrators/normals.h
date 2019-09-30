@@ -1,8 +1,6 @@
 #pragma once
 
 #include <minpt/core/scene.h>
-#include <minpt/core/integrator.h>
-#include <minpt/core/interaction.h>
 
 namespace minpt {
 

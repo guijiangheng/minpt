@@ -27,7 +27,7 @@ constexpr float degrees(float rad) {
 }
 
 template <typename VectorType>
-VectorType barycentric(const VectorType& a, const VectorType& b, const VectorType& c, const Vector2f& uv) {
+auto barycentric(const VectorType& a, const VectorType& b, const VectorType& c, const Vector<typename VectorType::Scalar, 2>& uv) {
   return (1 - uv.x() - uv.y()) * a + uv.x() * b + uv.y() * c;
 }
 

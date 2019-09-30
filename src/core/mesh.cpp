@@ -64,27 +64,21 @@ void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
   auto ib = f(1, index);
   auto ic = f(2, index);
 
-  Vector3f a = v.col(f(0, index));
-  Vector3f b = v.col(f(1, index));
-  Vector3f c = v.col(f(2, index));
+  Vector3f a = v.col(ia);
+  Vector3f b = v.col(ib);
+  Vector3f c = v.col(ic);
   isect.p = barycentric(a, b, c, isect.uv);
   isect.n = (b - a).cross(c - a).normalized();
 
   if (n.size()) {
-    Vector3f na = n.col(ia);
-    Vector3f nb = n.col(ib);
-    Vector3f nc = n.col(ic);
-    Vector3f ns = barycentric(na, nb, nc, isect.uv).normalized();
+    Vector3f ns = barycentric(n.col(ia), n.col(ib), n.col(ic), isect.uv).normalized();
     isect.shFrame = Frame(ns);
   } else {
     isect.shFrame = Frame(isect.n);
   }
 
   if (uv.size()) {
-    Vector2f uva = uv.col(f(0, index));
-    Vector2f uvb = uv.col(f(1, index));
-    Vector2f uvc = uv.col(f(2, index));
-    isect.uv = barycentric(uva, uvb, uvc, isect.uv);
+    isect.uv = barycentric(uv.col(ia), uv.col(ib), uv.col(ic), isect.uv);
   }
 }
 

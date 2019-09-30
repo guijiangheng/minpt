@@ -38,10 +38,13 @@ add_definitions(${NANOGUI_EXTRA_DEFS})
 
 set(
   MINPT_HEADERS
+  include/minpt/minpt.h
+
   include/minpt/utils/utils.h
   include/minpt/utils/bitmap.h
   include/minpt/utils/exception.h
 
+  include/minpt/core/object.h
   include/minpt/core/ray.h
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h

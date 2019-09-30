@@ -2,9 +2,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <tinyformat.h>
-#include <minpt/math/math.h>
 #include <minpt/math/bounds.h>
+#include <minpt/core/object.h>
 #include <minpt/core/interaction.h>
 
 namespace minpt {
@@ -17,7 +16,7 @@ namespace minpt {
  * the specifics of how to create its contents (e.g. by loading from an
  * external file)
  */
-class Mesh {
+class Mesh : public Object {
 public:
   virtual ~Mesh() = default;
 
@@ -56,7 +55,7 @@ public:
 
   void computeIntersection(std::uint32_t index, Interaction& isect) const;
 
-  std::string toString() const {
+  std::string toString() const override {
     return tfm::format(
       "Mesh[\n"
       "  name = \"%s\",\n"

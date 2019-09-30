@@ -2,10 +2,11 @@
 
 #include <vector>
 #include <minpt/core/mesh.h>
+#include <minpt/core/object.h>
 
 namespace minpt {
 
-class Accelerator {
+class Accelerator : public Object {
 public:
   Accelerator() noexcept {
     primOffset.push_back(0);
@@ -38,8 +39,6 @@ public:
   virtual bool intersect(const Ray3f& ray) const = 0;
 
   virtual bool intersect(const Ray3f& ray, Interaction& isect) const = 0;
-
-  virtual std::string toString() const = 0;
 
 protected:
   std::vector<Mesh*> meshes;

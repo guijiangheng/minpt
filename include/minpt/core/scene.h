@@ -8,7 +8,7 @@
 
 namespace minpt {
 
-class Scene {
+class Scene : public Object {
 public:
   Scene(Camera* camera, Sampler* sampler, Integrator* integrator, Accelerator* accel)
     : camera(camera)
@@ -59,7 +59,7 @@ public:
 
   void render(const std::string& outputName) const;
 
-  std::string toString() const {
+  std::string toString() const override {
     std::string string;
     for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {
       string += std::string("  ") + indent(meshes[i]->toString());

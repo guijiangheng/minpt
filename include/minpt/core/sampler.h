@@ -5,7 +5,7 @@
 
 namespace minpt {
 
-class Sampler {
+class Sampler : public Object {
 public:
   explicit Sampler(std::int64_t samplesPerPixel) noexcept
     : samplesPerPixel(samplesPerPixel)
@@ -32,8 +32,6 @@ public:
   virtual Vector2f get2D() = 0;
 
   virtual std::unique_ptr<Sampler> clone() const = 0;
-
-  virtual std::string toString() const = 0;
 
 public:
   std::int64_t samplesPerPixel;

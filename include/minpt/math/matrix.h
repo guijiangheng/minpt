@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <minpt/core/ray.h>
 #include <minpt/math/math.h>
