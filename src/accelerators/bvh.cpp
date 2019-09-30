@@ -3,7 +3,6 @@
 namespace minpt {
 
 bool BVHAccel::intersect(const Ray3f& ray) const {
-  bool hit = false;
   auto mesh = meshes[0];
   for (std::uint32_t i = 0; i < mesh->getPrimitiveCount(); ++i) {
     if (mesh->intersect(i, ray)) return true;

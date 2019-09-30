@@ -61,7 +61,7 @@ public:
       "Mesh[\n"
       "  name = \"%s\",\n"
       "  vertexCount = %i,\n"
-      "  triangleCount = %i,\n"
+      "  triangleCount = %i\n"
       "]",
       name, v.cols(), f.cols()
     );

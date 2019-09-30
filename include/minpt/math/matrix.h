@@ -25,7 +25,7 @@ public:
   }
 
   Vector3Type applyP(const Vector3Type& p) const {
-    auto result = Base::operator*(Vector4f(p[0], p[1], p[2], 1));
+    Vector4f result = Base::operator*(Vector4f(p[0], p[1], p[2], 1.0f));
     return result.head(3) / result.w();
   }
 
@@ -80,7 +80,7 @@ public:
   }
 
   static Matrix4 lookAt(const Vector3Type& origin, const Vector3Type& target, const Vector3Type& up) {
-    auto z = (origin - target).normalized();
+    auto z = (target - origin).normalized();
     auto x = up.cross(z).normalized();
     auto y = z.cross(x);
     Eigen::Matrix4f mat;

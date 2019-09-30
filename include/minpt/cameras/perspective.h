@@ -13,16 +13,16 @@ public:
       float fov) noexcept : Camera(frame, outputSize), fov(fov) {
     auto aspect = outputSize.x() / (float)outputSize.y();
     Matrix4f screenToRaster = (
-      Eigen::DiagonalMatrix<float, 3>(0.5f, -0.5f * aspect, 1.0f) *
-      Eigen::Translation3f(1.0f, -1.0f / aspect, 0.0f)).matrix();
-    Matrix4f cameraToScreen = Matrix4f::perspective(radians(fov / 2.0f), 0.01f, 1000.0f);
+      Eigen::DiagonalMatrix<float, 3>(-0.5f * outputSize.x(), -0.5f * aspect * outputSize.y(), 1.0f) *
+      Eigen::Translation3f(-1.0f, -1.0f / aspect, 0.0f)).matrix();
+    Matrix4f cameraToScreen = Matrix4f::perspective(fov, 0.0001f, 1000.0f);
     rasterToCamera = (screenToRaster * cameraToScreen).inverse();
   }
 
   Ray3f generateRay(const CameraSample& sample) const override {
     Vector3f pFilm(sample.pFilm.x(), sample.pFilm.y(), 0);
-    auto pCamera = rasterToCamera.applyP(pFilm);
-    Ray3f ray(Vector3f(0), pCamera.normalized());
+    Vector3f pCamera = rasterToCamera.applyP(pFilm);
+    Ray3f ray(Vector3f(0.0f), pCamera.normalized());
     return frame * ray;
   }
 
