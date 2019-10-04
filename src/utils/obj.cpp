@@ -8,8 +8,8 @@ namespace minpt {
 struct Vertex {
   Vertex() noexcept = default;
 
-  Vertex(const std::string& string) {
-    auto tokens = tokenize(string, "/");
+  Vertex(const std::string& string) noexcept : n((std::uint32_t)-1), uv((std::uint32_t)-1) {
+    auto tokens = tokenize(string, "/", true);
     p = toUInt(tokens[0]);
     if (tokens.size() >= 2 && !tokens[1].empty())
       uv = toUInt(tokens[1]);
@@ -17,11 +17,11 @@ struct Vertex {
       n = toUInt(tokens[2]);
   }
 
-  bool operator==(const Vertex& v) const {
+  inline bool operator==(const Vertex& v) const {
     return p == v.p && n == v.n && uv == v.uv;
   }
 
-  bool operator!=(const Vertex& v) const {
+  inline bool operator!=(const Vertex& v) const {
     return p != v.p && n != v.n && uv != v.uv;
   }
 
@@ -112,7 +112,7 @@ WavefrontOBJ::WavefrontOBJ(const std::string& filename) {
   if (!normals.empty()) {
     n.resize(3, nVerts);
     for (auto i = 0; i < nVerts; ++i)
-      n.col(i) = normals[vertices[i].uv - 1];
+      n.col(i) = normals[vertices[i].n - 1];
   }
 
   if (!uvs.empty()) {

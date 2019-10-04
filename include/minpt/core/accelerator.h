@@ -40,6 +40,10 @@ public:
 
   virtual bool intersect(const Ray3f& ray, Interaction& isect) const = 0;
 
+  EClassType getClassType() const override {
+    return EAccel;
+  }
+
 protected:
   std::vector<Mesh*> meshes;
   std::vector<std::uint32_t> indices;

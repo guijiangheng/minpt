@@ -8,6 +8,7 @@ class Object {
 public:
   enum EClassType {
     EScene = 0,
+    EAccel,
     EMesh,
     ECamera,
     EIntegrator,
@@ -22,6 +23,7 @@ public:
   static std::string classTypeName(EClassType type) {
     switch (type) {
       case EScene:      return "scene";
+      case EAccel:      return "accel";
       case EMesh:       return "mesh";
       case ECamera:     return "camera";
       case EIntegrator: return "integrator";
