@@ -1,4 +1,5 @@
 #include <tbb/parallel_for.h>
+#include <minpt/core/timer.h>
 #include <minpt/core/scene.h>
 #include <minpt/utils/bitmap.h>
 
@@ -11,6 +12,9 @@ void Scene::render(const std::string& outputName) const {
   Vector2i tiles(
     (outputSize.x() + TILE_SIZE - 1) / TILE_SIZE,
     (outputSize.y() + TILE_SIZE - 1) / TILE_SIZE);
+  std::cout << "Rendering ..";
+  std::cout.flush();
+  Timer timer;
   tbb::parallel_for(tbb::blocked_range<int>{0, tiles.x() * tiles.y()}, [&](auto& range) {
     auto sampler = this->sampler->clone();
     for (auto i = range.begin(); i < range.end(); ++i) {
@@ -33,6 +37,7 @@ void Scene::render(const std::string& outputName) const {
         }
     }
   });
+  std::cout << "done. (took" << timer.elapsedString() << ")" << std::endl;
   bitmap.save(outputName);
 }
 

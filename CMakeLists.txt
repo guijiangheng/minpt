@@ -42,9 +42,10 @@ set(
 
   include/minpt/utils/utils.h
   include/minpt/utils/bitmap.h
-  include/minpt/utils/exception.h
 
   include/minpt/core/object.h
+  include/minpt/core/exception.h
+  include/minpt/core/timer.h
   include/minpt/core/ray.h
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h

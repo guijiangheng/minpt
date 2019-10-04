@@ -5,9 +5,9 @@
 #include <ImfVersion.h>
 #include <ImfIO.h>
 
-#include <minpt/utils/bitmap.h>
-#include <minpt/utils/exception.h>
+#include <minpt/core/exception.h>
 #include <minpt/utils/utils.h>
+#include <minpt/utils/bitmap.h>
 
 namespace minpt {
 

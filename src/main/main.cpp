@@ -7,7 +7,6 @@ int main() {
   auto sampler = new RandomSampler(1);
   auto accel = new BVHAccel();
   auto integrator = new NormalIntegrator();
-  auto mesh = new WavefrontOBJ("bunny.obj");
   auto camera = new PerspectiveCamera(
     Matrix4f::lookAt(
       Vector3f(-0.0315182, 0.284011, 0.7331),
@@ -18,9 +17,9 @@ int main() {
     16.0f
   );
   Scene scene(camera, sampler, integrator, accel);
-  scene.addMesh(mesh);
+  scene.addMesh(new WavefrontOBJ("bunny.obj"));
   scene.activate();
-  scene.render("bunny.exr");
   std::cout << scene.toString() << std::endl;
+  scene.render("bunny.exr");
   return 0;
 }

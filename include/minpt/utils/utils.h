@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 #include <filesystem/resolver.h>
+#include <minpt/core/exception.h>
 #include <minpt/math/math.h>
-#include <minpt/utils/exception.h>
 
 namespace minpt {
 
@@ -37,6 +37,8 @@ inline bool endsWith(const std::string& value, const std::string& ending) {
   if (ending.size() > value.size()) return false;
   return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
 }
+
+std::string timeString(double time, bool precise = false);
 
 filesystem::resolver* getFileResolver();
 
