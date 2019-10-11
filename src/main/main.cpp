@@ -4,22 +4,23 @@
 using namespace minpt;
 
 int main() {
-  auto sampler = new RandomSampler(1);
-  auto accel = new BVHAccel();
-  auto integrator = new NormalIntegrator();
-  auto camera = new PerspectiveCamera(
-    Matrix4f::lookAt(
-      Vector3f(-0.0315182, 0.284011, 0.7331),
-      Vector3f(-0.0123771, 0.0540913, -0.239922),
-      Vector3f(0.00717446, 0.973206, -0.229822)
-    ),
-    Vector2i(768, 768),
-    16.0f
-  );
-  Scene scene(camera, sampler, integrator, accel);
-  scene.addMesh(new WavefrontOBJ("bunny.obj"));
-  scene.activate();
-  std::cout << scene.toString() << std::endl;
-  scene.render("bunny.exr");
+  PropertyList props;
+  props.setBool("active", true);
+  props.setInteger("age", 23);
+  props.setFloat("alpha", 0.111);
+  props.setString("name", "guijiangheng");
+  props.setColor("albedo", Color3f(1.0f));
+  props.setVector("position", Vector3f(1.0f, 2.0f, 3.0f));
+  props.setTransform("transform", Matrix4f::perspective(30.0f, 0.0001f, 1000.0f));
+  std::cout
+    << props.getBool("active") << " "
+    << props.getInteger("age") << " "
+    << props.getFloat("alpha") << " "
+    << props.getString("name") << " "
+    << std::endl;
+  std::cout << props.getColor("albedo").toString() << std::endl;
+  std::cout << props.getVector("position").toString() << std::endl;
+  std::cout << props.getTransform("transform").toString() << std::endl;
+
   return 0;
 }

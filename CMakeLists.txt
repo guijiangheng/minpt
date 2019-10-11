@@ -45,6 +45,7 @@ set(
 
   include/minpt/core/object.h
   include/minpt/core/exception.h
+  include/minpt/core/proplist.h
   include/minpt/core/timer.h
   include/minpt/core/ray.h
   include/minpt/core/interaction.h
