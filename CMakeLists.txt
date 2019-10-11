@@ -43,9 +43,10 @@ set(
   include/minpt/utils/utils.h
   include/minpt/utils/bitmap.h
 
-  include/minpt/core/object.h
   include/minpt/core/exception.h
   include/minpt/core/proplist.h
+  include/minpt/core/object.h
+  include/minpt/core/objectfactory.h
   include/minpt/core/timer.h
   include/minpt/core/ray.h
   include/minpt/core/interaction.h
@@ -76,6 +77,7 @@ set(
   src/utils/bitmap.cpp
   src/core/mesh.cpp
   src/core/scene.cpp
+  src/core/objectfactory.cpp
   src/utils/obj.cpp
   src/accelerators/bvh.cpp
 )

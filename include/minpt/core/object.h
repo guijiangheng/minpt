@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <minpt/core/exception.h>
 
 namespace minpt {
 
@@ -15,6 +16,16 @@ public:
     ESampler,
     EClassTypeCount
   };
+
+  virtual void activate()
+  { }
+
+  virtual void addChild(Object* child) {
+    throw Exception(
+      "Object::addChild() is not implemented for objects of type '%s'!",
+      classTypeName(getClassType())
+    );
+  }
 
   virtual EClassType getClassType() const = 0;
 
