@@ -1,16 +1,19 @@
-#pragma once
-
 #include <minpt/utils/utils.h>
 #include <minpt/core/camera.h>
+#include <minpt/core/objectfactory.h>
 
 namespace minpt {
 
 class PerspectiveCamera : public Camera {
 public:
-  PerspectiveCamera(
-      const Matrix4f& frame,
-      const Vector2i& outputSize,
-      float fov) noexcept : Camera(frame, outputSize), fov(fov) {
+  PerspectiveCamera(const PropertyList& props)
+    : Camera(
+      props.getTransform("toWorld"),
+      Vector2i(
+        props.getInteger("width"),
+        props.getInteger("height")))
+    , fov(props.getFloat("fov")) {
+
     auto aspect = outputSize.x() / (float)outputSize.y();
     Matrix4f screenToRaster = (
       Eigen::DiagonalMatrix<float, 3>(-0.5f * outputSize.x(), -0.5f * aspect * outputSize.y(), 1.0f) *
@@ -43,5 +46,7 @@ private:
   Matrix4f rasterToCamera;
   float fov;
 };
+
+MINPT_REGISTER_CLASS(PerspectiveCamera, "perspective");
 
 }

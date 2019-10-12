@@ -17,8 +17,7 @@ public:
     EClassTypeCount
   };
 
-  virtual void activate()
-  { }
+  virtual ~Object() = default;
 
   virtual void addChild(Object* child) {
     throw Exception(
@@ -26,6 +25,9 @@ public:
       classTypeName(getClassType())
     );
   }
+
+  virtual void activate()
+  { }
 
   virtual EClassType getClassType() const = 0;
 
@@ -42,9 +44,6 @@ public:
       default:          return "<unknown>";
     }
   }
-
-protected:
-  virtual ~Object() = default;
 };
 
 }

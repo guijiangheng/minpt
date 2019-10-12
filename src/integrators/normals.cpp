@@ -1,11 +1,13 @@
-#pragma once
-
 #include <minpt/core/scene.h>
+#include <minpt/core/objectfactory.h>
 
 namespace minpt {
 
 class NormalIntegrator : public Integrator {
 public:
+  NormalIntegrator(const PropertyList& props)
+  { }
+
   Color3f li(const Ray3f& ray, const Scene& scene, Sampler& sampler) const override {
     Interaction isect;
     if (scene.intersect(ray, isect)) {
@@ -20,5 +22,7 @@ public:
   }
 
 };
+
+MINPT_REGISTER_CLASS(NormalIntegrator, "normals");
 
 }

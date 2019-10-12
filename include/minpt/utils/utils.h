@@ -74,6 +74,8 @@ inline bool endsWith(const std::string& value, const std::string& ending) {
 
 std::string timeString(double time, bool precise = false);
 
+std::string memString(size_t size, bool precise = false);
+
 filesystem::resolver* getFileResolver();
 
 }

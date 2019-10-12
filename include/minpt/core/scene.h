@@ -1,6 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+
+#include <minpt/core/proplist.h>
 #include <minpt/core/camera.h>
 #include <minpt/core/sampler.h>
 #include <minpt/core/integrator.h>
@@ -10,11 +13,11 @@ namespace minpt {
 
 class Scene : public Object {
 public:
-  Scene(Camera* camera, Sampler* sampler, Integrator* integrator, Accelerator* accel)
-    : camera(camera)
-    , sampler(sampler)
-    , integrator(integrator)
-    , accel(accel)
+  Scene(const PropertyList& props)
+    : camera(nullptr)
+    , sampler(nullptr)
+    , integrator(nullptr)
+    , accel(nullptr)
   { }
 
   ~Scene() {
@@ -24,17 +27,7 @@ public:
     delete accel;
   }
 
-  bool intersect(const Ray3f& ray) const {
-    return accel->intersect(ray);
-  }
-
-  bool intersect(const Ray3f& ray, Interaction& isect) const {
-    return accel->intersect(ray, isect);
-  }
-
-  Bounds3f getBoundingBox() const {
-    return accel->getBoundingBox();
-  }
+  void addChild(Object* child) override;
 
   /**
    * Initializes internal data structure (kd-tree, bvh,
@@ -49,12 +42,24 @@ public:
       throw Exception("No sampler was specified!");
     if (!accel)
       throw Exception("No accelerator was specified!");
+
     accel->build();
+
+    std::cout << std::endl;
+    std::cout << "Configuration: " << toString() << std::endl;
+    std::cout << std::endl;
   }
 
-  void addMesh(Mesh* mesh) {
-    meshes.push_back(mesh);
-    accel->addMesh(mesh);
+  bool intersect(const Ray3f& ray) const {
+    return accel->intersect(ray);
+  }
+
+  bool intersect(const Ray3f& ray, Interaction& isect) const {
+    return accel->intersect(ray, isect);
+  }
+
+  Bounds3f getBoundingBox() const {
+    return accel->getBoundingBox();
   }
 
   void render(const std::string& outputName) const;
@@ -63,30 +68,7 @@ public:
     return EScene;
   }
 
-  std::string toString() const override {
-    std::string string;
-    for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {
-      string += std::string("  ") + indent(meshes[i]->toString());
-      if (i + 1 < length)
-        string += ",";
-      string += "\n";
-    }
-    return tfm::format(
-      "Scene[\n"
-      "  integrator = %s,\n"
-      "  accelerator = %s,\n"
-      "  sampler = %s,\n"
-      "  camera = %s,\n"
-      "  meshes = {\n"
-      "  %s }\n"
-      "]",
-      indent(integrator->toString()),
-      indent(accel->toString()),
-      indent(sampler->toString()),
-      indent(camera->toString()),
-      indent(string)
-    );
-  }
+  std::string toString() const override;
 
 public:
   std::vector<Mesh*> meshes;

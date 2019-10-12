@@ -7,6 +7,8 @@ namespace minpt {
 
 class Sampler : public Object {
 public:
+  Sampler() = default;
+
   explicit Sampler(std::int64_t samplesPerPixel) noexcept
     : samplesPerPixel(samplesPerPixel)
   { }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 #include <minpt/core/mesh.h>
 #include <minpt/core/object.h>
 

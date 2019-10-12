@@ -41,6 +41,21 @@ std::string timeString(double time, bool precise) {
   return os.str();
 }
 
+
+std::string memString(size_t size, bool precise) {
+  auto value = (double)size;
+  const char* suffixes[] = { "B", "KiB", "MiB", "GiB", "TiB", "PiB" };
+  auto suffix = 0;
+  while (suffix < 5 && value > 1024.0f) {
+    value /= 1024.0f;
+    ++suffix;
+  }
+  std::ostringstream os;
+  os << std::setprecision(suffix == 0 ? 0 : (precise ? 4 : 1))
+     << std::fixed << value << " " << suffixes[suffix];
+  return os.str();
+}
+
 std::vector<std::string> tokenize(const std::string& string, const std::string& delim, bool includeEmpty) {
   std::vector<std::string> tokens;
   std::string::size_type lastPos = 0, pos = string.find_first_of(delim, lastPos);

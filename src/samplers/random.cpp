@@ -1,13 +1,13 @@
-#pragma once
-
 #include <pcg32.h>
+#include <minpt/core/objectfactory.h>
 #include <minpt/core/sampler.h>
 
 namespace minpt {
 
 class RandomSampler : public Sampler {
 public:
-  explicit RandomSampler(std::int64_t samplesPerPixel) noexcept : Sampler(samplesPerPixel)
+  RandomSampler(const PropertyList& props)
+    : Sampler(props.getInteger("sampleCount"))
   { }
 
   void prepare(const Vector2i& block) override {
@@ -23,7 +23,8 @@ public:
   }
 
   std::unique_ptr<Sampler> clone() const override {
-    auto cloned = new RandomSampler(samplesPerPixel);
+    auto cloned = new RandomSampler();
+    cloned->samplesPerPixel = samplesPerPixel;
     cloned->random = random;
     return std::unique_ptr<Sampler>(cloned);
   }
@@ -32,8 +33,14 @@ public:
     return tfm::format("RandomSampler[samplesPerPixel=%i]", samplesPerPixel);
   }
 
+protected:
+  RandomSampler()
+  { }
+
 private:
   pcg32 random;
 };
+
+MINPT_REGISTER_CLASS(RandomSampler, "random");
 
 }

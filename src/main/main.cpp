@@ -1,26 +1,44 @@
 #include <iostream>
-#include <minpt/minpt.h>
+#include <filesystem/resolver.h>
+#include <minpt/core/scene.h>
+#include <minpt/core/parser.h>
 
 using namespace minpt;
 
-int main() {
-  PropertyList props;
-  props.setBoolean("active", true);
-  props.setInteger("age", 23);
-  props.setFloat("alpha", 0.111);
-  props.setString("name", "guijiangheng");
-  props.setColor("albedo", Color3f(1.0f));
-  props.setVector("position", Vector3f(1.0f, 2.0f, 3.0f));
-  props.setTransform("transform", Matrix4f::perspective(30.0f, 0.0001f, 1000.0f));
-  std::cout
-    << props.getBoolean("active") << " "
-    << props.getInteger("age") << " "
-    << props.getFloat("alpha") << " "
-    << props.getString("name") << " "
-    << std::endl;
-  std::cout << props.getColor("albedo").toString() << std::endl;
-  std::cout << props.getVector("position").toString() << std::endl;
-  std::cout << props.getTransform("transform").toString() << std::endl;
+int main(int argc, char** argv) {
+  if (argc != 2) {
+    std::cerr << "Syntax: " << argv[0] << " <scene.xml>" << std::endl;
+    return -1;
+  }
+
+  filesystem::path path(argv[1]);
+
+  try {
+    if (path.extension() == "xml") {
+      /* Add the parent directory of the scene file to the
+        file resolver. That way, the XML file can reference
+        resources (OBJ files, textures) using relative paths */
+      getFileResolver()->prepend(path.parent_path());
+      std::unique_ptr<Object> root(loadFromXML(argv[1]));
+      if (root->getClassType() == Object::EScene) {
+        std::string outputName = argv[1];
+        auto lastDot = outputName.find_last_of(".");
+        if (lastDot != std::string::npos)
+          outputName.erase(lastDot, std::string::npos);
+        outputName += ".exr";
+        auto scene = static_cast<Scene*>(root.get());
+        scene->render(outputName);
+      }
+    } else {
+      std::cerr
+        << "Fatal error: unknown file \"" << argv[1]
+        << "\", expected an extension of type .xml" << std::endl;
+      return -1;
+    }
+  } catch (const std::exception& e) {
+    std::cerr << "Fatal error: " << e.what() << std::endl;
+    return -1;
+  }
 
   return 0;
 }

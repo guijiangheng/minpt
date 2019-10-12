@@ -36,10 +36,7 @@ set(
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
 
-set(
-  MINPT_HEADERS
-  include/minpt/minpt.h
-
+add_executable(minpt
   include/minpt/utils/utils.h
   include/minpt/utils/bitmap.h
 
@@ -58,8 +55,6 @@ set(
   include/minpt/core/integrator.h
   include/minpt/core/accelerator.h
 
-  include/minpt/samplers/random.h
-
   include/minpt/math/math.h
   include/minpt/math/bounds.h
   include/minpt/math/color.h
@@ -67,27 +62,20 @@ set(
   include/minpt/math/frame.h
   include/minpt/math/transform.h
 
-  include/minpt/accelerators/bvh.h
-
-  include/minpt/integrators/normals.h
-)
-
-set(
-  MINPT_SRCS
+  src/main/main.cpp
   src/utils/utils.cpp
   src/utils/bitmap.cpp
-  src/core/parser.cpp
-  src/core/mesh.cpp
   src/core/scene.cpp
+  src/core/mesh.cpp
+  src/core/parser.cpp
   src/core/objectfactory.cpp
-  src/utils/obj.cpp
+  src/meshes/obj.cpp
+  src/samplers/random.cpp
   src/accelerators/bvh.cpp
+  src/cameras/perspective.cpp
+  src/integrators/normals.cpp
 )
 
-add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})
-target_compile_features(minpt PUBLIC cxx_std_17)
-target_include_directories(minpt PUBLIC ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(minpt PUBLIC tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS})
-
-add_executable(main src/main/main.cpp)
-target_link_libraries(main PRIVATE minpt)
+target_compile_features(minpt PRIVATE cxx_std_17)
+target_include_directories(minpt PRIVATE ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(minpt PRIVATE tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS})
