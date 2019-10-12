@@ -1,6 +1,10 @@
+#include <set>
+#include <vector>
 #include <fstream>
 #include <pugixml.hpp>
 #include <Eigen/Geometry>
+
+#include <minpt/utils/utils.h>
 #include <minpt/core/parser.h>
 #include <minpt/core/objectfactory.h>
 
@@ -106,8 +110,8 @@ Object* loadFromXML(const std::string& filename) {
     auto tag = it->second;
 
     auto hasParent            = parentTag != EInvalid;
-    auto parentIsObject       = parentTag < Object::EClassTypeCount;
-    auto currentIsObject      = tag < Object::EClassTypeCount;
+    auto parentIsObject       = parentTag < (int)Object::EClassTypeCount;
+    auto currentIsObject      = tag < (int)Object::EClassTypeCount;
     auto parentIsTransform    = parentTag == ETransform;
     auto currentIsTransformOp = tag == ETranslate || tag == ERotate || tag == EScale || tag == ELookAt || tag == EMatrix;
 
@@ -142,10 +146,112 @@ Object* loadFromXML(const std::string& filename) {
         children.push_back(child);
     }
 
+    auto checkAttributes = [&](const pugi::xml_node& node, std::set<std::string> attrs) {
+      for (auto& attr : node.attributes()) {
+        auto it = attrs.find(attr.name());
+        if (it == attrs.end())
+          throw Exception(
+            "Error while parsing \"%s\": unexpected attribute \"%s\" in \"%s\" at %s",
+            filename, attr.name(), node.name(), offset(node.offset_debug())
+          );
+        attrs.erase(it);
+      }
+      if (!attrs.empty())
+        throw Exception(
+          "Error while parsing \"%s\": missing attribute \"%s\" in \"%s\" at %s",
+          filename, *attrs.begin(), node.name(), offset(node.offset_debug())
+        );
+    };
+
     Object* result = nullptr;
 
+    try {
+      if (currentIsObject) {
+        checkAttributes(node, { "type" });
+        result = ObjectFactory::createInstance(node.attribute("type").value(), props);
+        for (auto child : children)
+          result->addChild(child);
+        result->activate();
+      } else {
+        switch (tag) {
+          case EBoolean:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setBoolean(node.attribute("name").value(), toBool(node.attribute("value").value()));
+            break;
+          case EInteger:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setInteger(node.attribute("name").value(), toInt(node.attribute("value").value()));
+            break;
+          case EFloat:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setFloat(node.attribute("name").value(), toFloat(node.attribute("value").value()));
+            break;
+          case EString:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setString(node.attribute("name").value(), node.attribute("value").value());
+            break;
+          case EVector:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setVector(node.attribute("name").value(), toVector3f(node.attribute("value").value()));
+            break;
+          case EColor:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setColor(node.attribute("name").value(), toColor3f(node.attribute("value").value()));
+            break;
+          case ETransform:
+            checkAttributes(node, { "name" });
+            parentProps.setTransform(node.attribute("name").value(), Matrix4f(transform.matrix()));
+            break;
+          case EMatrix: {
+              checkAttributes(node, { "value" });
+              auto tokens = tokenize(node.attribute("value").value());
+              if (tokens.size() != 16)
+                throw Exception("Expected 16 values");
+              Eigen::Matrix4f matrix;
+                for (int i = 0; i < 4; ++i)
+                  for (auto j = 0; j < 4; ++j)
+                    matrix(i, j) = toFloat(tokens[i * 4 + j]);
+              transform = Eigen::Affine3f(matrix) * transform;
+            }
+            break;
+          case EScale: {
+              checkAttributes(node, { "value" });
+              auto scale = toVector3f(node.attribute("value").value());
+              transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+            }
+            break;
+          case ERotate: {
+              checkAttributes(node, { "angle", "axis" });
+              auto angle = radians(toFloat(node.attribute("angle").value()));
+              auto axis = toVector3f(node.attribute("axis").value());
+              transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+            }
+            break;
+          case ELookAt:{
+              checkAttributes(node, { "origin", "target", "up" });
+              auto origin = toVector3f(node.attribute("origin").value());
+              auto target = toVector3f(node.attribute("target").value());
+              auto up = toVector3f(node.attribute("up").value());
+              auto matrix = Matrix4f::lookAt(origin, target, up);
+              transform = Eigen::Affine3f(matrix) * transform;
+            }
+            break;
+          default:
+            throw Exception("Unhandled element \"%s\"", node.name());
+        }
+      }
+    } catch (const Exception& e) {
+      throw Exception(
+        "Error while parsing \"%s\": %s (at %s)",
+        filename, e.what(), offset(node.offset_debug())
+      );
+    }
 
+    return result;
   };
+
+  PropertyList props;
+  return parseTag(*doc.begin(), props, EInvalid);
 }
 
 }

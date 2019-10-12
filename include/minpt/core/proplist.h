@@ -12,17 +12,17 @@ class PropertyList {
 public:
   PropertyList() = default;
 
-  void setBool(const std::string& name, bool value) {
+  void setBoolean(const std::string& name, bool value) {
     warnDuplicate(name);
     props[name] = value;
   }
 
-  bool getBool(const std::string& name) const {
+  bool getBoolean(const std::string& name) const {
     checkExist(name);
     return std::any_cast<bool>(props.at(name));
   }
 
-  bool getBool(const std::string& name, bool defaultValue) const {
+  bool getBoolean(const std::string& name, bool defaultValue) const {
     auto it = props.find(name);
     if (it == props.end()) return defaultValue;
     return std::any_cast<bool>(it->second);

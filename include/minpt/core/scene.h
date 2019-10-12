@@ -40,7 +40,7 @@ public:
    * Initializes internal data structure (kd-tree, bvh,
    * emitter sampling data structure etc)
    */
-  void activate() {
+  void activate() override {
     if (!integrator)
       throw Exception("No integrator was specified!");
     if (!camera)

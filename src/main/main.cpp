@@ -5,7 +5,7 @@ using namespace minpt;
 
 int main() {
   PropertyList props;
-  props.setBool("active", true);
+  props.setBoolean("active", true);
   props.setInteger("age", 23);
   props.setFloat("alpha", 0.111);
   props.setString("name", "guijiangheng");
@@ -13,7 +13,7 @@ int main() {
   props.setVector("position", Vector3f(1.0f, 2.0f, 3.0f));
   props.setTransform("transform", Matrix4f::perspective(30.0f, 0.0001f, 1000.0f));
   std::cout
-    << props.getBool("active") << " "
+    << props.getBoolean("active") << " "
     << props.getInteger("age") << " "
     << props.getFloat("alpha") << " "
     << props.getString("name") << " "
