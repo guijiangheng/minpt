@@ -19,6 +19,11 @@ public:
   BoundingBox(const Base& b) noexcept : Base(b)
   { }
 
+  void reset() {
+    min.setConstant( std::numeric_limits<Scalar>::infinity());
+    max.setConstant(-std::numeric_limits<Scalar>::infinity());
+  }
+
   int getMajorAxis() const {
     auto largest = 0;
     auto d = Base::diagonal();

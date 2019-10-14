@@ -58,7 +58,7 @@ public:
     return accel->intersect(ray, isect);
   }
 
-  Bounds3f getBoundingBox() const {
+  const Bounds3f& getBoundingBox() const {
     return accel->getBoundingBox();
   }
 

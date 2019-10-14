@@ -79,6 +79,7 @@ public:
   MatrixXf n;
   MatrixXf uv;
   MatrixXu f;
+  Bounds3f bounds;
 };
 
 }

@@ -66,6 +66,7 @@ public:
       if (prefix == "v") {
         Vector3f p;
         line >> p.x() >> p.y() >> p.z();
+        bounds.extend(p);
         positions.push_back(p);
       } else if (prefix == "vt") {
         Vector2f uv;

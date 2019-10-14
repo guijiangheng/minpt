@@ -19,7 +19,12 @@ public:
 
   void addMesh(Mesh* mesh) {
     meshes.push_back(mesh);
+    bounds.extend(mesh->bounds);
     primOffset.push_back(primOffset.back() + mesh->getPrimitiveCount());
+  }
+
+  const Bounds3f& getBoundingBox() const {
+    return bounds;
   }
 
   std::uint32_t getPrimitiveCount() const {
@@ -34,8 +39,6 @@ public:
 
   virtual void build() = 0;
 
-  virtual Bounds3f getBoundingBox() const = 0;
-
   virtual bool intersect(const Ray3f& ray) const = 0;
 
   virtual bool intersect(const Ray3f& ray, Interaction& isect) const = 0;
@@ -45,6 +48,7 @@ public:
   }
 
 protected:
+  Bounds3f bounds;
   std::vector<Mesh*> meshes;
   std::vector<std::uint32_t> indices;
   std::vector<std::uint32_t> primOffset;
