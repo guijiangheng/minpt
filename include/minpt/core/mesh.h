@@ -2,10 +2,9 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-
 #include <minpt/math/bounds.h>
-#include <minpt/core/object.h>
 #include <minpt/core/interaction.h>
+#include <minpt/core/object.h>
 
 namespace minpt {
 

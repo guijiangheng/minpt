@@ -1,4 +1,4 @@
-#include <minpt/core/objectfactory.h>
+#include <minpt/core/object.h>
 
 namespace minpt {
 

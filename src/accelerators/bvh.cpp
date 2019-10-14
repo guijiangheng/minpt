@@ -1,4 +1,3 @@
-#include <minpt/core/objectfactory.h>
 #include <minpt/core/accelerator.h>
 
 namespace minpt {

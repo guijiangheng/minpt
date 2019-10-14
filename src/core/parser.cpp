@@ -5,8 +5,8 @@
 #include <Eigen/Geometry>
 
 #include <minpt/utils/utils.h>
+#include <minpt/core/object.h>
 #include <minpt/core/parser.h>
-#include <minpt/core/objectfactory.h>
 
 namespace minpt {
 

@@ -2,8 +2,6 @@
 
 #include <map>
 #include <any>
-#include <iostream>
-
 #include <minpt/math/color.h>
 #include <minpt/math/matrix.h>
 #include <minpt/core/exception.h>

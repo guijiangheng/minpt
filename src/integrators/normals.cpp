@@ -1,5 +1,4 @@
 #include <minpt/core/scene.h>
-#include <minpt/core/objectfactory.h>
 
 namespace minpt {
 

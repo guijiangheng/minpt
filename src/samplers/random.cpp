@@ -1,5 +1,4 @@
 #include <pcg32.h>
-#include <minpt/core/objectfactory.h>
 #include <minpt/core/sampler.h>
 
 namespace minpt {

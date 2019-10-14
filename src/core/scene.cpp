@@ -2,7 +2,6 @@
 #include <minpt/utils/bitmap.h>
 #include <minpt/core/timer.h>
 #include <minpt/core/scene.h>
-#include <minpt/core/objectfactory.h>
 
 namespace minpt {
 

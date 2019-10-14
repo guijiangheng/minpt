@@ -1,6 +1,5 @@
 #include <minpt/utils/utils.h>
 #include <minpt/core/camera.h>
-#include <minpt/core/objectfactory.h>
 
 namespace minpt {
 

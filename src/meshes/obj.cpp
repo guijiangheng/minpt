@@ -1,8 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
-
-#include <minpt/core/objectfactory.h>
 #include <minpt/core/timer.h>
 #include <minpt/core/mesh.h>
 
