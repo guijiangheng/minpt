@@ -20,8 +20,8 @@ public:
   { }
 
   void reset() {
-    min.setConstant( std::numeric_limits<Scalar>::infinity());
-    max.setConstant(-std::numeric_limits<Scalar>::infinity());
+    m_min.setConstant( std::numeric_limits<Scalar>::infinity());
+    m_max.setConstant(-std::numeric_limits<Scalar>::infinity());
   }
 
   int getMajorAxis() const {

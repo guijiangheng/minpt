@@ -39,19 +39,19 @@ public:
   { }
 
   void build() override {
-    auto primIndex = 0u;
     auto nPrims = getPrimitiveCount();
     auto primInfos = std::make_unique<PrimInfo[]>(nPrims);
     indices.resize(nPrims);
+    auto primIndex = 0u;
     for (auto mesh : meshes)
       for (std::uint32_t i = 0, n = mesh->getPrimitiveCount(); i < n; ++i) {
         primInfos[primIndex] = PrimInfo(mesh->getBoundingBox(i));
         indices[primIndex] = primIndex;
         ++primIndex;
       }
+    auto buffer = std::make_unique<std::uint32_t[]>(nPrims);
     nodes.resize(nPrims * 2);
     nodes[0].bounds = bounds;
-    auto buffer = std::make_unique<std::uint32_t[]>(nPrims);
     exhaustBuild(primInfos.get(), 0u, indices.data(), indices.data() + nPrims, buffer.get());
   }
 
@@ -66,7 +66,7 @@ public:
     auto nPrims = (std::uint32_t)(end - start);
 
     if (nPrims == 1) {
-      node = BVHNode(primInfos[*start].bounds, *start, 1);
+      node = BVHNode(primInfos[*start].bounds, (std::uint32_t)(start - indices.data()), 1);
       return;
     }
 
@@ -81,18 +81,37 @@ public:
         return primInfos[a].center[axis] < primInfos[b].center[axis];
       });
       Bounds3f bounds;
-      for (std::uint32_t i = 0; i < nPrims - 1; ++i) {
+      for (std::uint32_t i = 1; i < nPrims; ++i) {
         bounds.extend(primInfos[*(end - i)].bounds);
-        rightAreaInv[i] = 1 / bounds.surfaceArea();
+        rightAreaInv[nPrims - i] = 1 / bounds.surfaceArea();
       }
+      if (axis == 0)
+        node.bounds = bounds.extend(primInfos[*start].bounds);
       bounds.reset();
-      for (std::uint32_t i = 0; i < nPrims - 1; ++i) {
-        bounds.extend(primInfos[*(start + i)].bounds);
-        auto cost = 1 + totalAreaInv * (1 / bounds.surfaceArea() * (i + 1) + rightAreaInv[i] * (nPrims - i - 1));
+      for (std::uint32_t i = 1; i < nPrims; ++i) {
+        bounds.extend(primInfos[*(start + i - 1)].bounds);
+        auto cost = 1 + totalAreaInv * (1 / bounds.surfaceArea() * i + rightAreaInv[i] * (nPrims - i));
+        if (cost < minCost) {
+          minCost = cost;
+          splitIndex = i;
+          splitAxis = axis;
+        }
       }
     }
 
+    if (splitAxis == -1) {
+      node = BVHNode(node.bounds, (std::uint32_t)(start - indices.data()), (std::uint16_t)nPrims);
+      return;
+    }
 
+    std::sort(start, end, [&, splitAxis](auto a, auto b) {
+      return primInfos[a].center[splitAxis] < primInfos[b].center[splitAxis];
+    });
+
+    node.splitAxis = splitAxis;
+    node.rightChild = nodeIndex + splitIndex * 2;
+    exhaustBuild(primInfos, nodeIndex + 1, start, start + splitIndex, buffer);
+    exhaustBuild(primInfos, node.rightChild, start + splitIndex, end, buffer + splitIndex);
   }
 
   bool intersect(const Ray3f& ray) const override {
