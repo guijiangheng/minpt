@@ -93,7 +93,7 @@ public:
     int splitIndex;
     int splitAxis = -1;
     float minCost = nPrims;
-    auto rightAreaInv = (float*)buffer;
+    auto rightAreas = (float*)buffer;
     auto totalAreaInv = 1 / node.bounds.surfaceArea();
 
     for (auto axis = 0; axis < 3; ++axis) {
@@ -103,14 +103,14 @@ public:
       Bounds3f bounds;
       for (std::uint32_t i = 1; i < nPrims; ++i) {
         bounds.extend(primInfos[*(end - i)].bounds);
-        rightAreaInv[nPrims - i] = 1 / bounds.surfaceArea();
+        rightAreas[nPrims - i] = bounds.surfaceArea();
       }
       if (axis == 0)
         node.bounds = bounds.extend(primInfos[*start].bounds);
       bounds.reset();
       for (std::uint32_t i = 1; i < nPrims; ++i) {
         bounds.extend(primInfos[*(start + i - 1)].bounds);
-        auto cost = INTERSECTION_COST + totalAreaInv * (1 / bounds.surfaceArea() * i + rightAreaInv[i] * (nPrims - i));
+        auto cost = INTERSECTION_COST + totalAreaInv * (bounds.surfaceArea() * i + rightAreas[i] * (nPrims - i));
         if (cost < minCost) {
           minCost = cost;
           splitIndex = i;
