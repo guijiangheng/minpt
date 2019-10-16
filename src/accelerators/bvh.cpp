@@ -31,7 +31,7 @@ struct BVHNode {
   { }
 
   BVHNode(const Bounds3f& bounds, std::uint16_t splitAxis, std::uint32_t rightChild)
-    : bounds(bounds), splitAxis(splitAxis), rightChild(rightChild)
+    : bounds(bounds), nPrims(0), splitAxis(splitAxis), rightChild(rightChild)
   { }
 };
 
@@ -66,13 +66,13 @@ public:
     exhaustBuild(primInfos.get(), 0u, indices.data(), indices.data() + nPrims, buffer.get());
 
     std::vector<BVHNode> packedNodes;
-    auto cost = compactNodes(0, packedNodes);
+    compactNodes(0, packedNodes);
     nodes = std::move(packedNodes);
 
     std::cout
       << "done (took " << timer.elapsedString() << " and "
       << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
-      << ", SAH cost = " << cost << ")." << std::endl;
+      << ", SAH cost = " << 10 << ")." << std::endl;
   }
 
   void exhaustBuild(
@@ -93,8 +93,8 @@ public:
     int splitIndex;
     int splitAxis = -1;
     float minCost = nPrims;
+    float totalAreaInv;
     auto rightAreas = (float*)buffer;
-    auto totalAreaInv = 1 / node.bounds.surfaceArea();
 
     for (auto axis = 0; axis < 3; ++axis) {
       std::sort(start, end, [&, axis](auto a, auto b) {
@@ -105,12 +105,14 @@ public:
         bounds.extend(primInfos[*(end - i)].bounds);
         rightAreas[nPrims - i] = bounds.surfaceArea();
       }
-      if (axis == 0)
+      if (axis == 0) {
         node.bounds = bounds.extend(primInfos[*start].bounds);
+        totalAreaInv = 1 / node.bounds.surfaceArea();
+      }
       bounds.reset();
       for (std::uint32_t i = 1; i < nPrims; ++i) {
         bounds.extend(primInfos[*(start + i - 1)].bounds);
-        auto cost = INTERSECTION_COST + totalAreaInv * (bounds.surfaceArea() * i + rightAreas[i] * (nPrims - i));
+        auto cost = INTERSECTION_COST + (bounds.surfaceArea() * i + rightAreas[i] * (nPrims - i)) * totalAreaInv;
         if (cost < minCost) {
           minCost = cost;
           splitIndex = i;
@@ -134,22 +136,32 @@ public:
     exhaustBuild(primInfos, node.rightChild, start + splitIndex, end, buffer + splitIndex);
   }
 
-  float compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) {
-    auto& node = nodes[nodeIndex];
-    packedNodes.push_back(node);
-
-    if (node.nPrims)
-      return 1.0f;
-
-    auto rightChildIndex = node.rightChild;
-    auto area = node.bounds.surfaceArea();
-    auto leftArea = nodes[nodeIndex + 1].bounds.surfaceArea();
-    auto rightArea = nodes[rightChildIndex].bounds.surfaceArea();
-    auto leftCost = compactNodes(nodeIndex + 1, packedNodes);
-    node.rightChild = (std::uint32_t)packedNodes.size();
-    auto rightCost = compactNodes(rightChildIndex, packedNodes);
-    return INTERSECTION_COST + (leftCost * leftArea + rightCost * rightArea) / area;
+  void compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) const {
+    packedNodes.push_back(nodes[nodeIndex]);
+    auto& node = packedNodes.back();
+    if (node.nPrims) return;
+    compactNodes(nodeIndex + 1, packedNodes);
+    auto rightChild = node.rightChild;
+    node.rightChild = packedNodes.size();
+    compactNodes(rightChild, packedNodes);
   }
+
+  // float compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) {
+  //   if (nodes[nodeIndex].nPrims) {
+  //     packedNodes.push_back(nodes[nodeIndex]);
+  //     return 1.0f;
+  //   }
+
+  //   auto& node = nodes[nodeIndex];
+  //   auto rightChildIndex = node.rightChild;
+  //   auto area = node.bounds.surfaceArea();
+  //   auto leftArea = nodes[nodeIndex + 1].bounds.surfaceArea();
+  //   auto rightArea = nodes[rightChildIndex].bounds.surfaceArea();
+  //   auto leftCost = compactNodes(nodeIndex + 1, packedNodes);
+  //   node.rightChild = (std::uint32_t)packedNodes.size();
+  //   auto rightCost = compactNodes(rightChildIndex, packedNodes);
+  //   return INTERSECTION_COST + (leftCost * leftArea + rightCost * rightArea) / area;
+  // }
 
   bool intersect(const Ray3f& ray, Interaction& isect) const override {
     Vector3f invDir(1 / ray.d.x(), 1 / ray.d.y(), 1 / ray.d.z());
