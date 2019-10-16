@@ -5,6 +5,8 @@
 
 namespace minpt {
 
+class Mesh;
+
 class Interaction {
 public:
   Interaction() = default;
@@ -33,7 +35,9 @@ public:
   Vector3f p;
   Vector3f n;
   Vector2f uv;
+  Vector3f wo;
   Frame shFrame;
+  const Mesh* mesh;
 };
 
 }
