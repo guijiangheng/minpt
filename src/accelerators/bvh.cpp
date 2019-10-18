@@ -63,21 +63,24 @@ public:
     auto buffer = std::make_unique<std::uint32_t[]>(nPrims);
     nodes.resize(nPrims * 2);
     nodes[0].bounds = bounds;
-    exhaustBuild(primInfos.get(), 0u, indices.data(), indices.data() + nPrims, buffer.get());
+    std::uint32_t totalNodes = 0;
+    exhaustBuild(primInfos.get(), 0u, totalNodes, indices.data(), indices.data() + nPrims, buffer.get());
 
     std::vector<BVHNode> packedNodes;
-    compactNodes(0, packedNodes);
+    packedNodes.reserve(totalNodes);
+    auto cost = compactNodes(0u, packedNodes);
     nodes = std::move(packedNodes);
 
     std::cout
       << "done (took " << timer.elapsedString() << " and "
       << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
-      << ", SAH cost = " << 10 << ")." << std::endl;
+      << ", SAH cost = " << cost << ")." << std::endl;
   }
 
   void exhaustBuild(
       PrimInfo* primInfos,
       std::uint32_t nodeIndex,
+      std::uint32_t& totalNodes,
       std::uint32_t* start,
       std::uint32_t* end,
       std::uint32_t* buffer) {
@@ -86,6 +89,7 @@ public:
     auto nPrims = (std::uint32_t)(end - start);
 
     if (nPrims == 1) {
+      ++totalNodes;
       node = BVHNode(primInfos[*start].bounds, (std::uint32_t)(start - indices.data()), 1);
       return;
     }
@@ -122,6 +126,7 @@ public:
     }
 
     if (splitAxis == -1) {
+      ++totalNodes;
       node = BVHNode(node.bounds, (std::uint32_t)(start - indices.data()), (std::uint16_t)nPrims);
       return;
     }
@@ -130,38 +135,26 @@ public:
       return primInfos[a].center[splitAxis] < primInfos[b].center[splitAxis];
     });
 
+    ++totalNodes;
     node.splitAxis = splitAxis;
     node.rightChild = nodeIndex + splitIndex * 2;
-    exhaustBuild(primInfos, nodeIndex + 1, start, start + splitIndex, buffer);
-    exhaustBuild(primInfos, node.rightChild, start + splitIndex, end, buffer + splitIndex);
+    exhaustBuild(primInfos, nodeIndex + 1, totalNodes, start, start + splitIndex, buffer);
+    exhaustBuild(primInfos, node.rightChild, totalNodes, start + splitIndex, end, buffer + splitIndex);
   }
 
-  void compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) const {
+  float compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) const {
     packedNodes.push_back(nodes[nodeIndex]);
     auto& node = packedNodes.back();
-    if (node.nPrims) return;
-    compactNodes(nodeIndex + 1, packedNodes);
+    if (node.nPrims) return 1.0f;
     auto rightChild = node.rightChild;
+    auto totalArea = node.bounds.surfaceArea();
+    auto leftArea = nodes[nodeIndex + 1].bounds.surfaceArea();
+    auto rightArea = nodes[rightChild].bounds.surfaceArea();
+    auto leftCost = compactNodes(nodeIndex + 1, packedNodes);
     node.rightChild = packedNodes.size();
-    compactNodes(rightChild, packedNodes);
+    auto rightCost = compactNodes(rightChild, packedNodes);
+    return INTERSECTION_COST + (leftCost * leftArea + rightCost * rightArea) / totalArea;
   }
-
-  // float compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) {
-  //   if (nodes[nodeIndex].nPrims) {
-  //     packedNodes.push_back(nodes[nodeIndex]);
-  //     return 1.0f;
-  //   }
-
-  //   auto& node = nodes[nodeIndex];
-  //   auto rightChildIndex = node.rightChild;
-  //   auto area = node.bounds.surfaceArea();
-  //   auto leftArea = nodes[nodeIndex + 1].bounds.surfaceArea();
-  //   auto rightArea = nodes[rightChildIndex].bounds.surfaceArea();
-  //   auto leftCost = compactNodes(nodeIndex + 1, packedNodes);
-  //   node.rightChild = (std::uint32_t)packedNodes.size();
-  //   auto rightCost = compactNodes(rightChildIndex, packedNodes);
-  //   return INTERSECTION_COST + (leftCost * leftArea + rightCost * rightArea) / area;
-  // }
 
   bool intersect(const Ray3f& ray, Interaction& isect) const override {
     Vector3f invDir(1 / ray.d.x(), 1 / ray.d.y(), 1 / ray.d.z());
