@@ -67,7 +67,7 @@ add_executable(minpt
   src/core/scene.cpp
   src/core/mesh.cpp
   src/core/parser.cpp
-  src/core/objectfactory.cpp
+  src/core/object.cpp
   src/meshes/obj.cpp
   src/samplers/random.cpp
   src/accelerators/bvh.cpp
