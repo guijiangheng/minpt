@@ -1,5 +1,7 @@
-#include <memory>
 #include <iostream>
+#include <memory>
+#include <atomic>
+#include <tbb/tbb.h>
 #include <minpt/core/timer.h>
 #include <minpt/core/accelerator.h>
 
@@ -13,6 +15,16 @@ struct PrimInfo {
 
   PrimInfo(const Bounds3f& bounds) : bounds(bounds), center(bounds.center())
   { }
+};
+
+struct Bins {
+  static constexpr auto BIN_COUNT = 16;
+  std::uint32_t counts[BIN_COUNT];
+  Bounds3f bounds[BIN_COUNT];
+
+  Bins() {
+    memset(counts, 0, sizeof(std::uint32_t) * BIN_COUNT);
+  }
 };
 
 struct BVHNode {
@@ -64,7 +76,7 @@ public:
     nodes.resize(nPrims * 2);
     nodes[0].bounds = bounds;
     std::uint32_t totalNodes = 0;
-    exhaustBuild(primInfos.get(), 0u, totalNodes, indices.data(), indices.data() + nPrims, buffer.get());
+    sahBuild(primInfos.get(), 0u, totalNodes, indices.data(), indices.data() + nPrims, buffer.get());
 
     std::vector<BVHNode> packedNodes;
     packedNodes.reserve(totalNodes);
@@ -75,6 +87,124 @@ public:
       << "done (took " << timer.elapsedString() << " and "
       << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
       << ", SAH cost = " << cost << ")." << std::endl;
+  }
+
+  void sahBuild(
+      PrimInfo* primInfos,
+      std::uint32_t nodeIndex,
+      std::uint32_t& totalNodes,
+      std::uint32_t* start,
+      std::uint32_t* end,
+      std::uint32_t* buffer) {
+
+    auto nPrims = (std::uint32_t)(end - start);
+
+    if (nPrims < 64) {
+      exhaustBuild(primInfos, nodeIndex, totalNodes, start, end, buffer);
+      return;
+    }
+
+    auto& node = nodes[nodeIndex];
+    auto axis = node.bounds.getMajorAxis();
+    auto min = node.bounds.min()[axis];
+    auto max = node.bounds.max()[axis];
+    auto binSizeInv = Bins::BIN_COUNT / (max - min);
+
+    auto bins = tbb::parallel_reduce(
+      tbb::blocked_range<std::uint32_t>(0u, nPrims, 1000),
+      Bins(),
+      [=](const tbb::blocked_range<std::uint32_t>& range, Bins bins) -> Bins {
+        for (auto i = range.begin(); i != range.end(); ++i) {
+          auto f = start[i];
+          auto centeroid = primInfos[f].center[axis];
+          auto index = (int)((centeroid - min) * binSizeInv);
+          if (index == Bins::BIN_COUNT) --index;
+          ++bins.counts[index];
+          bins.bounds[index].extend(primInfos[f].bounds);
+        }
+        return bins;
+      },
+      [](const Bins& a, const Bins& b) {
+        Bins bins;
+        for (auto i = 0; i < Bins::BIN_COUNT; ++i) {
+          bins.counts[i] = a.counts[i] + b.counts[i];
+          bins.bounds[i] = a.bounds[i].merged(b.bounds[i]);
+        }
+        return bins;
+      }
+    );
+
+    Bounds3f leftBounds[Bins::BIN_COUNT];
+    leftBounds[0] = bins.bounds[0];
+    for (auto i = 1; i < Bins::BIN_COUNT - 1; ++i) {
+      bins.counts[i] += bins.counts[i - 1];
+      leftBounds[i] = bins.bounds[i].merged(leftBounds[i - 1]);
+    }
+
+    auto splitIndex = -1;
+    auto minCost = (float)nPrims;
+    auto totalAreaInv = 1 / node.bounds.surfaceArea();
+    Bounds3f bestRightBounds, rightBounds = bins.bounds[Bins::BIN_COUNT - 1];
+
+    for (auto i = Bins::BIN_COUNT - 2; i >= 0; --i) {
+      auto cost = INTERSECTION_COST + totalAreaInv * (
+        bins.counts[i] * leftBounds[i].surfaceArea() +
+        (nPrims - bins.counts[i]) * rightBounds.surfaceArea());
+      if (cost < minCost) {
+        minCost = cost;
+        splitIndex = i;
+        bestRightBounds = rightBounds;
+      }
+      rightBounds.extend(bins.bounds[i]);
+    }
+
+    if (splitIndex == -1) {
+      exhaustBuild(primInfos, nodeIndex, totalNodes, start, end, buffer);
+      return;
+    }
+
+    ++totalNodes;
+    auto leftCount = bins.counts[splitIndex];
+    node.nPrims = 0;
+    node.splitAxis = axis;
+    node.rightChild = nodeIndex + 2 * leftCount;
+    nodes[nodeIndex + 1].bounds = leftBounds[splitIndex];
+    nodes[node.rightChild].bounds = bestRightBounds;
+
+    std::atomic<std::uint32_t> offsetLeft(0);
+    std::atomic<std::uint32_t> offsetRight(leftCount);
+
+    tbb::parallel_for(
+      tbb::blocked_range<std::uint32_t>(0u, nPrims, 1000),
+      [=, &offsetLeft, &offsetRight](const tbb::blocked_range<std::uint32_t>& range) {
+        std::uint32_t leftCount = 0;
+        std::uint32_t rightCount = 0;
+        for (auto i = range.begin(); i != range.end(); ++i) {
+          auto f = start[i];
+          auto centroid = primInfos[f].center[axis];
+          auto index = (int)((centroid - min) * binSizeInv);
+          if (index == Bins::BIN_COUNT) --index;
+          ++(index <= splitIndex ? leftCount : rightCount);
+        }
+        auto left = offsetLeft.fetch_add(leftCount);
+        auto right = offsetRight.fetch_add(rightCount);
+        for (auto i = range.begin(); i != range.end(); ++i) {
+          auto f = start[i];
+          auto centroid = primInfos[f].center[axis];
+          auto index = (int)((centroid - min) * binSizeInv);
+          if (index == Bins::BIN_COUNT) --index;
+          if (index <= splitIndex)
+            buffer[left++] = f;
+          else
+            buffer[right++] = f;
+        }
+      }
+    );
+
+    ++totalNodes;
+    memcpy(start, buffer, sizeof(std::uint32_t) * nPrims);
+    sahBuild(primInfos, nodeIndex + 1, totalNodes, start, start + leftCount, buffer);
+    sahBuild(primInfos, node.rightChild, totalNodes, start + leftCount, end, buffer);
   }
 
   void exhaustBuild(
