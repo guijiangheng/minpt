@@ -4,6 +4,7 @@
 #include <map>
 
 #include <minpt/math/color.h>
+#include <minpt/math/bounds.h>
 #include <minpt/math/matrix.h>
 #include <minpt/core/exception.h>
 
@@ -39,8 +40,10 @@ public:
   DEFINE_PROPERTY_ACCESSOR(int, Integer);
   DEFINE_PROPERTY_ACCESSOR(float, Float);
   DEFINE_PROPERTY_ACCESSOR(std::string, String);
+  DEFINE_PROPERTY_ACCESSOR(Vector2i, Vector2i);
   DEFINE_PROPERTY_ACCESSOR(Color3f, Color3f);
   DEFINE_PROPERTY_ACCESSOR(Vector3f, Vector3f);
+  DEFINE_PROPERTY_ACCESSOR(Bounds2f, Bounds2f);
   DEFINE_PROPERTY_ACCESSOR(Matrix4f, Transform);
 
 private:

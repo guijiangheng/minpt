@@ -24,8 +24,10 @@ enum ETag {
   EInteger,
   EFloat,
   EString,
-  EVector,
+  EVector2i,
+  EVector3f,
   EColor,
+  EBounds2f,
   ETransform,
   EMatrix,
   EScale,
@@ -47,8 +49,10 @@ static std::map<std::string, ETag> tags = {
   { "integer",    EInteger },
   { "float",      EFloat },
   { "string",     EString },
-  { "vector",     EVector },
+  { "vector2i",   EVector2i },
+  { "vector3f",   EVector3f },
   { "color",      EColor },
+  { "bounds2f",   EBounds2f },
   { "transform",  ETransform },
   { "matrix",     EMatrix },
   { "scale",      EScale },
@@ -176,31 +180,61 @@ Object* loadFromXML(const std::string& filename) {
         switch (tag) {
           case EBoolean:
             checkAttributes(node, { "name", "value" });
-            parentProps.setBoolean(node.attribute("name").value(), toBool(node.attribute("value").value()));
+            parentProps.setBoolean(
+              node.attribute("name").value(),
+              toBool(node.attribute("value").value()));
             break;
           case EInteger:
             checkAttributes(node, { "name", "value" });
-            parentProps.setInteger(node.attribute("name").value(), toInt(node.attribute("value").value()));
+            parentProps.setInteger(
+              node.attribute("name").value(),
+              toInt(node.attribute("value").value()));
             break;
           case EFloat:
             checkAttributes(node, { "name", "value" });
-            parentProps.setFloat(node.attribute("name").value(), toFloat(node.attribute("value").value()));
+            parentProps.setFloat(
+              node.attribute("name").value(),
+              toFloat(node.attribute("value").value()));
             break;
           case EString:
             checkAttributes(node, { "name", "value" });
-            parentProps.setString(node.attribute("name").value(), node.attribute("value").value());
+            parentProps.setString(
+              node.attribute("name").value(),
+              node.attribute("value").value());
             break;
-          case EVector:
+          case EVector2i:
             checkAttributes(node, { "name", "value" });
-            parentProps.setVector3f(node.attribute("name").value(), toVector3f(node.attribute("value").value()));
+            parentProps.setVector2i(
+              node.attribute("name").value(),
+              toVector2i(node.attribute("value").value()));
+            break;
+          case EVector3f:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setVector3f(
+              node.attribute("name").value(),
+              toVector3f(node.attribute("value").value()));
             break;
           case EColor:
             checkAttributes(node, { "name", "value" });
-            parentProps.setColor3f(node.attribute("name").value(), toColor3f(node.attribute("value").value()));
+            parentProps.setColor3f(
+              node.attribute("name").value(),
+              toColor3f(node.attribute("value").value()));
+            break;
+          case EBounds2f:
+            checkAttributes(node, { "name", "min", "max" });
+            parentProps.setBounds2f(
+              node.attribute("name").value(),
+              Bounds2f(
+                toVector2f(node.attribute("min").value()),
+                toVector2f(node.attribute("max").value())
+              )
+            );
             break;
           case ETransform:
             checkAttributes(node, { "name" });
-            parentProps.setTransform(node.attribute("name").value(), Matrix4f(transform.matrix()));
+            parentProps.setTransform(
+              node.attribute("name").value(),
+              Matrix4f(transform.matrix()));
             break;
           case EMatrix: {
               checkAttributes(node, { "value" });

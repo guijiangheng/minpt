@@ -1,3 +1,4 @@
+#include <minpt/math/bounds.h>
 #include <minpt/utils/utils.h>
 #include <minpt/core/camera.h>
 
@@ -8,9 +9,8 @@ public:
   PerspectiveCamera(const PropertyList& props)
     : Camera(
       props.getTransform("toWorld"),
-      Vector2i(
-        props.getInteger("width"),
-        props.getInteger("height")))
+      Vector2i(props.getVector2i("outputSize")))
+    , screenWindow(props.getBounds2f("screenWindow"))
     , fov(props.getFloat("fov")) {
 
     auto aspect = outputSize.x() / (float)outputSize.y();
@@ -33,16 +33,19 @@ public:
       "PerspectiveCamera[\n"
       "  frame = %s,\n"
       "  outputSize = %s,\n"
+      "  screenWindow = %s,\n"
       "  fov = %f\n"
       "]",
       indent(frame.toString(), 10),
       indent(outputSize.toString()),
+      indent(screenWindow.toString()),
       fov
     );
   }
 
 private:
   Matrix4f rasterToCamera;
+  Bounds2f screenWindow;
   float fov;
 };
 

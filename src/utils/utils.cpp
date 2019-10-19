@@ -20,6 +20,79 @@ std::string indent(const std::string& string, int amount) {
   return oss.str();
 }
 
+std::string toLower(const std::string& value) {
+  std::string result;
+  result.resize(value.size());
+  std::transform(value.begin(), value.end(), result.begin(), ::tolower);
+  return result;
+}
+
+bool toBool(const std::string& string) {
+  auto value = toLower(string);
+  if (value == "false")
+    return false;
+  if (value == "true")
+    return true;
+  throw Exception("Could not parse boolean value \"%s\"", string);
+}
+
+int toInt(const std::string& string) {
+  char* endPtr = nullptr;
+  auto result = (int)strtol(string.c_str(), &endPtr, 10);
+  if (*endPtr != '\0')
+    throw Exception("Could not parse integer value \"%s\"", string);
+  return result;
+}
+
+float toFloat(const std::string& string) {
+  char* end = nullptr;
+  auto result = (float)strtof(string.c_str(), &end);
+  if (*end != '\0')
+    throw Exception("Could not parse integer value \"%s\"", string);
+  return result;
+}
+
+unsigned int toUInt(const std::string& string) {
+  char* endPtr = nullptr;
+  auto result = (unsigned int)strtoul(string.c_str(), &endPtr, 10);
+  if (*endPtr != '\0')
+    throw Exception("Could not parse integer value \"%s\"", string);
+  return result;
+}
+
+Vector2i toVector2i(const std::string& string) {
+  auto tokens = tokenize(string);
+  if (tokens.size() != 2)
+    throw Exception("Expected 2 values");
+  return Vector2i(toInt(tokens[0]), toInt(tokens[1]));
+}
+
+Vector2f toVector2f(const std::string& string) {
+  auto tokens = tokenize(string);
+  if (tokens.size() != 2)
+    throw Exception("Expected 2 values");
+  return Vector2f(toFloat(tokens[0]), toFloat(tokens[1]));
+}
+
+Vector3f toVector3f(const std::string& string) {
+  auto tokens = tokenize(string);
+  if (tokens.size() != 3)
+    throw Exception("Expected 3 values");
+  return Vector3f(toFloat(tokens[0]), toFloat(tokens[1]), toFloat(tokens[2]));
+}
+
+Color3f toColor3f(const std::string& string) {
+  auto tokens = tokenize(string);
+  if (tokens.size() != 3)
+    throw Exception("Expected 3 values");
+  return Color3f(toFloat(tokens[0]), toFloat(tokens[1]), toFloat(tokens[2]));
+}
+
+bool endsWith(const std::string& value, const std::string& ending) {
+  if (ending.size() > value.size()) return false;
+  return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
 std::string timeString(double time, bool precise) {
   if (std::isnan(time) || std::isinf(time)) return "inf";
   auto suffix = "ms";
