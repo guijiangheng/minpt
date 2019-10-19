@@ -2,6 +2,7 @@
 #include <memory>
 #include <atomic>
 #include <tbb/tbb.h>
+
 #include <minpt/core/timer.h>
 #include <minpt/core/accelerator.h>
 
@@ -47,61 +48,27 @@ struct BVHNode {
   { }
 };
 
-class BVHAccel : public Accelerator {
+class BVHBuildTask : public tbb::task {
 public:
-  BVHAccel(const PropertyList& props)
+  BVHBuildTask(
+      std::vector<BVHNode>& nodes,
+      const std::uint32_t* indices,
+      const PrimInfo* primInfos,
+      std::uint32_t nodeIndex,
+      std::uint32_t* start, std::uint32_t* end, std::uint32_t* buffer)
+    : nodes(nodes)
+    , indices(indices)
+    , primInfos(primInfos)
+    , nodeIndex(nodeIndex)
+    , start(start) , end(end) , buffer(buffer)
   { }
 
-  void build() override {
-    auto nPrims = getPrimitiveCount();
-
-    std::cout
-      << "Constructing a SAH BVH (" << meshes.size()
-      << (meshes.size() == 1 ? " shape, " : " shapes, ")
-      << nPrims << " primitives) .. ";
-
-    Timer timer;
-
-    auto primInfos = std::make_unique<PrimInfo[]>(nPrims);
-    indices.resize(nPrims);
-    auto primIndex = 0u;
-    for (auto mesh : meshes)
-      for (std::uint32_t i = 0, n = mesh->getPrimitiveCount(); i < n; ++i) {
-        primInfos[primIndex] = PrimInfo(mesh->getBoundingBox(i));
-        indices[primIndex] = primIndex;
-        ++primIndex;
-      }
-
-    auto buffer = std::make_unique<std::uint32_t[]>(nPrims);
-    nodes.resize(nPrims * 2);
-    nodes[0].bounds = bounds;
-    std::uint32_t totalNodes = 0;
-    sahBuild(primInfos.get(), 0u, totalNodes, indices.data(), indices.data() + nPrims, buffer.get());
-
-    std::vector<BVHNode> packedNodes;
-    packedNodes.reserve(totalNodes);
-    auto cost = compactNodes(0u, packedNodes);
-    nodes = std::move(packedNodes);
-
-    std::cout
-      << "done (took " << timer.elapsedString() << " and "
-      << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
-      << ", SAH cost = " << cost << ")." << std::endl;
-  }
-
-  void sahBuild(
-      PrimInfo* primInfos,
-      std::uint32_t nodeIndex,
-      std::uint32_t& totalNodes,
-      std::uint32_t* start,
-      std::uint32_t* end,
-      std::uint32_t* buffer) {
-
+  tbb::task* execute() override {
     auto nPrims = (std::uint32_t)(end - start);
 
-    if (nPrims < 64) {
-      exhaustBuild(primInfos, nodeIndex, totalNodes, start, end, buffer);
-      return;
+    if (nPrims < SERIAL_THRESHOLD) {
+      seriallyBuild(nodeIndex, start, end, buffer);
+      return nullptr;
     }
 
     auto& node = nodes[nodeIndex];
@@ -111,7 +78,7 @@ public:
     auto binSizeInv = Bins::BIN_COUNT / (max - min);
 
     auto bins = tbb::parallel_reduce(
-      tbb::blocked_range<std::uint32_t>(0u, nPrims, 1000),
+      tbb::blocked_range<std::uint32_t>(0u, nPrims, GRAIN_SIZE),
       Bins(),
       [=](const tbb::blocked_range<std::uint32_t>& range, Bins bins) -> Bins {
         for (auto i = range.begin(); i != range.end(); ++i) {
@@ -147,7 +114,7 @@ public:
     Bounds3f bestRightBounds, rightBounds = bins.bounds[Bins::BIN_COUNT - 1];
 
     for (auto i = Bins::BIN_COUNT - 2; i >= 0; --i) {
-      auto cost = INTERSECTION_COST + totalAreaInv * (
+      auto cost = TRAVERSAL_COST + totalAreaInv * (
         bins.counts[i] * leftBounds[i].surfaceArea() +
         (nPrims - bins.counts[i]) * rightBounds.surfaceArea());
       if (cost < minCost) {
@@ -159,11 +126,10 @@ public:
     }
 
     if (splitIndex == -1) {
-      exhaustBuild(primInfos, nodeIndex, totalNodes, start, end, buffer);
-      return;
+      seriallyBuild(nodeIndex, start, end, buffer);
+      return nullptr;
     }
 
-    ++totalNodes;
     auto leftCount = bins.counts[splitIndex];
     node.nPrims = 0;
     node.splitAxis = axis;
@@ -175,7 +141,7 @@ public:
     std::atomic<std::uint32_t> offsetRight(leftCount);
 
     tbb::parallel_for(
-      tbb::blocked_range<std::uint32_t>(0u, nPrims, 1000),
+      tbb::blocked_range<std::uint32_t>(0u, nPrims, GRAIN_SIZE),
       [=, &offsetLeft, &offsetRight](const tbb::blocked_range<std::uint32_t>& range) {
         std::uint32_t leftCount = 0;
         std::uint32_t rightCount = 0;
@@ -201,26 +167,25 @@ public:
       }
     );
 
-    ++totalNodes;
-    memcpy(start, buffer, sizeof(std::uint32_t) * nPrims);
-    sahBuild(primInfos, nodeIndex + 1, totalNodes, start, start + leftCount, buffer);
-    sahBuild(primInfos, node.rightChild, totalNodes, start + leftCount, end, buffer);
+    memcpy(start, buffer, nPrims * sizeof(uint32_t));
+    auto& c = *new(allocate_continuation()) tbb::empty_task();
+    c.set_ref_count(2);
+    auto& b = *new(c.allocate_child()) BVHBuildTask(
+      nodes, indices, primInfos, node.rightChild, start + leftCount, end, buffer + leftCount);
+    spawn(b);
+    recycle_as_child_of(c);
+    ++nodeIndex;
+    end = start + leftCount;
+
+    return this;
   }
 
-  void exhaustBuild(
-      PrimInfo* primInfos,
-      std::uint32_t nodeIndex,
-      std::uint32_t& totalNodes,
-      std::uint32_t* start,
-      std::uint32_t* end,
-      std::uint32_t* buffer) {
-
+  void seriallyBuild(std::uint32_t nodeIndex, std::uint32_t* start, std::uint32_t* end, std::uint32_t* buffer) {
     auto& node = nodes[nodeIndex];
     auto nPrims = (std::uint32_t)(end - start);
 
     if (nPrims == 1) {
-      ++totalNodes;
-      node = BVHNode(primInfos[*start].bounds, (std::uint32_t)(start - indices.data()), 1);
+      node = BVHNode(primInfos[*start].bounds, (std::uint32_t)(start - indices), 1);
       return;
     }
 
@@ -246,7 +211,7 @@ public:
       bounds.reset();
       for (std::uint32_t i = 1; i < nPrims; ++i) {
         bounds.extend(primInfos[*(start + i - 1)].bounds);
-        auto cost = INTERSECTION_COST + (bounds.surfaceArea() * i + rightAreas[i] * (nPrims - i)) * totalAreaInv;
+        auto cost = TRAVERSAL_COST + (bounds.surfaceArea() * i + rightAreas[i] * (nPrims - i)) * totalAreaInv;
         if (cost < minCost) {
           minCost = cost;
           splitIndex = i;
@@ -256,8 +221,7 @@ public:
     }
 
     if (splitAxis == -1) {
-      ++totalNodes;
-      node = BVHNode(node.bounds, (std::uint32_t)(start - indices.data()), (std::uint16_t)nPrims);
+      node = BVHNode(node.bounds, (std::uint32_t)(start - indices), (std::uint16_t)nPrims);
       return;
     }
 
@@ -265,25 +229,95 @@ public:
       return primInfos[a].center[splitAxis] < primInfos[b].center[splitAxis];
     });
 
-    ++totalNodes;
     node.splitAxis = splitAxis;
     node.rightChild = nodeIndex + splitIndex * 2;
-    exhaustBuild(primInfos, nodeIndex + 1, totalNodes, start, start + splitIndex, buffer);
-    exhaustBuild(primInfos, node.rightChild, totalNodes, start + splitIndex, end, buffer + splitIndex);
+    seriallyBuild(nodeIndex + 1, start, start + splitIndex, buffer);
+    seriallyBuild(node.rightChild, start + splitIndex, end, buffer + splitIndex);
   }
 
-  float compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) const {
-    packedNodes.push_back(nodes[nodeIndex]);
-    auto& node = packedNodes.back();
-    if (node.nPrims) return 1.0f;
-    auto rightChild = node.rightChild;
+public:
+  static constexpr std::uint32_t SERIAL_THRESHOLD = 32;
+  static constexpr std::uint32_t GRAIN_SIZE = 1000;
+  static constexpr float TRAVERSAL_COST = 1.0f;
+
+private:
+  std::vector<BVHNode>& nodes;
+  const std::uint32_t* indices;
+  const PrimInfo* primInfos;
+  std::uint32_t nodeIndex;
+  std::uint32_t* start;
+  std::uint32_t* end;
+  std::uint32_t* buffer;
+};
+
+class BVHAccel : public Accelerator {
+public:
+  BVHAccel(const PropertyList& props)
+  { }
+
+  void build() override {
+    auto nPrims = getPrimitiveCount();
+
+    std::cout
+      << "Constructing a SAH BVH (" << meshes.size()
+      << (meshes.size() == 1 ? " shape, " : " shapes, ")
+      << nPrims << " primitives) .. ";
+
+    Timer timer;
+
+    auto primInfos = std::make_unique<PrimInfo[]>(nPrims);
+    indices.resize(nPrims);
+    auto primIndex = 0u;
+    for (auto mesh : meshes)
+      for (std::uint32_t i = 0, n = mesh->getPrimitiveCount(); i < n; ++i) {
+        primInfos[primIndex] = PrimInfo(mesh->getBoundingBox(i));
+        indices[primIndex] = primIndex;
+        ++primIndex;
+      }
+
+    auto buffer = std::make_unique<std::uint32_t[]>(nPrims);
+    nodes.resize(nPrims * 2);
+    nodes[0].bounds = bounds;
+    auto& task = *new(tbb::task::allocate_root()) BVHBuildTask(
+      nodes, indices.data(), primInfos.get(),
+      0u, indices.data(), indices.data() + nPrims, buffer.get());
+    tbb::task::spawn_root_and_wait(task);
+
+    auto stats = statistics(0u);
+    std::vector<BVHNode> packedNodes;
+    packedNodes.reserve(stats.second);
+    compactNodes(0u, packedNodes);
+    nodes = std::move(packedNodes);
+
+    std::cout
+      << "done (took " << timer.elapsedString() << " and "
+      << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
+      << ", SAH cost = " << stats.first << ")." << std::endl;
+  }
+
+  std::pair<float, std::uint32_t> statistics(std::uint32_t nodeIndex) const {
+    auto& node = nodes[nodeIndex];
+    if (node.nPrims)
+      return std::make_pair((float)node.nPrims, 1u);
+    auto left = statistics(nodeIndex + 1);
+    auto right = statistics(node.rightChild);
     auto totalArea = node.bounds.surfaceArea();
     auto leftArea = nodes[nodeIndex + 1].bounds.surfaceArea();
-    auto rightArea = nodes[rightChild].bounds.surfaceArea();
-    auto leftCost = compactNodes(nodeIndex + 1, packedNodes);
+    auto rightArea = nodes[node.rightChild].bounds.surfaceArea();
+    return std::make_pair(
+      BVHBuildTask::TRAVERSAL_COST + (left.first * leftArea + right.first * rightArea) / totalArea,
+      left.second + right.second + 1
+    );
+  }
+
+  void compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) const {
+    packedNodes.push_back(nodes[nodeIndex]);
+    auto& node = packedNodes.back();
+    if (node.nPrims) return;
+    compactNodes(nodeIndex + 1, packedNodes);
+    auto rightChild = node.rightChild;
     node.rightChild = packedNodes.size();
-    auto rightCost = compactNodes(rightChild, packedNodes);
-    return INTERSECTION_COST + (leftCost * leftArea + rightCost * rightArea) / totalArea;
+    compactNodes(rightChild, packedNodes);
   }
 
   bool intersect(const Ray3f& ray, Interaction& isect) const override {
@@ -370,7 +404,6 @@ public:
 
 private:
   std::vector<BVHNode> nodes;
-  static constexpr auto INTERSECTION_COST = 1.0f;
 };
 
 MINPT_REGISTER_CLASS(BVHAccel, "bvh");
