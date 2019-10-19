@@ -7,16 +7,19 @@ namespace minpt {
 class PerspectiveCamera : public Camera {
 public:
   PerspectiveCamera(const PropertyList& props)
-    : Camera(
-      props.getTransform("toWorld"),
-      Vector2i(props.getVector2i("outputSize")))
-    , screenWindow(props.getBounds2f("screenWindow"))
-    , fov(props.getFloat("fov")) {
+      : Camera(
+        props.getTransform("toWorld"),
+        Vector2i(props.getVector2i("outputSize")))
+      , fov(props.getFloat("fov")) {
 
-    auto aspect = outputSize.x() / (float)outputSize.y();
+    auto aspectInv = (float)outputSize.y() / outputSize.x();
+    screenWindow = props.getBounds2f("screenWindow", Bounds2f(
+      Vector2f(-1.0f, -aspectInv),
+      Vector2f( 1.0f,  aspectInv)));
+    Vector2f diag = screenWindow.diagonal();
     Matrix4f screenToRaster = (
-      Eigen::DiagonalMatrix<float, 3>(-0.5f * outputSize.x(), -0.5f * aspect * outputSize.y(), 1.0f) *
-      Eigen::Translation3f(-1.0f, -1.0f / aspect, 0.0f)).matrix();
+      Eigen::DiagonalMatrix<float, 3>(outputSize.x() / diag.x(), -outputSize.y() / diag.y(), 1.0f) *
+      Eigen::Translation3f(-screenWindow.min().x(), -screenWindow.max().y(), 0.0f)).matrix();
     Matrix4f cameraToScreen = Matrix4f::perspective(fov, 0.0001f, 1000.0f);
     rasterToCamera = (screenToRaster * cameraToScreen).inverse();
   }
