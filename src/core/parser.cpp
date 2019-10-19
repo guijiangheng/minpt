@@ -192,11 +192,11 @@ Object* loadFromXML(const std::string& filename) {
             break;
           case EVector:
             checkAttributes(node, { "name", "value" });
-            parentProps.setVector(node.attribute("name").value(), toVector3f(node.attribute("value").value()));
+            parentProps.setVector3f(node.attribute("name").value(), toVector3f(node.attribute("value").value()));
             break;
           case EColor:
             checkAttributes(node, { "name", "value" });
-            parentProps.setColor(node.attribute("name").value(), toColor3f(node.attribute("value").value()));
+            parentProps.setColor3f(node.attribute("name").value(), toColor3f(node.attribute("value").value()));
             break;
           case ETransform:
             checkAttributes(node, { "name" });
