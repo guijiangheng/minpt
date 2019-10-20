@@ -32,6 +32,8 @@ set(
   ${NANOGUI_EXTRA_INCS}
   # Portable filesystem API
   ${FILESYSTEM_INCLUDE_DIR}
+  # Lodepng library for image read write
+  ${LODEPNG_INCLUDE_DIR}
 )
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
@@ -77,4 +79,4 @@ add_executable(minpt
 
 target_compile_features(minpt PRIVATE cxx_std_17)
 target_include_directories(minpt PRIVATE ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(minpt PRIVATE tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS})
+target_link_libraries(minpt PRIVATE tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng)

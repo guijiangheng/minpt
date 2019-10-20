@@ -25,3 +25,6 @@
 [submodule "ext/openexr"]
 	path = ext/openexr
 	url = https://github.com/mitsuba-renderer/openexr/
+[submodule "ext/lodepng"]
+	path = ext/lodepng
+	url = https://github.com/lvandeve/lodepng.git

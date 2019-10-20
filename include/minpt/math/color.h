@@ -10,7 +10,7 @@ public:
   using Base = Eigen::Array3f;
   using Base::Base;
 
-  explicit Color3f(float value = 0.0f) noexcept : Base(value, value, value)
+  explicit Color3f(float value) noexcept : Base(value, value, value)
   { }
 
   float& r() {

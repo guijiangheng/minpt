@@ -18,6 +18,7 @@ public:
     , sampler(nullptr)
     , integrator(nullptr)
     , accel(nullptr)
+    , outputName(props.getString("outputName", ""))
   { }
 
   ~Scene() {
@@ -76,6 +77,7 @@ public:
   Sampler* sampler;
   Integrator* integrator;
   Accelerator* accel;
+  std::string outputName;
 };
 
 }
