@@ -114,7 +114,6 @@ std::string timeString(double time, bool precise) {
   return os.str();
 }
 
-
 std::string memString(size_t size, bool precise) {
   auto value = (double)size;
   const char* suffixes[] = { "B", "KiB", "MiB", "GiB", "TiB", "PiB" };

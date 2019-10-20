@@ -21,12 +21,16 @@ int main(int argc, char** argv) {
       getFileResolver()->prepend(path.parent_path());
       std::unique_ptr<Object> root(loadFromXML(argv[1]));
       if (root->getClassType() == Object::EScene) {
-        std::string outputName = argv[1];
-        auto lastDot = outputName.find_last_of(".");
-        if (lastDot != std::string::npos)
-          outputName.erase(lastDot, std::string::npos);
-        outputName += ".exr";
         auto scene = static_cast<Scene*>(root.get());
+        auto& outputName = scene->outputName;
+        if (outputName.empty()) {
+          outputName = argv[1];
+          auto lastDot = outputName.find_last_of(".");
+          if (lastDot != std::string::npos)
+            outputName.erase(lastDot, std::string::npos);
+          outputName += ".exr";
+          scene->outputName = outputName;
+        }
         scene->render(outputName);
       }
     } else {
