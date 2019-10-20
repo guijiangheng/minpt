@@ -24,7 +24,7 @@ public:
   }
 
   CameraSample getCameraSample(const Vector2i& pFilm) {
-    return { Vector2f((float)pFilm.x(), (float)pFilm.y()) + get2D() };
+    return { Vector2f(pFilm) + get2D() };
   }
 
   virtual void prepare(const Vector2i& block) = 0;

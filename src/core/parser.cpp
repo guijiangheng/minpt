@@ -2,7 +2,6 @@
 #include <vector>
 #include <fstream>
 #include <pugixml.hpp>
-#include <Eigen/Geometry>
 
 #include <minpt/utils/utils.h>
 #include <minpt/core/object.h>
@@ -87,7 +86,7 @@ Object* loadFromXML(const std::string& filename) {
   if (!result)
     throw Exception("Error while parsing \"%s\": %s (at %s)", filename, result.description(), offset(result.offset));
 
-  Eigen::Affine3f transform;
+  Matrix4f transform;
 
   std::function<Object*(pugi::xml_node&, PropertyList&, ETag)> parseTag = [&](
     pugi::xml_node& node,
@@ -140,7 +139,7 @@ Object* loadFromXML(const std::string& filename) {
     if (tag == EScene)
       node.append_attribute("type") = "scene";
     else if (tag == ETransform)
-      transform.setIdentity();
+      transform = Matrix4f::identity();
 
     PropertyList props;
     std::vector<Object*> children;
@@ -232,33 +231,31 @@ Object* loadFromXML(const std::string& filename) {
             break;
           case ETransform:
             checkAttributes(node, { "name" });
-            parentProps.setTransform(
-              node.attribute("name").value(),
-              Matrix4f(transform.matrix()));
+            parentProps.setTransform(node.attribute("name").value(), transform);
             break;
           case EMatrix: {
               checkAttributes(node, { "value" });
               auto tokens = tokenize(node.attribute("value").value());
               if (tokens.size() != 16)
                 throw Exception("Expected 16 values");
-              Eigen::Matrix4f matrix;
+              Matrix4f matrix;
                 for (int i = 0; i < 4; ++i)
                   for (auto j = 0; j < 4; ++j)
-                    matrix(i, j) = toFloat(tokens[i * 4 + j]);
-              transform = Eigen::Affine3f(matrix) * transform;
+                    matrix.e[i][j] = toFloat(tokens[i * 4 + j]);
+              transform = matrix * transform;
             }
             break;
           case EScale: {
               checkAttributes(node, { "value" });
               auto scale = toVector3f(node.attribute("value").value());
-              transform = Eigen::DiagonalMatrix<float, 3>(scale) * transform;
+              transform = Matrix4f::scale(scale.x, scale.y, scale.z) * transform;
             }
             break;
           case ERotate: {
               checkAttributes(node, { "angle", "axis" });
               auto angle = radians(toFloat(node.attribute("angle").value()));
               auto axis = toVector3f(node.attribute("axis").value());
-              transform = Eigen::AngleAxis<float>(angle, axis) * transform;
+              transform = Matrix4f::rotate(axis, angle) * transform;
             }
             break;
           case ELookAt:{
@@ -266,8 +263,7 @@ Object* loadFromXML(const std::string& filename) {
               auto origin = toVector3f(node.attribute("origin").value());
               auto target = toVector3f(node.attribute("target").value());
               auto up = toVector3f(node.attribute("up").value());
-              auto matrix = Matrix4f::lookAt(origin, target, up);
-              transform = Eigen::Affine3f(matrix) * transform;
+              transform = Matrix4f::lookAt(origin, target, up) * transform;
             }
             break;
           default:

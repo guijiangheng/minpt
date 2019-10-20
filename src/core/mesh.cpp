@@ -3,54 +3,54 @@
 
 namespace minpt {
 
-bool Mesh::intersect(uint32_t index, const Ray3f& ray) const {
-  const Vector3f& a = v.col(f(0, index));
-  const Vector3f& b = v.col(f(1, index));
-  const Vector3f& c = v.col(f(2, index));
+bool Mesh::intersect(uint32_t index, const Ray& ray) const {
+  auto& a = p[f[3 * index]];
+  auto& b = p[f[3 * index + 1]];
+  auto& c = p[f[3 * index + 2]];
 
-  Vector3f e1 = b - a;
-  Vector3f e2 = c - a;
-  Vector3f p = ray.d.cross(e2);
-  auto det = p.dot(e1);
+  auto e1 = b - a;
+  auto e2 = c - a;
+  auto p = cross(ray.d, e2);
+  auto det = dot(p, e1);
   if (std::abs(det) < 0.000001f) return false;
 
-  Vector3f t = ray.o - a;
+  auto t = ray.o - a;
   auto detInv = 1 / det;
-  auto u = p.dot(t) * detInv;
+  auto u = dot(p, t) * detInv;
   if (u < 0 || u > 1) return false;
 
-  Vector3f q = t.cross(e1);
-  auto v = q.dot(ray.d) * detInv;
+  auto q = cross(t, e1);
+  auto v = dot(q, ray.d) * detInv;
   if (v < 0 || u + v > 1) return false;
 
-  auto dist = q.dot(e2) * detInv;
+  auto dist = dot(q, e2) * detInv;
   if (dist <= 0 || dist > ray.tMax) return false;
 
   return true;
 }
 
 // ref https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
-bool Mesh::intersect(uint32_t index, const Ray3f& ray, Interaction& isect) const {
-  auto& a = v.col(f(0, index));
-  auto& b = v.col(f(1, index));
-  auto& c = v.col(f(2, index));
+bool Mesh::intersect(uint32_t index, const Ray& ray, Interaction& isect) const {
+  auto& a = p[f[3 * index]];
+  auto& b = p[f[3 * index + 1]];
+  auto& c = p[f[3 * index + 2]];
 
-  Vector3f e1 = b - a;
-  Vector3f e2 = c - a;
-  Vector3f p = ray.d.cross(e2);
-  auto det = p.dot(e1);
+  auto e1 = b - a;
+  auto e2 = c - a;
+  auto p = cross(ray.d, e2);
+  auto det = dot(p, e1);
   if (std::abs(det) < 0.000001f) return false;
 
-  Vector3f t = ray.o - a;
+  auto t = ray.o - a;
   auto detInv = 1 / det;
-  auto u = p.dot(t) * detInv;
+  auto u = dot(p, t) * detInv;
   if (u < 0 || u > 1) return false;
 
-  Vector3f q = t.cross(e1);
-  auto v = q.dot(ray.d) * detInv;
+  auto q = cross(t, e1);
+  auto v = dot(q, ray.d) * detInv;
   if (v < 0 || u + v > 1) return false;
 
-  auto dist = q.dot(e2) * detInv;
+  auto dist = dot(q, e2) * detInv;
   if (dist <= 0 || dist > ray.tMax) return false;
 
   ray.tMax = dist;
@@ -60,25 +60,25 @@ bool Mesh::intersect(uint32_t index, const Ray3f& ray, Interaction& isect) const
 }
 
 void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
-  auto ia = f(0, index);
-  auto ib = f(1, index);
-  auto ic = f(2, index);
+  auto ia = f[3 * index];
+  auto ib = f[3 * index + 1];
+  auto ic = f[3 * index + 2];
 
-  const Vector3f& a = v.col(ia);
-  const Vector3f& b = v.col(ib);
-  const Vector3f& c = v.col(ic);
+  auto& a = p[ia];
+  auto& b = p[ib];
+  auto& c = p[ic];
   isect.p = barycentric(a, b, c, isect.uv);
-  isect.n = (b - a).cross(c - a).normalized();
+  isect.n = normalize(cross(c - a, b - a));
 
-  if (n.size()) {
-    Vector3f ns = barycentric(n.col(ia), n.col(ib), n.col(ic), isect.uv).normalized();
+  if (n) {
+    auto ns = normalize(barycentric(n[ia], n[ib], n[ic], isect.uv));
     isect.shFrame = Frame(ns);
   } else {
     isect.shFrame = Frame(isect.n);
   }
 
-  if (uv.size()) {
-    isect.uv = barycentric(uv.col(ia), uv.col(ib), uv.col(ic), isect.uv);
+  if (uv) {
+    isect.uv = barycentric(uv[ia], uv[ib], uv[ic], isect.uv);
   }
 }
 

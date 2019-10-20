@@ -10,7 +10,7 @@ public:
   { }
 
   void prepare(const Vector2i& block) override {
-    random.seed(block.x(), block.y());
+    random.seed(block.x, block.y);
   }
 
   float get1D() override {

@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
+
 #include <minpt/core/timer.h>
 #include <minpt/core/mesh.h>
 
@@ -43,6 +44,7 @@ public:
     auto filename = props.getString("filename");
     auto path = getFileResolver()->resolve(filename);
     std::ifstream file(path.str());
+
     if (file.fail())
       throw Exception("Unable to open OBJ file \"%s\"!", filename);
 
@@ -53,7 +55,7 @@ public:
     std::vector<Vector3f> positions;
     std::vector<Vector3f> normals;
     std::vector<Vector2f> uvs;
-    std::vector<int> indices;
+    std::vector<std::uint32_t> indices;
     std::vector<Vertex> vertices;
     std::unordered_map<Vertex, uint32_t, VertexHash> vertexMap;
 
@@ -65,17 +67,17 @@ public:
 
       if (prefix == "v") {
         Vector3f p;
-        line >> p.x() >> p.y() >> p.z();
-        bounds.extend(p);
+        line >> p.x >> p.y >> p.z;
+        bounds.merge(p);
         positions.push_back(p);
       } else if (prefix == "vt") {
         Vector2f uv;
-        line >> uv.x() >> uv.y();
+        line >> uv.x >> uv.y;
         uvs.push_back(uv);
       } else if (prefix == "vn") {
         Vector3f n;
-        line >> n.x() >> n.y() >> n.z();
-        normals.push_back(n.normalized());
+        line >> n.x >> n.y >> n.z;
+        normals.push_back(normalize(n));
       } else if (prefix == "f") {
         Vertex verts[6];
         auto nVerts = 3;
@@ -107,31 +109,36 @@ public:
       }
     }
 
-    auto nVerts = (int)vertices.size();
+    nVertices = (std::uint32_t)vertices.size();
+    nTriangles = (std::uint32_t)(indices.size() / 3);
 
-    f.resize(3, indices.size() / 3);
-    memcpy(f.data(), indices.data(), sizeof(uint32_t) * indices.size());
+    f.reset(new std::uint32_t[indices.size()]);
+    memcpy(f.get(), indices.data(), sizeof(std::uint32_t) * indices.size());
 
-    v.resize(3, nVerts);
-    for (auto i = 0; i < nVerts; ++i)
-      v.col(i) = positions[vertices[i].p - 1];
+    p.reset(new Vector3f[nVertices]);
+    for (auto i = 0u; i < nVertices; ++i)
+      p[i] = positions[vertices[i].p - 1];
 
     if (!normals.empty()) {
-      n.resize(3, nVerts);
-      for (auto i = 0; i < nVerts; ++i)
-        n.col(i) = normals[vertices[i].n - 1];
+      n.reset(new Vector3f[nVertices]);
+      for (auto i = 0u; i < nVertices; ++i)
+        n[i] = normals[vertices[i].n - 1];
     }
 
     if (!uvs.empty()) {
-      uv.resize(2, nVerts);
-      for (auto i = 0; i < nVerts; ++i)
-        uv.col(i) = uvs[vertices[i].uv - 1];
+      uv.reset(new Vector2f[nVertices]);
+      for (auto i = 0u; i < nVertices; ++i)
+        uv[i] = uvs[vertices[i].uv - 1];
     }
 
     std::cout
-      << "done. (V=" << v.cols() << ", F=" << f.cols() << ", took "
+      << "done. (V=" << nVertices << ", F=" << nTriangles << ", took "
       << timer.elapsedString() << " and "
-      << memString(f.size() * sizeof(uint32_t) + sizeof(float) * (v.size() + n.size() + uv.size()))
+      << memString(
+        nTriangles * 3 * sizeof(uint32_t) +
+        nVertices * sizeof(Vector3f) +
+        (n ? nVertices * sizeof(Vector3f) : 0) +
+        (uv ? nVertices * sizeof(Vector2f) : 0))
       << ")" << std::endl;
   }
 };

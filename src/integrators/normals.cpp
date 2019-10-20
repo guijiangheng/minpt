@@ -7,11 +7,10 @@ public:
   NormalIntegrator(const PropertyList& props)
   { }
 
-  Color3f li(const Ray3f& ray, const Scene& scene, Sampler& sampler) const override {
+  Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override {
     Interaction isect;
     if (scene.intersect(ray, isect)) {
-      auto n = isect.shFrame.n.cwiseAbs();
-      return Color3f(n.x(), n.y(), n.z());
+      return Color3f(abs(isect.shFrame.n));
     }
     return Color3f(0.0f);
   }

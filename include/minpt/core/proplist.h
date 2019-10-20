@@ -3,9 +3,9 @@
 #include <any>
 #include <map>
 
-#include <minpt/math/color.h>
-#include <minpt/math/bounds.h>
-#include <minpt/math/matrix.h>
+#include <minpt/math/color3.h>
+#include <minpt/math/bounds2.h>
+#include <minpt/math/matrix4.h>
 #include <minpt/core/exception.h>
 
 namespace minpt {

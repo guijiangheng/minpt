@@ -14,7 +14,7 @@ struct PrimInfo {
 
   PrimInfo() = default;
 
-  PrimInfo(const Bounds3f& bounds) : bounds(bounds), center(bounds.center())
+  PrimInfo(const Bounds3f& bounds) : bounds(bounds), center(bounds.centroid())
   { }
 };
 
@@ -72,9 +72,9 @@ public:
     }
 
     auto& node = nodes[nodeIndex];
-    auto axis = node.bounds.getMajorAxis();
-    auto min = node.bounds.min()[axis];
-    auto max = node.bounds.max()[axis];
+    auto axis = node.bounds.majorAxis();
+    auto min = node.bounds.pMin[axis];
+    auto max = node.bounds.pMax[axis];
     auto binSizeInv = Bins::BIN_COUNT / (max - min);
 
     auto bins = tbb::parallel_reduce(
@@ -87,7 +87,7 @@ public:
           auto index = (int)((centeroid - min) * binSizeInv);
           if (index == Bins::BIN_COUNT) --index;
           ++bins.counts[index];
-          bins.bounds[index].extend(primInfos[f].bounds);
+          bins.bounds[index].merge(primInfos[f].bounds);
         }
         return bins;
       },
@@ -95,7 +95,7 @@ public:
         Bins bins;
         for (auto i = 0; i < Bins::BIN_COUNT; ++i) {
           bins.counts[i] = a.counts[i] + b.counts[i];
-          bins.bounds[i] = a.bounds[i].merged(b.bounds[i]);
+          bins.bounds[i] = merge(a.bounds[i], b.bounds[i]);
         }
         return bins;
       }
@@ -105,24 +105,24 @@ public:
     leftBounds[0] = bins.bounds[0];
     for (auto i = 1; i < Bins::BIN_COUNT - 1; ++i) {
       bins.counts[i] += bins.counts[i - 1];
-      leftBounds[i] = bins.bounds[i].merged(leftBounds[i - 1]);
+      leftBounds[i] = merge(leftBounds[i - 1], bins.bounds[i]);
     }
 
     auto splitIndex = -1;
     auto minCost = (float)nPrims;
-    auto totalAreaInv = 1 / node.bounds.surfaceArea();
+    auto totalAreaInv = 1 / node.bounds.area();
     Bounds3f bestRightBounds, rightBounds = bins.bounds[Bins::BIN_COUNT - 1];
 
     for (auto i = Bins::BIN_COUNT - 2; i >= 0; --i) {
       auto cost = TRAVERSAL_COST + totalAreaInv * (
-        bins.counts[i] * leftBounds[i].surfaceArea() +
-        (nPrims - bins.counts[i]) * rightBounds.surfaceArea());
+        bins.counts[i] * leftBounds[i].area() +
+        (nPrims - bins.counts[i]) * rightBounds.area());
       if (cost < minCost) {
         minCost = cost;
         splitIndex = i;
         bestRightBounds = rightBounds;
       }
-      rightBounds.extend(bins.bounds[i]);
+      rightBounds.merge(bins.bounds[i]);
     }
 
     if (splitIndex == -1) {
@@ -189,8 +189,8 @@ public:
       return;
     }
 
-    int splitIndex;
     int splitAxis = -1;
+    std::uint32_t splitIndex = 0;
     float minCost = nPrims;
     float totalAreaInv;
     auto rightAreas = (float*)buffer;
@@ -201,17 +201,17 @@ public:
       });
       Bounds3f bounds;
       for (std::uint32_t i = 1; i < nPrims; ++i) {
-        bounds.extend(primInfos[*(end - i)].bounds);
-        rightAreas[nPrims - i] = bounds.surfaceArea();
+        bounds.merge(primInfos[*(end - i)].bounds);
+        rightAreas[nPrims - i] = bounds.area();
       }
       if (axis == 0) {
-        node.bounds = bounds.extend(primInfos[*start].bounds);
-        totalAreaInv = 1 / node.bounds.surfaceArea();
+        node.bounds = bounds.merge(primInfos[*start].bounds);
+        totalAreaInv = 1 / node.bounds.area();
       }
       bounds.reset();
       for (std::uint32_t i = 1; i < nPrims; ++i) {
-        bounds.extend(primInfos[*(start + i - 1)].bounds);
-        auto cost = TRAVERSAL_COST + (bounds.surfaceArea() * i + rightAreas[i] * (nPrims - i)) * totalAreaInv;
+        bounds.merge(primInfos[*(start + i - 1)].bounds);
+        auto cost = TRAVERSAL_COST + (bounds.area() * i + rightAreas[i] * (nPrims - i)) * totalAreaInv;
         if (cost < minCost) {
           minCost = cost;
           splitIndex = i;
@@ -270,7 +270,7 @@ public:
     auto primIndex = 0u;
     for (auto mesh : meshes)
       for (std::uint32_t i = 0, n = mesh->getPrimitiveCount(); i < n; ++i) {
-        primInfos[primIndex] = PrimInfo(mesh->getBoundingBox(i));
+        primInfos[primIndex] = PrimInfo(mesh->getBounds(i));
         indices[primIndex] = primIndex;
         ++primIndex;
       }
@@ -301,9 +301,9 @@ public:
       return std::make_pair((float)node.nPrims, 1u);
     auto left = statistics(nodeIndex + 1);
     auto right = statistics(node.rightChild);
-    auto totalArea = node.bounds.surfaceArea();
-    auto leftArea = nodes[nodeIndex + 1].bounds.surfaceArea();
-    auto rightArea = nodes[node.rightChild].bounds.surfaceArea();
+    auto totalArea = node.bounds.area();
+    auto leftArea = nodes[nodeIndex + 1].bounds.area();
+    auto rightArea = nodes[node.rightChild].bounds.area();
     return std::make_pair(
       BVHBuildTask::TRAVERSAL_COST + (left.first * leftArea + right.first * rightArea) / totalArea,
       left.second + right.second + 1
@@ -320,9 +320,9 @@ public:
     compactNodes(rightChild, packedNodes);
   }
 
-  bool intersect(const Ray3f& ray, Interaction& isect) const override {
-    Vector3f invDir(1 / ray.d.x(), 1 / ray.d.y(), 1 / ray.d.z());
-    const int dirIsNeg[3] = { invDir.x() < 0, invDir.y() < 0, invDir.z() < 0 };
+  bool intersect(const Ray& ray, Interaction& isect) const override {
+    Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
+    const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
 
     auto hit = false;
     std::uint32_t index;
@@ -365,9 +365,9 @@ public:
     return hit;
   }
 
-  bool intersect(const Ray3f& ray) const override {
-    Vector3f invDir(1 / ray.d.x(), 1 / ray.d.y(), 1 / ray.d.z());
-    const int dirIsNeg[3] = { invDir.x() < 0, invDir.y() < 0, invDir.z() < 0 };
+  bool intersect(const Ray& ray) const override {
+    Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
+    const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
 
     std::uint32_t nodesToVisit[64];
     nodesToVisit[0] = 0u;
