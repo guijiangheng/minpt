@@ -42,15 +42,12 @@ void Bitmap::readImagePNG(const std::string& filename) {
   for (auto y = 0u; y < height; ++y)
     for (auto x = 0u; x < width; ++x) {
       operator()(y, x) = Color3f(
-        bytes[offset]     / 255.0f,
-        bytes[offset + 1] / 255.0f,
-        bytes[offset + 2] / 255.0f
+        inverseGammaCorrect(bytes[offset]     / 255.0f),
+        inverseGammaCorrect(bytes[offset + 1] / 255.0f),
+        inverseGammaCorrect(bytes[offset + 2] / 255.0f)
       );
       offset += 3;
     }
-  unaryExpr([](const Color3f& color) {
-    return inverseGammaCorrect(color);
-  });
 }
 
 void Bitmap::readImageEXR(const std::string& filename) {

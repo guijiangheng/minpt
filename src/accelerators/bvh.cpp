@@ -324,18 +324,19 @@ public:
     Vector3f invDir(1 / ray.d.x(), 1 / ray.d.y(), 1 / ray.d.z());
     const int dirIsNeg[3] = { invDir.x() < 0, invDir.y() < 0, invDir.z() < 0 };
 
-    int index;
     auto hit = false;
-    int nodesToVisit[64];
-    nodesToVisit[0] = 0;
-    int currentIndex, toVisitOffset = 0;
+    std::uint32_t index;
+    std::uint32_t nodesToVisit[64];
+    nodesToVisit[0] = 0u;
+    std::uint32_t currentIndex;
+    int toVisitOffset = 0;
 
     while (toVisitOffset != -1) {
       currentIndex = nodesToVisit[toVisitOffset--];
       auto& node = nodes[currentIndex];
       if (node.bounds.intersect(ray, invDir, dirIsNeg)) {
         if (node.nPrims) {
-          for (auto i = 0; i < node.nPrims; ++i) {
+          for (std::uint32_t i = 0, n = (std::uint32_t)node.nPrims; i < n; ++i) {
             auto triIndex = indices[node.primsOffset + i];
             auto mesh = findMesh(triIndex);
             if (mesh->intersect(triIndex, ray, isect)) {
@@ -368,16 +369,17 @@ public:
     Vector3f invDir(1 / ray.d.x(), 1 / ray.d.y(), 1 / ray.d.z());
     const int dirIsNeg[3] = { invDir.x() < 0, invDir.y() < 0, invDir.z() < 0 };
 
-    int nodesToVisit[64];
-    nodesToVisit[0] = 0;
-    int currentIndex, toVisitOffset = 0;
+    std::uint32_t nodesToVisit[64];
+    nodesToVisit[0] = 0u;
+    std::uint32_t currentIndex;
+    int toVisitOffset = 0;
 
     while (toVisitOffset != -1) {
       currentIndex = nodesToVisit[toVisitOffset--];
       auto& node = nodes[currentIndex];
       if (node.bounds.intersect(ray, invDir, dirIsNeg)) {
         if (node.nPrims) {
-          for (auto i = 0; i < node.nPrims; ++i) {
+          for (std::uint32_t i = 0, n = (std::uint32_t)node.nPrims; i < n; ++i) {
             auto triIndex = indices[node.primsOffset + i];
             auto mesh = findMesh(triIndex);
             if (mesh->intersect(triIndex, ray))

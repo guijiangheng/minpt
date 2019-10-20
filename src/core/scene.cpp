@@ -72,7 +72,7 @@ void Scene::render(const std::string& outputName) const {
         }
     }
   });
-  std::cout << "done. (took " << timer.elapsedString() << ")" << std::endl;
+  std::cout << " done. (took " << timer.elapsedString() << ")" << std::endl;
   bitmap.save(outputName);
 }
 
