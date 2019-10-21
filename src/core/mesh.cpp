@@ -4,9 +4,10 @@
 namespace minpt {
 
 bool Mesh::intersect(uint32_t index, const Ray& ray) const {
-  auto& a = p[f[3 * index]];
-  auto& b = p[f[3 * index + 1]];
-  auto& c = p[f[3 * index + 2]];
+  auto offset = 3 * index;
+  auto& a = p[f[offset]];
+  auto& b = p[f[offset + 1]];
+  auto& c = p[f[offset + 2]];
 
   auto e1 = b - a;
   auto e2 = c - a;
@@ -31,9 +32,10 @@ bool Mesh::intersect(uint32_t index, const Ray& ray) const {
 
 // ref https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf
 bool Mesh::intersect(uint32_t index, const Ray& ray, Interaction& isect) const {
-  auto& a = p[f[3 * index]];
-  auto& b = p[f[3 * index + 1]];
-  auto& c = p[f[3 * index + 2]];
+  auto offset = 3 * index;
+  auto& a = p[f[offset]];
+  auto& b = p[f[offset + 1]];
+  auto& c = p[f[offset + 2]];
 
   auto e1 = b - a;
   auto e2 = c - a;
@@ -60,9 +62,10 @@ bool Mesh::intersect(uint32_t index, const Ray& ray, Interaction& isect) const {
 }
 
 void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
-  auto ia = f[3 * index];
-  auto ib = f[3 * index + 1];
-  auto ic = f[3 * index + 2];
+  auto offset = 3 * index;
+  auto ia = f[offset];
+  auto ib = f[offset + 1];
+  auto ic = f[offset + 2];
 
   auto& a = p[ia];
   auto& b = p[ib];

@@ -9,7 +9,7 @@ public:
   PerspectiveCamera(const PropertyList& props)
       : Camera(
         props.getTransform("toWorld"),
-        Vector2i(props.getVector2i("outputSize")))
+        props.getVector2i("outputSize"))
       , fov(props.getFloat("fov")) {
 
     auto aspectInv = (float)outputSize.y / outputSize.x;

@@ -43,12 +43,7 @@ public:
       throw Exception("No sampler was specified!");
     if (!accel)
       throw Exception("No accelerator was specified!");
-
     accel->build();
-
-    std::cout << std::endl;
-    std::cout << "Configuration: " << toString() << std::endl;
-    std::cout << std::endl;
   }
 
   bool intersect(const Ray& ray) const {

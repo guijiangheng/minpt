@@ -95,17 +95,18 @@ public:
         Bins bins;
         for (auto i = 0; i < Bins::BIN_COUNT; ++i) {
           bins.counts[i] = a.counts[i] + b.counts[i];
-          bins.bounds[i] = merge(a.bounds[i], b.bounds[i]);
+          merge(bins.bounds[i], a.bounds[i], b.bounds[i]);
         }
         return bins;
       }
     );
 
-    Bounds3f leftBounds[Bins::BIN_COUNT];
+    std::uint8_t boundsBuffer[Bins::BIN_COUNT * sizeof(Bounds3f)];
+    auto leftBounds = reinterpret_cast<Bounds3f*>(boundsBuffer);
     leftBounds[0] = bins.bounds[0];
     for (auto i = 1; i < Bins::BIN_COUNT - 1; ++i) {
       bins.counts[i] += bins.counts[i - 1];
-      leftBounds[i] = merge(leftBounds[i - 1], bins.bounds[i]);
+      merge(leftBounds[i], leftBounds[i - 1], bins.bounds[i]);
     }
 
     auto splitIndex = -1;

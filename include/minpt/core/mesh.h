@@ -33,10 +33,9 @@ public:
 
   Bounds3f getBounds(int index) const {
     auto offset = 3 * index;
-    auto& a = p[f[offset]];
-    auto& b = p[f[offset + 1]];
-    auto& c = p[f[offset + 2]];
-    return merge(Bounds3(a, b), c);
+    auto bounds = Bounds3(p[f[offset]], p[f[offset + 1]]);
+    bounds.merge(p[f[offset + 2]]);
+    return bounds;
   }
 
   bool intersect(std::uint32_t index, const Ray& ray) const;
