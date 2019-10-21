@@ -57,13 +57,16 @@ add_executable(minpt
   include/minpt/core/accelerator.h
 
   include/minpt/math/math.h
-  include/minpt/math/bounds.h
-  include/minpt/math/color.h
-  include/minpt/math/vector.h
+  include/minpt/math/bounds2.h
+  include/minpt/math/bounds3.h
+  include/minpt/math/color3.h
+  include/minpt/math/vector2.h
+  include/minpt/math/vector3.h
+  include/minpt/math/matrix4.h
   include/minpt/math/frame.h
-  include/minpt/math/transform.h
 
   src/main/main.cpp
+  src/math/matrix4.cpp
   src/utils/utils.cpp
   src/utils/bitmap.cpp
   src/core/scene.cpp

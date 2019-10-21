@@ -2,7 +2,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <minpt/math/vector.h>
+#include <minpt/math/vector2.h>
 
 namespace minpt {
 
@@ -26,9 +26,29 @@ constexpr float degrees(float rad) {
   return 180 / Pi * rad;
 }
 
-template <typename VectorType>
-auto barycentric(const VectorType& a, const VectorType& b, const VectorType& c, const Vector<typename VectorType::Scalar, 2>& uv) {
-  return (1 - uv.x() - uv.y()) * a + uv.x() * b + uv.y() * c;
+template <typename Vector>
+Vector lerp(const Vector& a, const Vector& b, typename Vector::Scalar t) {
+  return a + (b - a) * t;
+}
+
+template <typename Vector>
+Vector barycentric(const Vector& a, const Vector& b, const Vector& c, const Vector2<typename Vector::Scalar>& uv) {
+  return a * (1 - uv.x - uv.y) + b * uv.x + c * uv.y;
+}
+
+template <typename Vector>
+Vector normalize(const Vector& v) {
+  return v / v.length();
+}
+
+template <typename Vector>
+typename Vector::Scalar distance(const Vector& a, const Vector& b) {
+  return (a - b).length();
+}
+
+template <typename Vector>
+typename Vector::Scalar distanceSquared(const Vector& a, const Vector& b) {
+  return (a - b).lengthSquared();
 }
 
 }

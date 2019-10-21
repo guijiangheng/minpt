@@ -31,6 +31,9 @@ int main(int argc, char** argv) {
           outputName += ".exr";
           scene->outputName = outputName;
         }
+        std::cout << std::endl;
+        std::cout << "Configuration: " << scene->toString() << std::endl;
+        std::cout << std::endl;
         scene->render(outputName);
       }
     } else {

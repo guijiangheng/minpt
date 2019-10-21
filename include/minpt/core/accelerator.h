@@ -19,7 +19,7 @@ public:
 
   void addMesh(Mesh* mesh) {
     meshes.push_back(mesh);
-    bounds.extend(mesh->bounds);
+    bounds.merge(mesh->bounds);
     primOffset.push_back(primOffset.back() + mesh->getPrimitiveCount());
   }
 
@@ -39,9 +39,9 @@ public:
 
   virtual void build() = 0;
 
-  virtual bool intersect(const Ray3f& ray) const = 0;
+  virtual bool intersect(const Ray& ray) const = 0;
 
-  virtual bool intersect(const Ray3f& ray, Interaction& isect) const = 0;
+  virtual bool intersect(const Ray& ray, Interaction& isect) const = 0;
 
   EClassType getClassType() const override {
     return EAccel;

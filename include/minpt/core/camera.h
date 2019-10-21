@@ -1,6 +1,6 @@
 #pragma once
 
-#include <minpt/math/matrix.h>
+#include <minpt/math/matrix4.h>
 #include <minpt/core/object.h>
 
 namespace minpt {
@@ -17,7 +17,7 @@ public:
 
   virtual ~Camera() = default;
 
-  virtual Ray3f generateRay(const CameraSample& sample) const = 0;
+  virtual Ray generateRay(const CameraSample& sample) const = 0;
 
   EClassType getClassType() const override {
     return ECamera;

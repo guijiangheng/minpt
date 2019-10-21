@@ -1,23 +1,19 @@
 #pragma once
 
-#include <minpt/math/vector.h>
+#include <minpt/math/vector3.h>
 
 namespace minpt {
 
-template <typename _VectorType>
 class Ray {
 public:
-  using VectorType = _VectorType;
-  using Scalar = typename VectorType::Scalar;
-
-  Ray(const VectorType& o,
-      const VectorType& d,
-      Scalar tMax = std::numeric_limits<Scalar>::infinity()) noexcept
+  Ray(const Vector3f& o,
+      const Vector3f& d,
+      float tMax = std::numeric_limits<float>::infinity()) noexcept
     : o(o), d(d), tMax(tMax)
   { }
 
-  VectorType operator()(Scalar t) const {
-    return o + t * d;
+  Vector3f operator()(float t) const {
+    return o + d * t;
   }
 
   std::string toString() const {
@@ -31,15 +27,9 @@ public:
   }
 
 public:
-  VectorType o;
-  VectorType d;
-  mutable Scalar tMax;
+  Vector3f o;
+  Vector3f d;
+  mutable float tMax;
 };
-
-using Ray2f = Ray<Vector2f>;
-using Ray2d = Ray<Vector2d>;
-
-using Ray3f = Ray<Vector3f>;
-using Ray3d = Ray<Vector3d>;
 
 }

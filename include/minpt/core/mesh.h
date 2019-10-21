@@ -1,8 +1,7 @@
 #pragma once
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-#include <minpt/math/bounds.h>
+#include <memory>
+#include <minpt/math/bounds3.h>
 #include <minpt/core/interaction.h>
 #include <minpt/core/object.h>
 
@@ -21,37 +20,27 @@ public:
   virtual ~Mesh() = default;
 
   std::uint32_t getPrimitiveCount() const {
-    return (std::uint32_t)f.cols();
-  }
-
-  std::uint32_t getVertexCount() const {
-    return (std::uint32_t)v.cols();
+    return nTriangles;
   }
 
   float getSurfaceArea(std::uint32_t index) const {
-    Vector3f a = v.col(f(0, index));
-    Vector3f b = v.col(f(1, index));
-    Vector3f c = v.col(f(2, index));
-    return Vector3f((a - b).cross(a - c)).norm() / 2;
+    auto offset = 3 * index;
+    auto& a = p[f[offset]];
+    auto& b = p[f[offset + 1]];
+    auto& c = p[f[offset + 2]];
+    return cross(b - a, b - c).length() / 2;
   }
 
-  Bounds3f getBoundingBox(std::uint32_t index) const {
-    auto& a = v.col(f(0, index));
-    auto& b = v.col(f(1, index));
-    Bounds3f box(a.cwiseMin(b), a.cwiseMax(b));
-    return box.extend(v.col(f(2, index)));
+  Bounds3f getBounds(int index) const {
+    auto offset = 3 * index;
+    auto bounds = Bounds3(p[f[offset]], p[f[offset + 1]]);
+    bounds.merge(p[f[offset + 2]]);
+    return bounds;
   }
 
-  Vector3f getCentroid(std::uint32_t index) const {
-    return (
-      v.col(f(0, index)) +
-      v.col(f(1, index)) +
-      v.col(f(2, index))) / 3;
-  }
+  bool intersect(std::uint32_t index, const Ray& ray) const;
 
-  bool intersect(std::uint32_t index, const Ray3f& ray) const;
-
-  bool intersect(std::uint32_t index, const Ray3f& ray, Interaction& isect) const;
+  bool intersect(std::uint32_t index, const Ray& ray, Interaction& isect) const;
 
   void computeIntersection(std::uint32_t index, Interaction& isect) const;
 
@@ -66,7 +55,7 @@ public:
       "  vertexCount = %i,\n"
       "  triangleCount = %i\n"
       "]",
-      name, v.cols(), f.cols()
+      name, nVertices, nTriangles
     );
   }
 
@@ -75,10 +64,12 @@ protected:
 
 public:
   std::string name;
-  MatrixXf v;
-  MatrixXf n;
-  MatrixXf uv;
-  MatrixXu f;
+  std::uint32_t nVertices;
+  std::uint32_t nTriangles;
+  std::unique_ptr<Vector3f[]> p;
+  std::unique_ptr<Vector3f[]> n;
+  std::unique_ptr<Vector2f[]> uv;
+  std::unique_ptr<std::uint32_t[]> f;
   Bounds3f bounds;
 };
 

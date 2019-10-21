@@ -1,4 +1,4 @@
-#include <minpt/math/bounds.h>
+#include <minpt/math/bounds2.h>
 #include <minpt/utils/utils.h>
 #include <minpt/core/camera.h>
 
@@ -9,26 +9,26 @@ public:
   PerspectiveCamera(const PropertyList& props)
       : Camera(
         props.getTransform("toWorld"),
-        Vector2i(props.getVector2i("outputSize")))
+        props.getVector2i("outputSize"))
       , fov(props.getFloat("fov")) {
 
-    auto aspectInv = (float)outputSize.y() / outputSize.x();
+    auto aspectInv = (float)outputSize.y / outputSize.x;
     screenWindow = props.getBounds2f("screenWindow", Bounds2f(
       Vector2f(-1.0f, -aspectInv),
       Vector2f( 1.0f,  aspectInv)));
-    Vector2f diag = screenWindow.diagonal();
-    Matrix4f screenToRaster = (
-      Eigen::DiagonalMatrix<float, 3>(outputSize.x() / diag.x(), -outputSize.y() / diag.y(), 1.0f) *
-      Eigen::Translation3f(-screenWindow.min().x(), -screenWindow.max().y(), 0.0f)).matrix();
+    auto diag = screenWindow.diag();
+    Matrix4f screenToRaster =
+      Matrix4f::scale(outputSize.x / diag.x, -outputSize.y / diag.y, 1.0f) *
+      Matrix4f::translate(-screenWindow.pMin.x, -screenWindow.pMax.y, 0.0f);
     Matrix4f cameraToScreen = Matrix4f::perspective(fov, 0.0001f, 1000.0f);
     rasterToCamera = (screenToRaster * cameraToScreen).inverse();
   }
 
-  Ray3f generateRay(const CameraSample& sample) const override {
-    Vector3f pFilm(sample.pFilm.x(), sample.pFilm.y(), 0);
+  Ray generateRay(const CameraSample& sample) const override {
+    Vector3f pFilm(sample.pFilm.x, sample.pFilm.y, 0.0f);
     Vector3f pCamera = rasterToCamera.applyP(pFilm);
-    Ray3f ray(Vector3f(0.0f), pCamera.normalized());
-    return frame * ray;
+    Ray ray(Vector3f(0.0f), normalize(pCamera));
+    return frame(ray);
   }
 
   std::string toString() const override {
