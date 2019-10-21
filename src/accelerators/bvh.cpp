@@ -236,7 +236,7 @@ public:
   }
 
 public:
-  static constexpr std::uint32_t SERIAL_THRESHOLD = 32;
+  static constexpr std::uint32_t SERIAL_THRESHOLD = 64;
   static constexpr std::uint32_t GRAIN_SIZE = 1000;
   static constexpr float TRAVERSAL_COST = 1.0f;
 

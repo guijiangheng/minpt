@@ -36,7 +36,7 @@ public:
   }
 
   Matrix4f& operator*=(const Matrix4f& m) {
-    *this *= m;
+    *this = *this * m;
     return *this;
   }
 
