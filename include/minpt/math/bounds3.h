@@ -15,8 +15,7 @@ public:
   explicit Bounds3(const Vector3<T>& p) noexcept : pMin(p), pMax(p)
   { }
 
-  Bounds3(const Vector3<T>& a, const Vector3<T>& b) noexcept
-    : pMin(min(a, b)), pMax(max(a, b))
+  Bounds3(const Vector3<T>& pMin, const Vector3<T>& pMax) noexcept : pMin(pMin), pMax(pMax)
   { }
 
   void reset() {
@@ -109,15 +108,13 @@ using Bounds3i = Bounds3<int>;
 using Bounds3f = Bounds3<float>;
 
 template <typename T>
-void merge(Bounds3<T>& bounds, const Bounds3<T>& b, const Vector3<T>& p) {
-  bounds.pMin = min(b.pMin, p);
-  bounds.pMax = max(b.pMax, p);
+Bounds3<T> merge(const Bounds3<T>& b, const Vector3<T>& p) {
+  return Bounds3<T>(min(b.pMin, p), max(b.pMax, p));
 }
 
 template <typename T>
-void merge(Bounds3<T>& bounds, const Bounds3<T>& a, const Bounds3<T>& b) {
-  bounds.pMin = min(a.pMin, b.pMin);
-  bounds.pMax = max(a.pMax, b.pMax);
+Bounds3<T> merge(const Bounds3<T>& a, const Bounds3<T>& b) {
+  return Bounds3<T>(min(a.pMin, b.pMin), max(a.pMax, b.pMax));
 }
 
 }

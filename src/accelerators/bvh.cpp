@@ -95,7 +95,7 @@ public:
         Bins bins;
         for (auto i = 0; i < Bins::BIN_COUNT; ++i) {
           bins.counts[i] = a.counts[i] + b.counts[i];
-          merge(bins.bounds[i], a.bounds[i], b.bounds[i]);
+          bins.bounds[i] = merge(a.bounds[i], b.bounds[i]);
         }
         return bins;
       }
@@ -106,7 +106,7 @@ public:
     leftBounds[0] = bins.bounds[0];
     for (auto i = 1; i < Bins::BIN_COUNT - 1; ++i) {
       bins.counts[i] += bins.counts[i - 1];
-      merge(leftBounds[i], leftBounds[i - 1], bins.bounds[i]);
+      leftBounds[i] = merge(leftBounds[i - 1], bins.bounds[i]);
     }
 
     auto splitIndex = -1;
@@ -237,9 +237,9 @@ public:
   }
 
 public:
-  static constexpr std::uint32_t SERIAL_THRESHOLD = 64;
+  static constexpr std::uint32_t SERIAL_THRESHOLD = 128;
   static constexpr std::uint32_t GRAIN_SIZE = 1000;
-  static constexpr float TRAVERSAL_COST = 1.0f;
+  static constexpr float TRAVERSAL_COST = 1.0f / 2;
 
 private:
   std::vector<BVHNode>& nodes;
@@ -293,6 +293,7 @@ public:
     std::cout
       << "done (took " << timer.elapsedString() << " and "
       << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
+      << ", node count = " << stats.second
       << ", SAH cost = " << stats.first << ")." << std::endl;
   }
 
