@@ -18,7 +18,6 @@ public:
   std::string toString() const override {
     return "NormalIntegrator[]";
   }
-
 };
 
 MINPT_REGISTER_CLASS(NormalIntegrator, "normals");

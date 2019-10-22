@@ -179,6 +179,10 @@ Vector3<T> max(const Vector3<T>& a, const Vector3<T>& b) {
   );
 }
 
+inline Vector3f faceForward(const Vector3f& n, const Vector3f& v) {
+  return dot(n, v) > 0 ? n : -n;
+}
+
 inline void coordinateSystem(const Vector3f& a, Vector3f& b, Vector3f& c) {
   b = std::abs(a.x) > std::abs(a.y) ?
     Vector3f(-a.z, 0, a.x) / std::sqrt(a.x * a.x + a.z * a.z) :

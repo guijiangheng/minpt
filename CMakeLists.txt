@@ -51,6 +51,7 @@ add_executable(minpt
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h
   include/minpt/core/sampler.h
+  include/minpt/core/sampling.h
   include/minpt/core/camera.h
   include/minpt/core/scene.h
   include/minpt/core/integrator.h
@@ -77,6 +78,7 @@ add_executable(minpt
   src/samplers/random.cpp
   src/accelerators/bvh.cpp
   src/cameras/perspective.cpp
+  src/integrators/ao.cpp
   src/integrators/normals.cpp
 )
 

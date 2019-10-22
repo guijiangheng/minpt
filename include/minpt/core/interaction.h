@@ -19,6 +19,14 @@ public:
     return shFrame.toWorld(v);
   }
 
+  Vector3f offsetRayOrigin(const Vector3f& w) const {
+    return p + faceForward(n, w) * RayOriginOffsetEpsilon;
+  }
+
+  Ray spawnRay(const Vector3f& w) const {
+    return Ray(offsetRayOrigin(w), w);
+  }
+
   std::string toString() const {
     return tfm::format(
       "Interaction[\n"
@@ -32,6 +40,7 @@ public:
   }
 
 public:
+  static constexpr auto RayOriginOffsetEpsilon = 0.00001f;
   Vector3f p;
   Vector3f n;
   Vector2f uv;
