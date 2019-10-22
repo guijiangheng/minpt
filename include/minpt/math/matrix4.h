@@ -56,6 +56,13 @@ public:
     );
   }
 
+  Vector3f fastApplyP(const Vector3f& p) const {
+    auto x = e[0][0] * p.x + e[0][1] * p.y + e[0][2] * p.z + e[0][3];
+    auto y = e[1][0] * p.x + e[1][1] * p.y + e[1][2] * p.z + e[1][3];
+    auto z = e[2][0] * p.x + e[2][1] * p.y + e[2][2] * p.z + e[2][3];
+    return Vector3f(x, y, z);
+  }
+
   Vector3f applyP(const Vector3f& p) const {
     auto x = e[0][0] * p.x + e[0][1] * p.y + e[0][2] * p.z + e[0][3];
     auto y = e[1][0] * p.x + e[1][1] * p.y + e[1][2] * p.z + e[1][3];
@@ -67,7 +74,7 @@ public:
   }
 
   Ray operator()(const Ray& r) const {
-    return Ray(applyP(r.o), applyV(r.d), r.tMax);
+    return Ray(fastApplyP(r.o), applyV(r.d), r.tMax);
   }
 
   Matrix4f& inverse();
