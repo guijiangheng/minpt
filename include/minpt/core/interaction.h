@@ -9,7 +9,7 @@ class Mesh;
 
 class Interaction {
 public:
-  Interaction() = default;
+  Interaction() noexcept = default;
 
   Vector3f toLocal(const Vector3f& v) const {
     return shFrame.toLocal(v);

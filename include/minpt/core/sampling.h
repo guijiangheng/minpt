@@ -11,7 +11,7 @@ inline Vector2f uniformSampleDisk(const Vector2f& u) {
 
 inline Vector3f cosineSampleHemisphere(const Vector2f& u) {
   auto p = uniformSampleDisk(u);
-  return Vector3f(p.x, p.y, std::sqrt(std::max(0.0f, 1 - p.length())));
+  return Vector3f(p.x, p.y, std::sqrt(std::max(0.0f, 1 - p.lengthSquared())));
 }
 
 }

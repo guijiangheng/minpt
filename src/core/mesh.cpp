@@ -71,7 +71,7 @@ void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
   auto& b = p[ib];
   auto& c = p[ic];
   isect.p = barycentric(a, b, c, isect.uv);
-  isect.n = normalize(cross(c - a, b - a));
+  isect.n = normalize(cross(b - a, c - a));
 
   if (n) {
     auto ns = normalize(barycentric(n[ia], n[ib], n[ic], isect.uv));
