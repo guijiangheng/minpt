@@ -85,3 +85,8 @@ add_executable(minpt
 target_compile_features(minpt PRIVATE cxx_std_17)
 target_include_directories(minpt PRIVATE ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(minpt PRIVATE tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng)
+
+add_executable(warptest src/main/warptest.cpp)
+target_compile_features(warptest PRIVATE cxx_std_17)
+target_include_directories(warptest PRIVATE ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(warptest PRIVATE tbb_static nanogui ${NANOGUI_EXTRA_LIBS})
