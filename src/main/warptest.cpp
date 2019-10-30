@@ -1,5 +1,5 @@
-#include <pcg32.h>
 
+#include <pcg32.h>
 #include <nanogui/glutil.h>
 #include <nanogui/layout.h>
 #include <nanogui/screen.h>
@@ -35,6 +35,7 @@ public:
   }
 
   ~WarpTest() {
+    delete gridShader;
     delete pointShader;
   }
 
@@ -133,6 +134,32 @@ public:
     pointShader->uploadAttrib("position", positions);
     pointShader->uploadAttrib("color", colors);
 
+    if (gridCheckBox->checked()) {
+      auto gridRes = (int)(std::sqrt((float)pointCount) + 0.5f);
+      auto fineGridRes = gridRes * 15;
+      lineCount = 4 * (gridRes + 1) * (fineGridRes + 1);
+      positions.resize(3, lineCount);
+      auto coarseScale = 1.0f / gridRes;
+      auto fineScale = 1.0f / fineGridRes;
+
+      auto index = 0;
+      for (auto i = 0; i <= gridRes; ++i)
+        for (auto j = 0; j <= fineGridRes; ++j) {
+          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, j * fineScale)).first;
+          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, (j + 1) * fineScale)).first;
+          positions.col(index++) = warpPoint(warpType, Vector2f(j * fineScale, i * coarseScale)).first;
+          positions.col(index++) = warpPoint(warpType, Vector2f((j + 1) * fineScale, i * coarseScale)).first;
+        }
+
+      if (warpType != None) {
+        for (auto i = 0; i < lineCount; ++i)
+          positions.col(i) = positions.col(i) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
+      }
+
+      gridShader->bind();
+      gridShader->uploadAttrib("position", positions);
+    }
+
     // Update user interface
     std::string str;
     if (pointCount > 1000000) {
@@ -165,6 +192,15 @@ public:
     glPointSize(2);
     glEnable(GL_DEPTH_TEST);
     pointShader->drawArray(GL_POINTS, 0, pointCount);
+
+    if (gridCheckBox->checked()) {
+      gridShader->bind();
+      gridShader->setUniform("mvp", mvp);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      gridShader->drawArray(GL_LINES, 0, lineCount);
+      glDisable(GL_BLEND);
+    }
   }
 
   void initializeGUI() {
@@ -254,6 +290,24 @@ public:
       "}"
     );
 
+    gridShader = new GLShader();
+    gridShader->init(
+      "Grid Shader",
+
+      "#version 330\n"
+      "uniform mat4 mvp;\n"
+      "in vec3 position;\n"
+      "void main() {\n"
+      "  gl_Position = mvp * vec4(position, 1.0);\n"
+      "}",
+
+      "#version 330\n"
+      "out vec4 out_color;\n"
+      "void main() {\n"
+      "  out_color = vec4(vec3(1.0), 0.4);\n"
+      "}"
+    );
+
     mBackground.setZero();
     pointCountSlider->setValue(0.5f);
 
@@ -282,6 +336,7 @@ public:
   }
 
 private:
+  int lineCount;
   int pointCount;
   Arcball arcball;
   Window* window;
@@ -293,6 +348,7 @@ private:
   Slider* angleSlider;
   TextBox* angleBox;
   CheckBox* brdfValueCheckBox;
+  GLShader* gridShader;
   GLShader* pointShader;
 };
 
