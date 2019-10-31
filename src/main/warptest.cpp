@@ -1,5 +1,7 @@
 
 #include <pcg32.h>
+#include <hypothesis.h>
+
 #include <nanogui/glutil.h>
 #include <nanogui/layout.h>
 #include <nanogui/screen.h>
@@ -11,6 +13,7 @@
 #include <nanogui/checkbox.h>
 #include <nanogui/messagedialog.h>
 
+#include <minpt/math/math.h>
 #include <minpt/core/sampling.h>
 #include <minpt/core/exception.h>
 
@@ -35,12 +38,115 @@ public:
   }
 
   ~WarpTest() {
+    glDeleteTextures(2, &textures[0]);
     delete gridShader;
     delete pointShader;
+    delete histogramShader;
   }
 
   void runTest() {
+    auto xres = 51;
+    auto yres = 51;
+    auto warpType = (WarpType)warpTypeBox->selectedIndex();
+    if (warpType != None && warpType != Disk) xres *= 2;
 
+    auto res = xres * yres;
+    auto sampleCount = res * 1000;
+    auto obsFrequencies = std::make_unique<double[]>(res);
+    auto expFrequencies = std::make_unique<double[]>(res);
+    std::memset(obsFrequencies.get(), 0, res * sizeof(double));
+    std::memset(expFrequencies.get(), 0, res * sizeof(double));
+
+    MatrixXf points, values;
+    generatePoints(sampleCount, Independent, warpType, points, values);
+
+    for (auto i = 0; i < sampleCount; ++i) {
+      float x, y;
+      Vector3f sample = points.col(i);
+      if (warpType == None) {
+        x = sample.x();
+        y = sample.y();
+      } else if (warpType == Disk) {
+        x = sample.x() * 0.5f + 0.5f;
+        y = sample.y() * 0.5f + 0.5f;
+      } else {
+        x = std::atan2(sample.y(), sample.x()) * minpt::Inv2Pi;
+        if (x < 0) x += 1;
+        y = sample.z() * 0.5f + 0.5f;
+      }
+      auto xbin = std::min(xres - 1, std::max(0, (int)std::floor(x * xres)));
+      auto ybin = std::min(yres - 1, std::max(0, (int)std::floor(y * yres)));
+      ++obsFrequencies[ybin * xres + xbin];
+    }
+
+    auto integrand = [&](double y, double x) -> double {
+      if (warpType == None) return 1.0f;
+      else if (warpType == Disk) {
+        x = x * 2 - 1;
+        y = y * 2 - 1;
+        return minpt::uniformSampleDiskPdf(minpt::Vector2f(x, y));
+      } else {
+        x *= 2 * minpt::Pi;
+        y = y * 2 - 1;
+        auto sinTheta = std::sqrt(1 - y * y);
+        auto sinPhi = std::sin(x);
+        auto cosPhi = std::cos(x);
+        minpt::Vector3f v((float)(sinTheta * cosPhi), (float)(sinTheta * sinPhi), (float)y);
+        if (warpType == CosineHemisphere)
+          return minpt::cosineSampleHemispherePdf(v);
+        else
+          throw minpt::Exception("Invalid warp type");
+      }
+    };
+
+    double scale = sampleCount;
+    if (warpType == None) scale *= 1;
+    if (warpType == Disk) scale *= 4;
+    else scale *= 4 * minpt::Pi;
+
+    auto p = expFrequencies.get();
+    constexpr auto Epsilon = 1e-4;
+    for (auto y = 0; y < yres; ++y) {
+      auto ybeg = y / (double)yres;
+      auto yend = (y + 1 - Epsilon) / (double)yres;
+      for (auto x = 0; x < xres; ++x) {
+        auto xbeg = x / (double)xres;
+        auto xend = (x + 1 - Epsilon) / (double)xres;
+        p[y * xres + x] = hypothesis::adaptiveSimpson2D(integrand, ybeg, xbeg, yend, xend) * scale;
+        if (p[y * xres + x] < 0)
+          throw minpt::Exception("The Pdf() function returned negative values!");
+      }
+    }
+
+    /* Write the test input data to disk for debugging */
+    hypothesis::chi2_dump(yres, xres, obsFrequencies.get(), expFrequencies.get(), "chitest.m");
+
+    constexpr auto minExpFrequency = 5;
+    constexpr auto significanceLevel = 0.01f;
+    testResult = hypothesis::chi2_test(yres * xres, obsFrequencies.get(), expFrequencies.get(),
+      sampleCount, minExpFrequency, significanceLevel, 1);
+
+    float maxValue = 0, minValue = std::numeric_limits<float>::infinity();
+    for (auto i = 0; i < res; ++i) {
+      maxValue = std::max(maxValue, (float)std::max(obsFrequencies[i], expFrequencies[i]));
+      minValue = std::min(minValue, (float)std::min(obsFrequencies[i], expFrequencies[i]));
+    }
+    minValue /= 2;
+    auto texScale = 1 / (maxValue - minValue);
+
+    auto buffer = std::make_unique<float[]>(res);
+    for (auto k = 0; k < 2; ++k) {
+      for (auto i = 0; i < res; ++i)
+        buffer[i] = ((k == 0 ? obsFrequencies[i] : expFrequencies[i]) - minValue) * texScale;
+      glBindTexture(GL_TEXTURE_2D, textures[k]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, xres, yres,
+                   0, GL_RED, GL_FLOAT, buffer.get());
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    }
+
+    drawHistogram = true;
+    window->setVisible(false);
   }
 
   std::pair<Vector3f, float> warpPoint(WarpType warpType, const Vector2f& point) {
@@ -308,6 +414,68 @@ public:
       "}"
     );
 
+    histogramShader = new GLShader();
+    histogramShader->init(
+      "Histogram shader",
+
+      "#version 330\n"
+      "uniform mat4 mvp;\n"
+      "in vec2 position;\n"
+      "out vec2 uv;\n"
+      "void main() {\n"
+      "  gl_Position = mvp * vec4(position, 0.0, 1.0);\n"
+      "  uv = position;\n"
+      "}",
+
+      "#version 330\n"
+      "out vec4 out_color;\n"
+      "uniform sampler2D tex;\n"
+      "in vec2 uv;\n"
+      "/* http://paulbourke.net/texture_colour/colourspace/ */\n"
+      "vec3 colormap(float v, float vmin, float vmax) {\n"
+      "  vec3 c = vec3(1.0);\n"
+      "  if (v < vmin)\n"
+      "    v = vmin;\n"
+      "  if (v > vmax)\n"
+      "    v = vmax;\n"
+      "  float dv = vmax - vmin;\n"
+      "  \n"
+      "  if (v < (vmin + 0.25 * dv)) {\n"
+      "    c.r = 0.0;\n"
+      "    c.g = 4.0 * (v - vmin) / dv;\n"
+      "  } else if (v < (vmin + 0.5 * dv)) {\n"
+      "    c.r = 0.0;\n"
+      "    c.b = 1.0 + 4.0 * (vmin + 0.25 * dv - v) / dv;\n"
+      "  } else if (v < (vmin + 0.75 * dv)) {\n"
+      "    c.r = 4.0 * (v - vmin - 0.5 * dv) / dv;\n"
+      "    c.b = 0.0;\n"
+      "  } else {\n"
+      "    c.g = 1.0 + 4.0 * (vmin + 0.75 * dv - v) / dv;\n"
+      "    c.b = 0.0;\n"
+      "  }\n"
+      "  return c;\n"
+      "}\n"
+      "void main() {\n"
+      "  float value = texture(tex, uv).r;\n"
+      "  out_color = vec4(colormap(value, 0.0, 1.0), 1.0);\n"
+      "}"
+    );
+
+    MatrixXf positions(2, 4);
+    MatrixXu indices(3, 2);
+    positions <<
+      0, 1, 1, 0,
+      0, 0, 1, 1;
+    indices <<
+      0, 2,
+      1, 3,
+      2, 0;
+    histogramShader->bind();
+    histogramShader->uploadAttrib("position", positions);
+    histogramShader->uploadIndices(indices);
+
+    glGenTextures(2, &textures[0]);
+
     mBackground.setZero();
     pointCountSlider->setValue(0.5f);
 
@@ -336,8 +504,11 @@ public:
   }
 
 private:
+  bool drawHistogram;
   int lineCount;
   int pointCount;
+  GLuint textures[2];
+  std::pair<bool, std::string> testResult;
   Arcball arcball;
   Window* window;
   Slider* pointCountSlider;
@@ -350,6 +521,7 @@ private:
   CheckBox* brdfValueCheckBox;
   GLShader* gridShader;
   GLShader* pointShader;
+  GLShader* histogramShader;
 };
 
 int main() {

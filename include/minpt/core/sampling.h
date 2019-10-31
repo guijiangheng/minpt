@@ -14,4 +14,13 @@ inline Vector3f cosineSampleHemisphere(const Vector2f& u) {
   return Vector3f(p.x, p.y, std::sqrt(std::max(0.0f, 1 - p.lengthSquared())));
 }
 
+inline float uniformSampleDiskPdf(const Vector2f& v) {
+  if (v.length() < 1.0f) return InvPi;
+  return 0;
+}
+
+inline float cosineSampleHemispherePdf(const Vector3f& v) {
+  return v.z * InvPi;
+}
+
 }
