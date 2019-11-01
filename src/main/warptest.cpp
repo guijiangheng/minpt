@@ -35,6 +35,7 @@ public:
 
   WarpTest(): Screen(Vector2i(800, 600), "Sampling and Warping") {
     initializeGUI();
+    shouldDrawHistogram = false;
   }
 
   ~WarpTest() {
@@ -101,7 +102,7 @@ public:
 
     double scale = sampleCount;
     if (warpType == None) scale *= 1;
-    if (warpType == Disk) scale *= 4;
+    else if (warpType == Disk) scale *= 4;
     else scale *= 4 * minpt::Pi;
 
     auto p = expFrequencies.get();
@@ -145,7 +146,7 @@ public:
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     }
 
-    drawHistogram = true;
+    shouldDrawHistogram = true;
     window->setVisible(false);
   }
 
@@ -283,29 +284,80 @@ public:
     pointCountSlider->setValue((std::log((float)pointCount) / std::log(2.f) - 5) / 15);
   }
 
+  void drawHistogram(const Vector2i& pos, const Vector2i& size_, GLuint tex) {
+    Vector2f s = -(pos.array().cast<float>() + Vector2f(0.25f, 0.25f).array())  / size_.array().cast<float>();
+    Vector2f e = size().array().cast<float>() / size_.array().cast<float>() + s.array();
+    Matrix4f mvp = ortho(s.x(), e.x(), e.y(), s.y(), -1, 1);
+    glDisable(GL_DEPTH_TEST);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    histogramShader->bind();
+    histogramShader->setUniform("mvp", mvp);
+    histogramShader->setUniform("tex", 0);
+    histogramShader->drawIndexed(GL_TRIANGLES, 0, 2);
+  }
+
   void drawContents() override {
-    constexpr float viewAngle = 30.0f, near = 0.01f, far = 100.0f;
-    auto fH = std::tan(viewAngle / 360.0f * M_PI) * near;
-    auto fW = fH * mSize.x() / mSize.y();
+    if (shouldDrawHistogram) {
+      auto warpType = (WarpType)warpTypeBox->selectedIndex();
+      constexpr int spacer = 20;
+      constexpr int lineHeight = (int)24 * 1.2f;
+      const int histWidth = (width() - 3 * spacer) / 2;
+      const int histHeight = (warpType == None || warpType == Disk) ? histWidth : histWidth / 2;
+      const int verticalOffset = (height() - histHeight - lineHeight - 70 - 2 * spacer) / 2;
+      drawHistogram(Vector2i(spacer, verticalOffset + lineHeight + spacer), Vector2i(histWidth, histHeight), textures[0]);
+      drawHistogram(Vector2i(2 * spacer + histWidth, verticalOffset + lineHeight + spacer), Vector2i(histWidth, histHeight), textures[1]);
 
-    Matrix4f view = lookAt(Vector3f(0, 0, 2), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
-    Matrix4f project = frustum(-fW, fW, -fH, fH, near, far);
-    Matrix4f model = arcball.matrix() * translate(Vector3f(-0.5f, -0.5f, 0.0f));
-    Matrix4f mvp = project * view * model;
+      auto ctx = mNVGContext;
+      nvgBeginFrame(ctx, mSize[0], mSize[1], mPixelRatio);
+      nvgBeginPath(ctx);
+      nvgRect(ctx, spacer, verticalOffset + lineHeight + histHeight + spacer * 2, width() - 2 * spacer, 70);
+      nvgFillColor(ctx, testResult.first ? Color(100, 255, 100, 100) : Color(255, 100, 100, 100));
+      nvgFill(ctx);
+      nvgFontSize(ctx, 24.0f);
+      nvgFontFace(ctx, "sans-bold");
+      nvgTextAlign(ctx, NVG_ALIGN_CENTER | NVG_ALIGN_BOTTOM);
+      nvgFillColor(ctx, Color(255, 255));
+      nvgText(ctx, spacer + histWidth / 2, verticalOffset + lineHeight, "Sample histogram", nullptr);
+      nvgText(ctx, 2 * spacer + histWidth * 1.5f, verticalOffset + lineHeight, "Integrated density", nullptr);
+      nvgStrokeColor(ctx, Color(255, 255));
+      nvgStrokeWidth(ctx, 2);
+      nvgBeginPath(ctx);
+      nvgRect(ctx, spacer, verticalOffset + lineHeight + spacer, histWidth, histHeight);
+      nvgRect(ctx, 2 * spacer + histWidth, verticalOffset + lineHeight + spacer, histWidth, histHeight);
+      nvgStroke(ctx);
 
-    pointShader->bind();
-    pointShader->setUniform("mvp", mvp);
-    glPointSize(2);
-    glEnable(GL_DEPTH_TEST);
-    pointShader->drawArray(GL_POINTS, 0, pointCount);
+      nvgFontSize(ctx, 20.0f);
+      nvgTextAlign(ctx, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
+      float bounds[4];
+      nvgTextBoxBounds(ctx, 0, 0, width() - 2 * spacer, testResult.second.c_str(), nullptr, bounds);
+      nvgTextBox(
+        ctx, spacer, verticalOffset + histHeight + lineHeight + spacer * 2 + (70 - bounds[3]) / 2,
+        width() - 2 * spacer, testResult.second.c_str(), nullptr);
+      nvgEndFrame(ctx);
+    } else {
+      constexpr float viewAngle = 30.0f, near = 0.01f, far = 100.0f;
+      auto fH = std::tan(viewAngle / 360.0f * M_PI) * near;
+      auto fW = fH * mSize.x() / mSize.y();
+      Matrix4f view = lookAt(Vector3f(0, 0, 2), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
+      Matrix4f project = frustum(-fW, fW, -fH, fH, near, far);
+      Matrix4f model = arcball.matrix() * translate(Vector3f(-0.5f, -0.5f, 0.0f));
+      Matrix4f mvp = project * view * model;
 
-    if (gridCheckBox->checked()) {
-      gridShader->bind();
-      gridShader->setUniform("mvp", mvp);
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      gridShader->drawArray(GL_LINES, 0, lineCount);
-      glDisable(GL_BLEND);
+      pointShader->bind();
+      pointShader->setUniform("mvp", mvp);
+      glPointSize(2);
+      glEnable(GL_DEPTH_TEST);
+      pointShader->drawArray(GL_POINTS, 0, pointCount);
+
+      if (gridCheckBox->checked()) {
+        gridShader->bind();
+        gridShader->setUniform("mvp", mvp);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        gridShader->drawArray(GL_LINES, 0, lineCount);
+        glDisable(GL_BLEND);
+      }
     }
   }
 
@@ -497,6 +549,11 @@ public:
   }
 
   bool mouseButtonEvent(const Vector2i& p, int button, bool down, int modifiers) override {
+    if (down && !window->visible()) {
+      shouldDrawHistogram = false;
+      window->setVisible(true);
+      return true;
+    }
     if (!Screen::mouseButtonEvent(p, button, down, modifiers))
       if (button == GLFW_MOUSE_BUTTON_1)
         arcball.button(p, down);
@@ -504,7 +561,7 @@ public:
   }
 
 private:
-  bool drawHistogram;
+  bool shouldDrawHistogram;
   int lineCount;
   int pointCount;
   GLuint textures[2];
@@ -530,6 +587,5 @@ int main() {
   nanogui::mainloop();
   delete screen;
   nanogui::shutdown();
-
   return 0;
 }
