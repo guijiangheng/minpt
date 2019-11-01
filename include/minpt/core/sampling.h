@@ -15,12 +15,11 @@ inline Vector3f cosineSampleHemisphere(const Vector2f& u) {
 }
 
 inline float uniformSampleDiskPdf(const Vector2f& v) {
-  if (v.length() < 1.0f) return InvPi;
-  return 0;
+  return v.length() < 1.0f ? InvPi : 0;
 }
 
 inline float cosineSampleHemispherePdf(const Vector3f& v) {
-  return v.z * InvPi;
+  return v.z < 0 ? 0 : v.z * InvPi;
 }
 
 }
