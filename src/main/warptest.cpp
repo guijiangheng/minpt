@@ -31,6 +31,7 @@ public:
   enum WarpType {
     None = 0,
     Disk,
+    UniformHemisphere,
     CosineHemisphere
   };
 
@@ -91,7 +92,9 @@ public:
         x *= 2 * minpt::Pi;
         y = y * 2 - 1;
         auto v = minpt::sphericalDirection(std::sqrt(1 - y * y), y, x);
-        if (warpType == CosineHemisphere)
+        if (warpType == UniformHemisphere)
+          return minpt::uniformSampleHemispherePdf(v);
+        else if (warpType == CosineHemisphere)
           return minpt::cosineSampleHemispherePdf(v);
         else
           throw minpt::Exception("Invalid warp type");
@@ -150,19 +153,24 @@ public:
 
   std::pair<Vector3f, float> warpPoint(WarpType warpType, const Vector2f& point) {
     Vector3f result;
-    minpt::Vector2f sample(point.x(), point.y());
+    minpt::Vector2f u(point.x(), point.y());
 
     switch (warpType) {
       case None:
         result << point, 0.0f;
         break;
       case Disk: {
-          auto temp = minpt::uniformSampleDisk(sample);
+          auto temp = minpt::uniformSampleDisk(u);
           result << temp.x, temp.y, 0.0f;
         }
         break;
+      case UniformHemisphere: {
+          auto temp = minpt::uniformSampleHemisphere(u);
+          result << temp.x, temp.y, temp.z;
+        }
+        break;
       case CosineHemisphere: {
-          auto temp = minpt::cosineSampleHemisphere(sample);
+          auto temp = minpt::cosineSampleHemisphere(u);
           result << temp.x, temp.y, temp.z;
         }
         break;
@@ -380,7 +388,7 @@ public:
 
     new Label(window, "Warping method", "sans-bold");
 
-    warpTypeBox = new ComboBox(window, { "None", "Disk", "Hemisphere (cos)" });
+    warpTypeBox = new ComboBox(window, { "None", "Disk", "Hemisphere (uni)", "Hemisphere (cos)" });
     warpTypeBox->setCallback([=](int) { refresh(); });
 
     panel = new Widget(window);
