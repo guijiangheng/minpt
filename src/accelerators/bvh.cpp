@@ -19,12 +19,12 @@ struct PrimInfo {
 };
 
 struct Bins {
-  static constexpr auto BIN_COUNT = 16;
-  std::uint32_t counts[BIN_COUNT];
-  Bounds3f bounds[BIN_COUNT];
+  static constexpr auto BinCount = 16;
+  std::uint32_t counts[BinCount];
+  Bounds3f bounds[BinCount];
 
   Bins() {
-    memset(counts, 0, sizeof(std::uint32_t) * BIN_COUNT);
+    memset(counts, 0, sizeof(std::uint32_t) * BinCount);
   }
 };
 
@@ -66,7 +66,7 @@ public:
   tbb::task* execute() override {
     auto nPrims = (std::uint32_t)(end - start);
 
-    if (nPrims < SERIAL_THRESHOLD) {
+    if (nPrims < SerialThreshold) {
       seriallyBuild(nodeIndex, start, end, buffer);
       return nullptr;
     }
@@ -75,17 +75,17 @@ public:
     auto axis = node.bounds.majorAxis();
     auto min = node.bounds.pMin[axis];
     auto max = node.bounds.pMax[axis];
-    auto binSizeInv = Bins::BIN_COUNT / (max - min);
+    auto binSizeInv = Bins::BinCount / (max - min);
 
     auto bins = tbb::parallel_reduce(
-      tbb::blocked_range<std::uint32_t>(0u, nPrims, GRAIN_SIZE),
+      tbb::blocked_range<std::uint32_t>(0u, nPrims, GrainSize),
       Bins(),
       [=](const tbb::blocked_range<std::uint32_t>& range, Bins bins) -> Bins {
         for (auto i = range.begin(); i != range.end(); ++i) {
           auto f = start[i];
           auto centeroid = primInfos[f].center[axis];
           auto index = (int)((centeroid - min) * binSizeInv);
-          if (index == Bins::BIN_COUNT) --index;
+          if (index == Bins::BinCount) --index;
           ++bins.counts[index];
           bins.bounds[index].merge(primInfos[f].bounds);
         }
@@ -93,7 +93,7 @@ public:
       },
       [](const Bins& a, const Bins& b) {
         Bins bins;
-        for (auto i = 0; i < Bins::BIN_COUNT; ++i) {
+        for (auto i = 0; i < Bins::BinCount; ++i) {
           bins.counts[i] = a.counts[i] + b.counts[i];
           bins.bounds[i] = merge(a.bounds[i], b.bounds[i]);
         }
@@ -101,10 +101,10 @@ public:
       }
     );
 
-    std::uint8_t boundsBuffer[Bins::BIN_COUNT * sizeof(Bounds3f)];
+    std::uint8_t boundsBuffer[Bins::BinCount * sizeof(Bounds3f)];
     auto leftBounds = reinterpret_cast<Bounds3f*>(boundsBuffer);
     leftBounds[0] = bins.bounds[0];
-    for (auto i = 1; i < Bins::BIN_COUNT - 1; ++i) {
+    for (auto i = 1; i < Bins::BinCount - 1; ++i) {
       bins.counts[i] += bins.counts[i - 1];
       leftBounds[i] = merge(leftBounds[i - 1], bins.bounds[i]);
     }
@@ -112,10 +112,10 @@ public:
     auto splitIndex = -1;
     auto minCost = (float)nPrims;
     auto totalAreaInv = 1 / node.bounds.area();
-    Bounds3f bestRightBounds, rightBounds = bins.bounds[Bins::BIN_COUNT - 1];
+    Bounds3f bestRightBounds, rightBounds = bins.bounds[Bins::BinCount - 1];
 
-    for (auto i = Bins::BIN_COUNT - 2; i >= 0; --i) {
-      auto cost = TRAVERSAL_COST + totalAreaInv * (
+    for (auto i = Bins::BinCount - 2; i >= 0; --i) {
+      auto cost = TraversalCost + totalAreaInv * (
         bins.counts[i] * leftBounds[i].area() +
         (nPrims - bins.counts[i]) * rightBounds.area());
       if (cost < minCost) {
@@ -142,7 +142,7 @@ public:
     std::atomic<std::uint32_t> offsetRight(leftCount);
 
     tbb::parallel_for(
-      tbb::blocked_range<std::uint32_t>(0u, nPrims, GRAIN_SIZE),
+      tbb::blocked_range<std::uint32_t>(0u, nPrims, GrainSize),
       [=, &offsetLeft, &offsetRight](const tbb::blocked_range<std::uint32_t>& range) {
         std::uint32_t leftCount = 0;
         std::uint32_t rightCount = 0;
@@ -150,7 +150,7 @@ public:
           auto f = start[i];
           auto centroid = primInfos[f].center[axis];
           auto index = (int)((centroid - min) * binSizeInv);
-          if (index == Bins::BIN_COUNT) --index;
+          if (index == Bins::BinCount) --index;
           ++(index <= splitIndex ? leftCount : rightCount);
         }
         auto left = offsetLeft.fetch_add(leftCount);
@@ -159,7 +159,7 @@ public:
           auto f = start[i];
           auto centroid = primInfos[f].center[axis];
           auto index = (int)((centroid - min) * binSizeInv);
-          if (index == Bins::BIN_COUNT) --index;
+          if (index == Bins::BinCount) --index;
           if (index <= splitIndex)
             buffer[left++] = f;
           else
@@ -212,7 +212,7 @@ public:
       bounds.reset();
       for (std::uint32_t i = 1; i < nPrims; ++i) {
         bounds.merge(primInfos[*(start + i - 1)].bounds);
-        auto cost = TRAVERSAL_COST + (bounds.area() * i + rightAreas[i] * (nPrims - i)) * totalAreaInv;
+        auto cost = TraversalCost + (bounds.area() * i + rightAreas[i] * (nPrims - i)) * totalAreaInv;
         if (cost < minCost) {
           minCost = cost;
           splitIndex = i;
@@ -237,9 +237,9 @@ public:
   }
 
 public:
-  static constexpr std::uint32_t SERIAL_THRESHOLD = 128;
-  static constexpr std::uint32_t GRAIN_SIZE = 1000;
-  static constexpr float TRAVERSAL_COST = 1.0f / 2;
+  static constexpr std::uint32_t SerialThreshold = 128;
+  static constexpr std::uint32_t GrainSize = 1000;
+  static constexpr float TraversalCost = 1.0f / 2;
 
 private:
   std::vector<BVHNode>& nodes;
@@ -307,7 +307,7 @@ public:
     auto leftArea = nodes[nodeIndex + 1].bounds.area();
     auto rightArea = nodes[node.rightChild].bounds.area();
     return std::make_pair(
-      BVHBuildTask::TRAVERSAL_COST + (left.first * leftArea + right.first * rightArea) / totalArea,
+      BVHBuildTask::TraversalCost + (left.first * leftArea + right.first * rightArea) / totalArea,
       left.second + right.second + 1
     );
   }

@@ -15,7 +15,6 @@
 #include <nanogui/messagedialog.h>
 
 #include <minpt/math/math.h>
-#include <minpt/math/frame.h>
 #include <minpt/core/sampling.h>
 #include <minpt/core/exception.h>
 

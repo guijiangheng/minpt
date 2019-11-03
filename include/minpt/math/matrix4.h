@@ -3,7 +3,7 @@
 #include <cstring>
 #include <Eigen/Core>
 #include <minpt/core/ray.h>
-#include <minpt/math/math.h>
+#include <minpt/math/common.h>
 
 namespace minpt {
 

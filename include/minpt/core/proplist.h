@@ -2,10 +2,7 @@
 
 #include <any>
 #include <map>
-
-#include <minpt/math/color3.h>
-#include <minpt/math/bounds2.h>
-#include <minpt/math/matrix4.h>
+#include <minpt/math/math.h>
 #include <minpt/core/exception.h>
 
 namespace minpt {

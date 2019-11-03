@@ -1,6 +1,6 @@
 #pragma once
 
-#include <minpt/math/matrix4.h>
+#include <minpt/math/math.h>
 #include <minpt/core/object.h>
 
 namespace minpt {

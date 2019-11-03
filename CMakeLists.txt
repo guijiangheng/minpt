@@ -59,6 +59,7 @@ add_executable(minpt
   include/minpt/core/accelerator.h
 
   include/minpt/math/math.h
+  include/minpt/math/common.h
   include/minpt/math/bounds2.h
   include/minpt/math/bounds3.h
   include/minpt/math/color3.h

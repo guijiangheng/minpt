@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
-#include <minpt/math/bounds3.h>
-#include <minpt/core/interaction.h>
+#include <minpt/math/math.h>
 #include <minpt/core/bsdf.h>
+#include <minpt/core/interaction.h>
 
 namespace minpt {
 

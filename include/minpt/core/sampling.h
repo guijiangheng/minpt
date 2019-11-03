@@ -1,5 +1,4 @@
 #include <minpt/math/math.h>
-#include <minpt/math/vector3.h>
 
 namespace minpt {
 

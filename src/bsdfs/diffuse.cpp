@@ -1,7 +1,7 @@
 #include <minpt/utils/utils.h>
-#include <minpt/math/frame.h>
-#include <minpt/core/sampling.h>
+#include <minpt/math/math.h>
 #include <minpt/core/bsdf.h>
+#include <minpt/core/sampling.h>
 
 namespace minpt {
 

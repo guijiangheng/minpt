@@ -1,5 +1,6 @@
 #pragma once
 
+#include <minpt/math/common.h>
 #include <minpt/math/vector3.h>
 
 namespace minpt {

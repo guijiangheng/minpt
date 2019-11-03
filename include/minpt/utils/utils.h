@@ -5,7 +5,6 @@
 #include <filesystem/resolver.h>
 #include <minpt/core/exception.h>
 #include <minpt/math/math.h>
-#include <minpt/math/color3.h>
 
 namespace minpt {
 
