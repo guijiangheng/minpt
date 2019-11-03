@@ -1,3 +1,4 @@
+#include <memory>
 
 #include <pcg32.h>
 #include <hypothesis.h>
@@ -14,6 +15,7 @@
 #include <nanogui/messagedialog.h>
 
 #include <minpt/math/math.h>
+#include <minpt/math/frame.h>
 #include <minpt/core/sampling.h>
 #include <minpt/core/exception.h>
 
@@ -89,10 +91,7 @@ public:
       } else {
         x *= 2 * minpt::Pi;
         y = y * 2 - 1;
-        auto sinTheta = std::sqrt(1 - y * y);
-        auto sinPhi = std::sin(x);
-        auto cosPhi = std::cos(x);
-        minpt::Vector3f v((float)(sinTheta * cosPhi), (float)(sinTheta * sinPhi), (float)y);
+        auto v = minpt::sphericalDirection(std::sqrt(1 - y * y), y, x);
         if (warpType == CosineHemisphere)
           return minpt::cosineSampleHemispherePdf(v);
         else

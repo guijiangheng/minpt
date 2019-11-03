@@ -48,6 +48,7 @@ add_executable(minpt
   include/minpt/core/parser.h
   include/minpt/core/timer.h
   include/minpt/core/ray.h
+  include/minpt/core/bsdf.h
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h
   include/minpt/core/sampler.h
@@ -74,6 +75,7 @@ add_executable(minpt
   src/core/mesh.cpp
   src/core/parser.cpp
   src/core/object.cpp
+  src/bsdfs/diffuse.cpp
   src/meshes/obj.cpp
   src/samplers/random.cpp
   src/accelerators/bvh.cpp

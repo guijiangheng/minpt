@@ -3,7 +3,7 @@
 #include <memory>
 #include <minpt/math/bounds3.h>
 #include <minpt/core/interaction.h>
-#include <minpt/core/object.h>
+#include <minpt/core/bsdf.h>
 
 namespace minpt {
 
@@ -17,7 +17,21 @@ namespace minpt {
  */
 class Mesh : public Object {
 public:
-  virtual ~Mesh() = default;
+  virtual ~Mesh() {
+    delete bsdf;
+  };
+
+  void addChild(Object* object) override {
+    switch (object->getClassType()) {
+      case EBSDF:
+        if (bsdf)
+          throw Exception("Mesh: tried to register multiple BSDF instances!");
+        bsdf = static_cast<BSDF*>(object);
+        break;
+      default:
+        throw Exception("Shape::addChild<%s> is not supported!", classTypeName(object->getClassType()));
+    }
+  }
 
   std::uint32_t getPrimitiveCount() const {
     return nTriangles;
@@ -54,9 +68,11 @@ public:
       "Mesh[\n"
       "  name = \"%s\",\n"
       "  vertexCount = %i,\n"
-      "  triangleCount = %i\n"
+      "  triangleCount = %i,\n"
+      "  bsdf = %s\n"
       "]",
-      name, nVertices, nTriangles
+      name, nVertices, nTriangles,
+      bsdf ? indent(bsdf->toString()) : std::string("null")
     );
   }
 
@@ -72,6 +88,7 @@ public:
   std::unique_ptr<Vector2f[]> uv;
   std::unique_ptr<std::uint32_t[]> f;
   Bounds3f bounds;
+  BSDF* bsdf = nullptr;
 };
 
 }

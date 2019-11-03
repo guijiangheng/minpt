@@ -13,6 +13,7 @@ public:
     ECamera,
     EIntegrator,
     ESampler,
+    EBSDF,
     EClassTypeCount
   };
 
@@ -40,6 +41,7 @@ public:
       case ECamera:     return "camera";
       case EIntegrator: return "integrator";
       case ESampler:    return "sampler";
+      case EBSDF:       return "bsdf";
       default:          return "<unknown>";
     }
   }

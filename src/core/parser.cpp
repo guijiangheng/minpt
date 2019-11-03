@@ -17,6 +17,7 @@ enum ETag {
   ECamera,
   EIntegrator,
   ESampler,
+  EBSDF,
 
   // Properties
   EBoolean = Object::EClassTypeCount,
@@ -25,7 +26,7 @@ enum ETag {
   EString,
   EVector2i,
   EVector3f,
-  EColor,
+  EColor3f,
   EBounds2f,
   ETransform,
   EMatrix,
@@ -44,13 +45,14 @@ static std::map<std::string, ETag> tags = {
   { "camera",     ECamera },
   { "integrator", EIntegrator },
   { "sampler",    ESampler },
+  { "bsdf",       EBSDF },
   { "boolean",    EBoolean },
   { "integer",    EInteger },
   { "float",      EFloat },
   { "string",     EString },
   { "vector2i",   EVector2i },
   { "vector3f",   EVector3f },
-  { "color",      EColor },
+  { "color3f",    EColor3f },
   { "bounds2f",   EBounds2f },
   { "transform",  ETransform },
   { "matrix",     EMatrix },
@@ -213,7 +215,7 @@ Object* loadFromXML(const std::string& filename) {
               node.attribute("name").value(),
               toVector3f(node.attribute("value").value()));
             break;
-          case EColor:
+          case EColor3f:
             checkAttributes(node, { "name", "value" });
             parentProps.setColor3f(
               node.attribute("name").value(),

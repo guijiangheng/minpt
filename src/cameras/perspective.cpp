@@ -1,5 +1,5 @@
-#include <minpt/math/bounds2.h>
 #include <minpt/utils/utils.h>
+#include <minpt/math/bounds2.h>
 #include <minpt/core/camera.h>
 
 namespace minpt {

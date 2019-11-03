@@ -26,6 +26,12 @@ constexpr float degrees(float rad) {
   return 180 / Pi * rad;
 }
 
+constexpr float clamp(float val, float low, float high) {
+  if (val < low) return low;
+  if (val > high) return high;
+  return val;
+}
+
 template <typename Vector>
 Vector lerp(const Vector& a, const Vector& b, typename Vector::Scalar t) {
   return a + (b - a) * t;
