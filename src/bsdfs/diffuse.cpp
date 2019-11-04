@@ -28,7 +28,7 @@ public:
     return albedo * InvPi;
   }
 
-  std::string toString() const {
+  std::string toString() const override {
     return tfm::format(
       "Diffuse[\n"
       "  albedo = %s\n"
