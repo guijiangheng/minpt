@@ -14,11 +14,7 @@ namespace minpt {
 class Scene : public Object {
 public:
   Scene(const PropertyList& props)
-    : camera(nullptr)
-    , sampler(nullptr)
-    , integrator(nullptr)
-    , accel(nullptr)
-    , outputName(props.getString("outputName", ""))
+    : outputName(props.getString("outputName", ""))
   { }
 
   ~Scene() {
@@ -68,10 +64,10 @@ public:
 
 public:
   std::vector<Mesh*> meshes;
-  Camera* camera;
-  Sampler* sampler;
-  Integrator* integrator;
-  Accelerator* accel;
+  Camera* camera = nullptr;
+  Sampler* sampler = nullptr;
+  Integrator* integrator = nullptr;
+  Accelerator* accel = nullptr;
   std::string outputName;
 };
 

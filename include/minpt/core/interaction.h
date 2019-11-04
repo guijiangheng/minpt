@@ -23,8 +23,8 @@ public:
     return p + faceForward(n, w) * RayOriginOffsetEpsilon;
   }
 
-  Ray spawnRay(const Vector3f& w) const {
-    return Ray(offsetRayOrigin(w), w);
+  Ray spawnRay(const Vector3f& w, float tMax = Infinity) const {
+    return Ray(offsetRayOrigin(w), w, tMax);
   }
 
   std::string toString() const {

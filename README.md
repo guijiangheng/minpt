@@ -1,7 +1,7 @@
 # minpt: a tiny c++ path tracer
 
-![fireplace-room](./gallery/normal.png)
-![fireplace-room](./gallery/ao.png)
+![fireplace-room](./gallery/fireplace_room-normal.png)
+![fireplace-room](./gallery/fireplace_room-ao.png)
 
 minpt is a tiny c++ path tracer written for learning Matt Pharr's book *" Physically Based Rendering: From Theory to Implementation"*. Most of codes and ideas come from PBRT and nori ray tracer, but with a lot of simplification.
 

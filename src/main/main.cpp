@@ -34,6 +34,7 @@ int main(int argc, char** argv) {
         std::cout << std::endl;
         std::cout << "Configuration: " << scene->toString() << std::endl;
         std::cout << std::endl;
+        scene->integrator->preprocess(*scene);
         scene->render(outputName);
       }
     } else {
