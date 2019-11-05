@@ -35,6 +35,9 @@ void Scene::addChild(Object* child) {
         throw Exception("There can only be one accelerator per scene!");
       accel = static_cast<Accelerator*>(child);
       break;
+    case ELight:
+      lights.push_back(static_cast<Light*>(child));
+      break;
     default:
       throw Exception("Scene::addChild(<%s>) is not supported", classTypeName(child->getClassType()));
   }
@@ -77,13 +80,22 @@ void Scene::render(const std::string& outputName) const {
 }
 
 std::string Scene::toString() const {
-  std::string string;
+  std::string meshStr;
   for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {
-    string += std::string("  ") + indent(meshes[i]->toString());
+    meshStr += std::string("  ") + indent(meshes[i]->toString());
     if (i + 1 < length)
-      string += ",";
-    string += "\n";
+      meshStr += ",";
+    meshStr += "\n";
   }
+
+  std::string lightStr;
+  for (std::size_t i = 0, length = lights.size(); i < length; ++i) {
+    lightStr += std::string(" ") + indent(lights[i]->toString());
+    if (i + 1 < length)
+      lightStr += ",";
+    lightStr += "\n";
+  }
+
   return tfm::format(
     "Scene[\n"
     "  integrator = %s,\n"
@@ -91,14 +103,17 @@ std::string Scene::toString() const {
     "  sampler = %s,\n"
     "  camera = %s,\n"
     "  meshes = {\n"
-    "  %s },\n"
+    "  %s  },\n"
+    "  lights = {\n"
+    "  %s  },\n"
     "  outputName=\"%s\"\n"
     "]",
     indent(integrator->toString()),
     indent(accel->toString()),
     indent(sampler->toString()),
     indent(camera->toString()),
-    indent(string),
+    indent(meshStr),
+    indent(lightStr),
     indent(outputName)
   );
 }

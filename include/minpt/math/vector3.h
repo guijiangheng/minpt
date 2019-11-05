@@ -162,6 +162,14 @@ Vector3<T> abs(const Vector3<T>& v) {
 }
 
 template <typename T>
+void swap(Vector3<T>& a, Vector3<T>& b) {
+  T temp;
+  temp = a.x; a.x = b.x; b.x = temp;
+  temp = a.y; a.y = b.y; b.y = temp;
+  temp = a.z; a.z = b.z; b.z = temp;
+}
+
+template <typename T>
 Vector3<T> min(const Vector3<T>& a, const Vector3<T>& b) {
   return Vector3<T>(
     std::min(a.x, b.x),
