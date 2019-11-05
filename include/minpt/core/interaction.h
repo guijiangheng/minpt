@@ -27,6 +27,12 @@ public:
     return Ray(offsetRayOrigin(w), w, tMax);
   }
 
+  Ray spawnRayTo(const Vector3f& target) const {
+    auto w = target - p;
+    auto o = offsetRayOrigin(w);
+    return Ray(o, w, 1.0f - ShadowEpsilon);
+  }
+
   std::string toString() const {
     return tfm::format(
       "Interaction[\n"
@@ -40,6 +46,7 @@ public:
   }
 
 public:
+  static constexpr auto ShadowEpsilon = 0.0001f;
   static constexpr auto RayOriginOffsetEpsilon = 0.00001f;
   Vector3f p;
   Vector3f n;

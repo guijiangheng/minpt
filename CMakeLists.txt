@@ -54,9 +54,11 @@ add_executable(minpt
   include/minpt/core/sampler.h
   include/minpt/core/sampling.h
   include/minpt/core/camera.h
+  include/minpt/core/light.h
   include/minpt/core/scene.h
   include/minpt/core/integrator.h
   include/minpt/core/accelerator.h
+  include/minpt/core/visibilitytester.h
 
   include/minpt/math/math.h
   include/minpt/math/common.h
@@ -76,6 +78,8 @@ add_executable(minpt
   src/core/mesh.cpp
   src/core/parser.cpp
   src/core/object.cpp
+  src/core/visibilitytester.cpp
+  src/lights/point.cpp
   src/bsdfs/diffuse.cpp
   src/meshes/obj.cpp
   src/samplers/random.cpp

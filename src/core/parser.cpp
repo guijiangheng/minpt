@@ -18,6 +18,7 @@ enum ETag {
   EIntegrator,
   ESampler,
   EBSDF,
+  ELight,
 
   // Properties
   EBoolean = Object::EClassTypeCount,
@@ -46,6 +47,7 @@ static std::map<std::string, ETag> tags = {
   { "integrator", EIntegrator },
   { "sampler",    ESampler },
   { "bsdf",       EBSDF },
+  { "light",      ELight },
   { "boolean",    EBoolean },
   { "integer",    EInteger },
   { "float",      EFloat },

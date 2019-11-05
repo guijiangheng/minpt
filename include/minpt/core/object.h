@@ -14,6 +14,7 @@ public:
     EIntegrator,
     ESampler,
     EBSDF,
+    ELight,
     EClassTypeCount
   };
 
@@ -42,6 +43,7 @@ public:
       case EIntegrator: return "integrator";
       case ESampler:    return "sampler";
       case EBSDF:       return "bsdf";
+      case ELight:      return "light";
       default:          return "<unknown>";
     }
   }

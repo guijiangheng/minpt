@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <minpt/core/proplist.h>
+#include <minpt/core/light.h>
 #include <minpt/core/camera.h>
 #include <minpt/core/sampler.h>
 #include <minpt/core/integrator.h>
@@ -63,12 +64,13 @@ public:
   std::string toString() const override;
 
 public:
-  std::vector<Mesh*> meshes;
   Camera* camera = nullptr;
   Sampler* sampler = nullptr;
   Integrator* integrator = nullptr;
   Accelerator* accel = nullptr;
   std::string outputName;
+  std::vector<Mesh*> meshes;
+  std::vector<Light*> lights;
 };
 
 }
