@@ -7,8 +7,6 @@ namespace minpt {
 
 class Light : public Object {
 public:
-  virtual ~Light() = default;
-
   virtual bool isDelta() const {
     return false;
   }

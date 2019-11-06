@@ -6,8 +6,6 @@ namespace minpt {
 
 class BSDF : public Object {
 public:
-  virtual ~BSDF() = default;
-
   virtual bool isDelta() const {
     return false;
   }

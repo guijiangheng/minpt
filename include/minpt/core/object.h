@@ -15,6 +15,7 @@ public:
     ESampler,
     EBSDF,
     ELight,
+    EFilter,
     EClassTypeCount
   };
 
@@ -44,6 +45,7 @@ public:
       case ESampler:    return "sampler";
       case EBSDF:       return "bsdf";
       case ELight:      return "light";
+      case EFilter:     return "filter";
       default:          return "<unknown>";
     }
   }

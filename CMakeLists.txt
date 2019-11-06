@@ -55,6 +55,7 @@ add_executable(minpt
   include/minpt/core/sampling.h
   include/minpt/core/camera.h
   include/minpt/core/light.h
+  include/minpt/core/filter.h
   include/minpt/core/scene.h
   include/minpt/core/integrator.h
   include/minpt/core/accelerator.h

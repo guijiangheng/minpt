@@ -30,7 +30,13 @@ public:
   }
 
   std::string toString() const override {
-    return "AmbientOcclusionIntegrator[]";
+    return tfm::format(
+      "AmbientOcclusionIntegrator[\n"
+      "  shadingSamples = %d,\n"
+      "  rayLength = %f\n"
+      "]",
+      shadingSamples, rayLength
+    );
   }
 
 private:

@@ -15,8 +15,6 @@ public:
     : frame(frame), outputSize(outputSize)
   { }
 
-  virtual ~Camera() = default;
-
   virtual Ray generateRay(const CameraSample& sample) const = 0;
 
   EClassType getClassType() const override {
