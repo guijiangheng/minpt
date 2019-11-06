@@ -81,19 +81,35 @@ void Scene::render(const std::string& outputName) const {
 
 std::string Scene::toString() const {
   std::string meshStr;
-  for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {
-    meshStr += std::string("  ") + indent(meshes[i]->toString());
-    if (i + 1 < length)
-      meshStr += ",";
-    meshStr += "\n";
+  if (meshes.empty())
+    meshStr = "{},\n";
+  else {
+    for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {
+      meshStr += std::string("  ") + indent(meshes[i]->toString());
+      if (i + 1 < length)
+        meshStr += ",";
+      meshStr += "\n";
+    }
+    meshStr = tfm::format(
+      "{\n%s},\n",
+      meshStr
+    );
   }
 
   std::string lightStr;
-  for (std::size_t i = 0, length = lights.size(); i < length; ++i) {
-    lightStr += std::string(" ") + indent(lights[i]->toString());
-    if (i + 1 < length)
-      lightStr += ",";
-    lightStr += "\n";
+  if (lights.empty())
+    lightStr = "{},\n";
+  else {
+    for (std::size_t i = 0, length = lights.size(); i < length; ++i) {
+      lightStr += std::string("  ") + indent(lights[i]->toString());
+      if (i + 1 < length)
+        lightStr += ",";
+      lightStr += "\n";
+    }
+    lightStr = tfm::format(
+      "{\n%s},\n",
+      lightStr
+    );
   }
 
   return tfm::format(
@@ -102,10 +118,8 @@ std::string Scene::toString() const {
     "  accelerator = %s,\n"
     "  sampler = %s,\n"
     "  camera = %s,\n"
-    "  meshes = {\n"
-    "  %s  },\n"
-    "  lights = {\n"
-    "  %s  },\n"
+    "  meshes = %s"
+    "  lights = %s"
     "  outputName=\"%s\"\n"
     "]",
     indent(integrator->toString()),

@@ -360,12 +360,8 @@ public:
     }
 
     if (hit) {
-      isect.mesh->computeIntersection(index, isect);
       isect.wo = -ray.d;
-      if (!sameHemisphere(isect.shFrame.n, isect.wo)) {
-        isect.shFrame.n = -isect.shFrame.n;
-        swap(isect.shFrame.s, isect.shFrame.t);
-      }
+      isect.mesh->computeIntersection(index, isect);
     }
 
     return hit;
