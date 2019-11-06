@@ -1,0 +1,22 @@
+<scene>
+	<string name="outputName" value="ajax-ao.png"/>
+	<accel type="bvh"/>
+	<integrator type="ao">
+		<integer name="shadingSamples" value="32"/>
+	</integrator>
+	<sampler type="random">
+		<integer name="sampleCount" value="16"/>
+	</sampler>
+	<mesh type="obj">
+		<string name="filename" value="ajax.obj"/>
+	</mesh>
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="-64.8161, 47.2211, 23.8576"
+							origin="-65.6055, 47.5762, 24.3583"
+							up="0.299858, 0.934836, -0.190177"/>
+		</transform>
+		<float name="fov" value="30"/>
+		<vector2i name="outputSize" value="768, 768"/>
+	</camera>
+</scene>

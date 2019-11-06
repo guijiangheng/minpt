@@ -82,7 +82,7 @@ void Scene::render(const std::string& outputName) const {
 std::string Scene::toString() const {
   std::string meshStr;
   if (meshes.empty())
-    meshStr = "{},\n";
+    meshStr = "{}";
   else {
     for (std::size_t i = 0, length = meshes.size(); i < length; ++i) {
       meshStr += std::string("  ") + indent(meshes[i]->toString());
@@ -91,14 +91,14 @@ std::string Scene::toString() const {
       meshStr += "\n";
     }
     meshStr = tfm::format(
-      "{\n%s},\n",
+      "{\n%s}",
       meshStr
     );
   }
 
   std::string lightStr;
   if (lights.empty())
-    lightStr = "{},\n";
+    lightStr = "{}";
   else {
     for (std::size_t i = 0, length = lights.size(); i < length; ++i) {
       lightStr += std::string("  ") + indent(lights[i]->toString());
@@ -107,7 +107,7 @@ std::string Scene::toString() const {
       lightStr += "\n";
     }
     lightStr = tfm::format(
-      "{\n%s},\n",
+      "{\n%s}",
       lightStr
     );
   }
@@ -118,8 +118,8 @@ std::string Scene::toString() const {
     "  accelerator = %s,\n"
     "  sampler = %s,\n"
     "  camera = %s,\n"
-    "  meshes = %s"
-    "  lights = %s"
+    "  meshes = %s,\n"
+    "  lights = %s,\n"
     "  outputName=\"%s\"\n"
     "]",
     indent(integrator->toString()),

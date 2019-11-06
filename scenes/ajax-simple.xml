@@ -1,0 +1,28 @@
+<scene>
+	<string name="outputName" value="ajax-simple.png"/>
+	<accel type="bvh"/>
+	<integrator type="path"/>
+	<sampler type="random">
+		<integer name="sampleCount" value="32"/>
+	</sampler>
+
+	<light type="point">
+		<vector3f name="pLight" value="-20, 40, 20"/>
+		<color3f name="intensity" value="952.4191, 952.4191, 952.4191"/>
+	</light>
+
+	<mesh type="obj">
+		<string name="filename" value="ajax.obj"/>
+		<bsdf type="diffuse"/>
+	</mesh>
+
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="-64.8161, 47.2211, 23.8576"
+							origin="-65.6055, 47.5762, 24.3583"
+							up="0.299858, 0.934836, -0.190177"/>
+		</transform>
+		<float name="fov" value="30"/>
+		<vector2i name="outputSize" value="768, 768"/>
+	</camera>
+</scene>
