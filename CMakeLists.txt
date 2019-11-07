@@ -66,6 +66,7 @@ add_executable(minpt
   include/minpt/math/bounds2.h
   include/minpt/math/bounds3.h
   include/minpt/math/color3.h
+  include/minpt/math/color4.h
   include/minpt/math/vector2.h
   include/minpt/math/vector3.h
   include/minpt/math/matrix4.h
