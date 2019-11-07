@@ -89,6 +89,8 @@ add_executable(minpt
   src/integrators/ao.cpp
   src/integrators/path.cpp
   src/integrators/normals.cpp
+  src/filters/box.cpp
+  src/filters/gaussian.cpp
 )
 
 target_compile_features(minpt PRIVATE cxx_std_17)
