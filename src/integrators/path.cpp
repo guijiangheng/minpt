@@ -17,7 +17,11 @@ public:
     VisibilityTester tester;
     auto li = scene.lights[0]->sample(isect, sampler.get2D(), wi, pdf, tester);
 
-    if (li.isBlack() || cosTheta(isect.shFrame.toLocal(wi)) < 0.0f || tester.occluded(scene))
+    auto reflect = dot(isect.n, isect.wo) * dot(isect.n, wi) > 0.0f;
+    auto wiLocal = isect.shFrame.toLocal(wi);
+    auto woLocal = isect.shFrame.toLocal(isect.wo);
+
+    if (li.isBlack() || !reflect || !sameHemisphere(wiLocal, woLocal) || tester.occluded(scene))
       return Color3f(0.0f);
 
     return li * dot(wi, isect.shFrame.n) / pdf;

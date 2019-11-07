@@ -73,9 +73,6 @@ void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
   isect.p = barycentric(a, b, c, isect.uv);
   isect.n = normalize(cross(b - a, c - a));
 
-  if (!sameHemisphere(isect.n, isect.wo))
-    isect.n = -isect.n;
-
   if (n) {
     auto ns = normalize(barycentric(n[ia], n[ib], n[ic], isect.uv));
     isect.shFrame = Frame(ns);

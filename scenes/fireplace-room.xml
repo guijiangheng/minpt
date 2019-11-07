@@ -9,7 +9,7 @@
 	</integrator>
 
 	<mesh type="obj">
-		<string name="filename" value="fireplace-room/fireplace-room.obj"/>
+		<string name="filename" value="fireplace-room.obj"/>
 	</mesh>
 
 	<camera type="perspective">
