@@ -42,9 +42,6 @@ public:
 
   ~WarpTest() {
     glDeleteTextures(2, &textures[0]);
-    delete gridShader;
-    delete pointShader;
-    delete histogramShader;
   }
 
   void runTest() {
@@ -243,9 +240,9 @@ public:
     for (auto i = 0; i < pointCount; ++i)
       colors.col(i) << i * colorScale, 1 - i * colorScale, 0;
 
-    pointShader->bind();
-    pointShader->uploadAttrib("position", positions);
-    pointShader->uploadAttrib("color", colors);
+    pointShader.bind();
+    pointShader.uploadAttrib("position", positions);
+    pointShader.uploadAttrib("color", colors);
 
     if (gridCheckBox->checked()) {
       auto gridRes = (int)(std::sqrt((float)pointCount) + 0.5f);
@@ -269,8 +266,8 @@ public:
           positions.col(i) = positions.col(i) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
       }
 
-      gridShader->bind();
-      gridShader->uploadAttrib("position", positions);
+      gridShader.bind();
+      gridShader.uploadAttrib("position", positions);
     }
 
     // Update user interface
@@ -297,10 +294,10 @@ public:
     glDisable(GL_DEPTH_TEST);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
-    histogramShader->bind();
-    histogramShader->setUniform("mvp", mvp);
-    histogramShader->setUniform("tex", 0);
-    histogramShader->drawIndexed(GL_TRIANGLES, 0, 2);
+    histogramShader.bind();
+    histogramShader.setUniform("mvp", mvp);
+    histogramShader.setUniform("tex", 0);
+    histogramShader.drawIndexed(GL_TRIANGLES, 0, 2);
   }
 
   void drawContents() override {
@@ -350,18 +347,18 @@ public:
       Matrix4f model = arcball.matrix() * translate(Vector3f(-0.5f, -0.5f, 0.0f));
       Matrix4f mvp = project * view * model;
 
-      pointShader->bind();
-      pointShader->setUniform("mvp", mvp);
+      pointShader.bind();
+      pointShader.setUniform("mvp", mvp);
       glPointSize(2);
       glEnable(GL_DEPTH_TEST);
-      pointShader->drawArray(GL_POINTS, 0, pointCount);
+      pointShader.drawArray(GL_POINTS, 0, pointCount);
 
       if (gridCheckBox->checked()) {
-        gridShader->bind();
-        gridShader->setUniform("mvp", mvp);
+        gridShader.bind();
+        gridShader.setUniform("mvp", mvp);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        gridShader->drawArray(GL_LINES, 0, lineCount);
+        gridShader.drawArray(GL_LINES, 0, lineCount);
         glDisable(GL_BLEND);
       }
     }
@@ -432,8 +429,7 @@ public:
 
     performLayout(mNVGContext);
 
-    pointShader = new GLShader();
-    pointShader->init(
+    pointShader.init(
       "Point shader",
 
       "#version 330\n"
@@ -454,8 +450,7 @@ public:
       "}"
     );
 
-    gridShader = new GLShader();
-    gridShader->init(
+    gridShader.init(
       "Grid Shader",
 
       "#version 330\n"
@@ -472,8 +467,7 @@ public:
       "}"
     );
 
-    histogramShader = new GLShader();
-    histogramShader->init(
+    histogramShader.init(
       "Histogram shader",
 
       "#version 330\n"
@@ -528,9 +522,9 @@ public:
       0, 2,
       1, 3,
       2, 0;
-    histogramShader->bind();
-    histogramShader->uploadAttrib("position", positions);
-    histogramShader->uploadIndices(indices);
+    histogramShader.bind();
+    histogramShader.uploadAttrib("position", positions);
+    histogramShader.uploadIndices(indices);
 
     glGenTextures(2, &textures[0]);
 
@@ -582,9 +576,9 @@ private:
   Slider* angleSlider;
   TextBox* angleBox;
   CheckBox* brdfValueCheckBox;
-  GLShader* gridShader;
-  GLShader* pointShader;
-  GLShader* histogramShader;
+  GLShader gridShader;
+  GLShader pointShader;
+  GLShader histogramShader;
 };
 
 int main() {

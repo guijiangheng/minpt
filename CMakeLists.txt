@@ -46,6 +46,7 @@ add_executable(minpt
   include/minpt/core/proplist.h
   include/minpt/core/object.h
   include/minpt/core/parser.h
+  include/minpt/core/block.h
   include/minpt/core/timer.h
   include/minpt/core/ray.h
   include/minpt/core/bsdf.h
@@ -60,6 +61,8 @@ add_executable(minpt
   include/minpt/core/integrator.h
   include/minpt/core/accelerator.h
   include/minpt/core/visibilitytester.h
+
+  include/minpt/gui/screen.h
 
   include/minpt/math/math.h
   include/minpt/math/common.h
@@ -80,7 +83,9 @@ add_executable(minpt
   src/core/mesh.cpp
   src/core/parser.cpp
   src/core/object.cpp
+  src/core/block.cpp
   src/core/visibilitytester.cpp
+  src/gui/screen.cpp
   src/lights/point.cpp
   src/bsdfs/diffuse.cpp
   src/meshes/obj.cpp

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <filesystem/resolver.h>
+
+#include <minpt/gui/screen.h>
 #include <minpt/core/scene.h>
 #include <minpt/core/parser.h>
 
@@ -37,6 +39,15 @@ int main(int argc, char** argv) {
         scene->integrator->preprocess(*scene);
         scene->render(outputName);
       }
+    } else if (path.extension() == "exr") {
+      Bitmap bitmap(argv[1]);
+      ImageBlock block(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
+      block.fromBitmap(bitmap);
+      nanogui::init();
+      auto screen = new Screen(block);
+      nanogui::mainloop();
+      delete screen;
+      nanogui::shutdown();
     } else {
       std::cerr
         << "Fatal error: unknown file \"" << argv[1]
