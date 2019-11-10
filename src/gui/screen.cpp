@@ -21,7 +21,6 @@ Screen::Screen(const ImageBlock& block)
 
     "#version 330\n"
     "uniform sampler2D source;\n"
-    "uniform float scale;\n"
     "in vec2 uv;\n"
     "out vec4 out_color;\n"
     "float toSRGB(float value) {\n"
@@ -73,7 +72,6 @@ void Screen::drawContents() {
   glDisable(GL_DEPTH_TEST);
   glActiveTexture(GL_TEXTURE0);
   shader.bind();
-  shader.setUniform("scale", 1.0f);
   shader.setUniform("source", 0);
   shader.drawIndexed(GL_TRIANGLES, 0, 2);
   glEnable(GL_DEPTH_TEST);

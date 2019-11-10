@@ -37,12 +37,14 @@ public:
       "  frame = %s,\n"
       "  outputSize = %s,\n"
       "  screenWindow = %s,\n"
-      "  fov = %f\n"
+      "  fov = %f,\n"
+      "  filter = %s\n"
       "]",
       indent(frame.toString(), 10),
       indent(outputSize.toString()),
       indent(screenWindow.toString()),
-      fov
+      fov,
+      indent(filter->toString())
     );
   }
 

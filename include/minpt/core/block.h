@@ -13,6 +13,8 @@ public:
 
   ~ImageBlock() {
     delete[] filters;
+    delete[] weightsX;
+    delete[] weightsY;
   }
 
   void clear() {
@@ -37,7 +39,7 @@ public:
 
   void put(const Vector2f& pos, const Color3f& value);
 
-  void put(ImageBlock& block);
+  void put(const ImageBlock& block);
 
   void lock() const {
     mutex.lock();
@@ -63,8 +65,11 @@ public:
 
 private:
   mutable tbb::mutex mutex;
+  float filterRadius;
   float lookupFactor;
   float* filters = nullptr;
+  float* weightsX = nullptr;
+  float* weightsY = nullptr;
 };
 
 }

@@ -1,0 +1,21 @@
+<scene>
+	<accel type="bvh"/>
+	<sampler type="random">
+		<integer name="sampleCount" value="32"/>
+	</sampler>
+	<integrator type="ao"/>
+
+	<mesh type="obj">
+		<string name="filename" value="bunny.obj"/>
+	</mesh>
+
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="-0.0123771, 0.0540913, -0.239922"
+							origin="-0.0315182, 0.284011, 0.7331"
+							up="0.00717446, 0.973206, -0.229822"/>
+		</transform>
+		<float name="fov" value="16"/>
+		<vector2i name="outputSize" value="768, 768"/>
+	</camera>
+</scene>

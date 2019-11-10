@@ -17,6 +17,30 @@ public:
     : r(r), g(g), b(b), w(w)
   { }
 
+  Color4f operator+(const Color4f& rhs) const {
+    return Color4f(r + rhs.r, b + rhs.g, b + rhs.b, w + rhs.w);
+  }
+
+  Color4f& operator+=(const Color4f& rhs) {
+    r += rhs.r;
+    g += rhs.g;
+    b += rhs.b;
+    w += rhs.w;
+    return *this;
+  }
+
+  Color4f operator*(float k) const {
+    return Color4f(r * k, g * k, b * k, w * k);
+  }
+
+  Color4f& operator*=(float k) {
+    r *= k;
+    g *= k;
+    b *= k;
+    w *= k;
+    return *this;
+  }
+
   Color3f eval() const {
     return w == 0 ? Color3f(0.0f) : Color3f(r, g, b) / w;
   }

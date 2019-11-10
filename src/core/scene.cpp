@@ -39,7 +39,7 @@ void Scene::addChild(Object* child) {
       lights.push_back(static_cast<Light*>(child));
       break;
     default:
-      throw Exception("Scene::addChild(<%s>) is not supported", classTypeName(child->getClassType()));
+      throw Exception("Scene::addChild(<%s>) is not supported!", classTypeName(child->getClassType()));
   }
 }
 
@@ -64,14 +64,17 @@ void Scene::render(const std::string& outputName) const {
       auto y1 = std::min(y0 + TILE_SIZE, outputSize.y);
       for (auto y = y0; y < y1; ++y)
         for (auto x = x0; x < x1; ++x) {
-          Color3f color(0.0f);
+          Color3f result(0.0f);
           sampler->startPixel();
           do {
             auto cameraSample = sampler->getCameraSample(Vector2i(x, y));
             auto ray = camera->generateRay(cameraSample);
-            color += integrator->li(ray, *this, *sampler);
+            auto color = integrator->li(ray, *this, *sampler);
+            if (!color.isValid())
+              std::cerr << "Integrator: computed a invalid radiance value: " << color.toString() << std::endl;
+            result += color;
           } while (sampler->startNextSample());
-          bitmap(y, x) = color / sampler->samplesPerPixel;
+          bitmap(y, x) = result / sampler->samplesPerPixel;
         }
     }
   });

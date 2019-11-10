@@ -1,11 +1,57 @@
 #include <iostream>
+#include <tbb/parallel_for.h>
 #include <filesystem/resolver.h>
 
 #include <minpt/gui/screen.h>
+#include <minpt/core/timer.h>
 #include <minpt/core/scene.h>
 #include <minpt/core/parser.h>
 
 using namespace minpt;
+
+static void render(const Scene& scene, const std::string& outputName) {
+  auto camera = scene.camera;
+  auto integrator = scene.integrator;
+  auto filter = camera->filter;
+  auto outputSize = camera->outputSize;
+
+  integrator->preprocess(scene);
+
+  ImageBlock result(outputSize, filter);
+  result.clear();
+
+  constexpr auto BLOCK_SIZE = 16;
+  Vector2i nTiles(
+    (outputSize.x + BLOCK_SIZE - 1) / BLOCK_SIZE,
+    (outputSize.y + BLOCK_SIZE - 1) / BLOCK_SIZE);
+  std::cout << "Rendering ..";
+  std::cout.flush();
+  Timer timer;
+
+  tbb::parallel_for(tbb::blocked_range<int>(0, nTiles.x * nTiles.y), [&, camera, integrator, filter](auto& range) {
+    ImageBlock block(Vector2i(BLOCK_SIZE), filter);
+    auto sampler = scene.sampler->clone();
+    for (auto i = range.begin(); i < range.end(); ++i) {
+      Vector2i tile(i % nTiles.x, i / nTiles.x);
+      block.offset = tile * BLOCK_SIZE;
+      block.size = min(outputSize - block.offset, Vector2i(BLOCK_SIZE));
+      sampler->prepare(tile);
+      block.clear();
+      for (auto y = 0; y < block.size.y; ++y)
+        for (auto x = 0; x < block.size.x; ++x) {
+          sampler->startPixel();
+          do {
+            auto cameraSample = sampler->getCameraSample(Vector2i(x, y) + block.offset);
+            auto ray = camera->generateRay(cameraSample);
+            block.put(cameraSample.pFilm, integrator->li(ray, scene, *sampler));
+          } while (sampler->startNextSample());
+        }
+      result.put(block);
+    }
+  });
+  std::cout << " done. (took " << timer.elapsedString() << ")" << std::endl;
+  result.toBitmap().save(outputName);
+}
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -13,32 +59,33 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  filesystem::path path(argv[1]);
-
   try {
+    filesystem::path path(argv[1]);
     if (path.extension() == "xml") {
       /* Add the parent directory of the scene file to the
         file resolver. That way, the XML file can reference
         resources (OBJ files, textures) using relative paths */
       getFileResolver()->prepend(path.parent_path());
       std::unique_ptr<Object> root(loadFromXML(argv[1]));
-      if (root->getClassType() == Object::EScene) {
-        auto scene = static_cast<Scene*>(root.get());
-        auto& outputName = scene->outputName;
-        if (outputName.empty()) {
-          outputName = argv[1];
-          auto lastDot = outputName.find_last_of(".");
-          if (lastDot != std::string::npos)
-            outputName.erase(lastDot, std::string::npos);
-          outputName += ".exr";
-          scene->outputName = outputName;
-        }
-        std::cout << std::endl;
-        std::cout << "Configuration: " << scene->toString() << std::endl;
-        std::cout << std::endl;
-        scene->integrator->preprocess(*scene);
-        scene->render(outputName);
+      if (root->getClassType() != Object::EScene)
+        throw Exception(
+          "Fatal error: root element must be scene, currently is %s!",
+          Object::classTypeName(root->getClassType())
+        );
+      auto scene = static_cast<Scene*>(root.get());
+      auto& outputName = scene->outputName;
+      if (outputName.empty()) {
+        outputName = argv[1];
+        auto lastDot = outputName.find_last_of(".");
+        if (lastDot != std::string::npos)
+          outputName.erase(lastDot, std::string::npos);
+        outputName += ".exr";
+        scene->outputName = outputName;
       }
+      std::cout << "Configuration: " << scene->toString() << std::endl;
+      // scene->integrator->preprocess(*scene);
+      // scene->render(outputName);
+      render(*scene, outputName);
     } else if (path.extension() == "exr") {
       Bitmap bitmap(argv[1]);
       ImageBlock block(Vector2i(bitmap.cols(), bitmap.rows()), nullptr);
@@ -51,7 +98,7 @@ int main(int argc, char** argv) {
     } else {
       std::cerr
         << "Fatal error: unknown file \"" << argv[1]
-        << "\", expected an extension of type .xml" << std::endl;
+        << "\", expected an extension of type .xml!" << std::endl;
       return -1;
     }
   } catch (const std::exception& e) {

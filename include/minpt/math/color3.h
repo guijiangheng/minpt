@@ -121,6 +121,13 @@ public:
     return r == 0 && g == 0 && b == 0;
   }
 
+  bool isValid() const {
+    if (r < 0 || !std::isfinite(r)) return false;
+    if (g < 0 || !std::isfinite(g)) return false;
+    if (b < 0 || !std::isfinite(b)) return false;
+    return true;
+  }
+
   bool operator==(const Color3f& rhs) const {
     return r == rhs.r && g == rhs.g && b == rhs.b;
   }
