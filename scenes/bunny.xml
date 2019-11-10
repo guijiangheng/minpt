@@ -3,7 +3,7 @@
 	<sampler type="random">
 		<integer name="sampleCount" value="32"/>
 	</sampler>
-	<integrator type="ao"/>
+	<integrator type="normals"/>
 
 	<mesh type="obj">
 		<string name="filename" value="bunny.obj"/>

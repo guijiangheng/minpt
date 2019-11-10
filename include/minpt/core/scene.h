@@ -55,8 +55,6 @@ public:
     return accel->getBoundingBox();
   }
 
-  void render(const std::string& outputName) const;
-
   EClassType getClassType() const override {
     return EScene;
   }

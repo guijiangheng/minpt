@@ -33,7 +33,7 @@ public:
 
   void activate() override {
     if (!filter)
-      filter = static_cast<Filter*>(ObjectFactory::createInstance("box", PropertyList()));
+      filter = static_cast<Filter*>(ObjectFactory::createInstance("gaussian", PropertyList()));
   }
 
   virtual Ray generateRay(const CameraSample& sample) const = 0;

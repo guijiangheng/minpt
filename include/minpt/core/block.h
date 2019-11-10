@@ -58,7 +58,6 @@ public:
   }
 
 public:
-  static constexpr int FilterResolution = 16;
   int borderSize = 0;
   Vector2i offset;
   Vector2i size;

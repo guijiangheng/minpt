@@ -6,13 +6,14 @@ namespace minpt {
 ImageBlock::ImageBlock(const Vector2i& size, const Filter* filter)
     : offset(0, 0), size(size) {
   if (filter) {
+    static constexpr auto FILTER_RESOLUTION = 16;
     filterRadius = filter->radius;
     borderSize = (int)std::ceil(filterRadius - 0.5f);
-    filters = new float[FilterResolution + 1];
-    filters[FilterResolution] = 0.0f;
-    for (auto i = 0; i < FilterResolution; ++i)
-      filters[i] = filter->eval(filterRadius * i / FilterResolution);
-    lookupFactor = FilterResolution / filterRadius;
+    filters = new float[FILTER_RESOLUTION + 1];
+    filters[FILTER_RESOLUTION] = 0.0f;
+    for (auto i = 0; i < FILTER_RESOLUTION; ++i)
+      filters[i] = filter->eval(filterRadius * i / FILTER_RESOLUTION);
+    lookupFactor = FILTER_RESOLUTION / filterRadius;
     auto weightSize = (int)std::ceil(2 * filterRadius) + 1;
     weightsX = new float[weightSize];
     weightsY = new float[weightSize];
@@ -31,21 +32,20 @@ void ImageBlock::put(const Vector2f& pos, const Color3f& value) {
     Vector2i(std::floor(p.x + filterRadius), std::floor(p.y + filterRadius))
   );
   bounds.pMin = minpt::max(bounds.pMin, Vector2i(0));
-  bounds.pMin = minpt::min(bounds.pMax, Vector2i(cols() - 1, rows() - 1));
+  bounds.pMax = minpt::min(bounds.pMax, Vector2i(cols() - 1, rows() - 1));
   for (auto x = bounds.pMin.x, idx = 0; x <= bounds.pMax.x; ++x)
     weightsX[idx++] = filters[(int)(std::abs(x - p.x) * lookupFactor)];
   for (auto y = bounds.pMin.y, idy = 0; y <= bounds.pMax.y; ++y)
     weightsY[idy++] = filters[(int)(std::abs(y - p.y) * lookupFactor)];
   for (auto y = bounds.pMin.y, yr = 0; y <= bounds.pMax.y; ++y, ++yr)
     for (auto x = bounds.pMin.x, xr = 0; x <= bounds.pMax.x; ++x, ++xr)
-      coeffRef(y, x) = Color4f(value) * weightsX[xr] * weightsY[yr];
+      coeffRef(y, x) = Color4f(value) * (weightsX[xr] * weightsY[yr]);
 }
 
 void ImageBlock::put(const ImageBlock& b) {
-  auto offset = b.offset - Vector2i(b.borderSize);
   auto size = b.size + Vector2i(2 * b.borderSize);
   tbb::mutex::scoped_lock lock(mutex);
-  block(offset.y, offset.x, size.y, size.x) += b.topLeftCorner(size.y, size.x);
+  block(b.offset.y, b.offset.x, size.y, size.x) += b.topLeftCorner(size.y, size.x);
 }
 
 }

@@ -83,8 +83,6 @@ int main(int argc, char** argv) {
         scene->outputName = outputName;
       }
       std::cout << "Configuration: " << scene->toString() << std::endl;
-      // scene->integrator->preprocess(*scene);
-      // scene->render(outputName);
       render(*scene, outputName);
     } else if (path.extension() == "exr") {
       Bitmap bitmap(argv[1]);
