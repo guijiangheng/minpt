@@ -19,7 +19,7 @@
 							up="0 1 0"/>
 		</transform>
 		<float name="fov" value="43"/>
-		<vector2i name="outputSize" value="1920, 1080"/>
+		<vector2i name="outputSize" value="960, 540"/>
 		<bounds2f name="screenWindow" min="-1.7777, -1.0" max="1.7777, 1.0"/>
 	</camera>
 </scene>

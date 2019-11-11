@@ -71,4 +71,42 @@ private:
   float* weightsY = nullptr;
 };
 
+class BlockGenerator {
+public:
+  BlockGenerator(const Vector2i& size, int blockSize) noexcept
+      : blockSize(blockSize)
+      , size(size)
+      , nBlocks(
+        (size.x + blockSize - 1) / blockSize,
+        (size.y + blockSize - 1) / blockSize) {
+    blocksLeft = nBlocks.x * nBlocks.y;
+  }
+
+  int getBlockCount() const {
+    return blocksLeft;
+  }
+
+  bool next(ImageBlock& block) {
+    tbb::mutex::scoped_lock lock(mutex);
+
+    if (!blocksLeft)
+      return false;
+
+    auto blockIndex = nBlocks.x * nBlocks.y - blocksLeft;
+    Vector2i tile(blockIndex % nBlocks.x, blockIndex / nBlocks.x);
+    block.offset = tile * blockSize;
+    block.size = min(size - block.offset, Vector2i(blockSize));
+    --blocksLeft;
+
+    return true;
+  }
+
+private:
+  int blockSize;
+  int blocksLeft;
+  Vector2i size;
+  Vector2i nBlocks;
+  tbb::mutex mutex;
+};
+
 }

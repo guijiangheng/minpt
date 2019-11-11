@@ -18,6 +18,9 @@ static void render(const Scene& scene, const std::string& outputName) {
 
   integrator->preprocess(scene);
 
+  constexpr auto BLOCK_SIZE = 32;
+  BlockGenerator generator(outputSize, BLOCK_SIZE);
+
   ImageBlock result(outputSize, filter);
   result.clear();
 
@@ -25,22 +28,16 @@ static void render(const Scene& scene, const std::string& outputName) {
   auto screen = new Screen(result);
 
   std::thread renderThread([&] {
-    constexpr auto BLOCK_SIZE = 16;
-    Vector2i nTiles(
-      (outputSize.x + BLOCK_SIZE - 1) / BLOCK_SIZE,
-      (outputSize.y + BLOCK_SIZE - 1) / BLOCK_SIZE);
     std::cout << "Rendering ..";
     std::cout.flush();
     Timer timer;
 
-    tbb::parallel_for(tbb::blocked_range<int>(0, nTiles.x * nTiles.y), [&, camera, integrator, filter](auto& range) {
+    tbb::parallel_for(tbb::blocked_range<int>(0, generator.getBlockCount()), [&, camera, integrator, filter](auto& range) {
       ImageBlock block(Vector2i(BLOCK_SIZE), filter);
       auto sampler = scene.sampler->clone();
       for (auto i = range.begin(); i < range.end(); ++i) {
-        Vector2i tile(i % nTiles.x, i / nTiles.x);
-        block.offset = tile * BLOCK_SIZE;
-        block.size = min(outputSize - block.offset, Vector2i(BLOCK_SIZE));
-        sampler->prepare(tile);
+        generator.next(block);
+        sampler->prepare(block.offset);
         block.clear();
         for (auto y = 0; y < block.size.y; ++y)
           for (auto x = 0; x < block.size.x; ++x) {
