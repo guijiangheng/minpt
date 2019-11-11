@@ -18,7 +18,7 @@ public:
   { }
 
   Color4f operator+(const Color4f& rhs) const {
-    return Color4f(r + rhs.r, b + rhs.g, b + rhs.b, w + rhs.w);
+    return Color4f(r + rhs.r, g + rhs.g, b + rhs.b, w + rhs.w);
   }
 
   Color4f& operator+=(const Color4f& rhs) {

@@ -1,4 +1,5 @@
 <scene>
+	<string name="outputName" value="bunny.png"/>
 	<accel type="bvh"/>
 	<sampler type="random">
 		<integer name="sampleCount" value="32"/>

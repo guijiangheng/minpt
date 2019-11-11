@@ -39,7 +39,7 @@ void ImageBlock::put(const Vector2f& pos, const Color3f& value) {
     weightsY[idy++] = filters[(int)(std::abs(y - p.y) * lookupFactor)];
   for (auto y = bounds.pMin.y, yr = 0; y <= bounds.pMax.y; ++y, ++yr)
     for (auto x = bounds.pMin.x, xr = 0; x <= bounds.pMax.x; ++x, ++xr)
-      coeffRef(y, x) = Color4f(value) * (weightsX[xr] * weightsY[yr]);
+      coeffRef(y, x) += Color4f(value) * (weightsX[xr] * weightsY[yr]);
 }
 
 void ImageBlock::put(const ImageBlock& b) {
