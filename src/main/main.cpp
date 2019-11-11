@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include <tbb/parallel_for.h>
 #include <filesystem/resolver.h>
 
@@ -20,36 +21,47 @@ static void render(const Scene& scene, const std::string& outputName) {
   ImageBlock result(outputSize, filter);
   result.clear();
 
-  constexpr auto BLOCK_SIZE = 16;
-  Vector2i nTiles(
-    (outputSize.x + BLOCK_SIZE - 1) / BLOCK_SIZE,
-    (outputSize.y + BLOCK_SIZE - 1) / BLOCK_SIZE);
-  std::cout << "Rendering ..";
-  std::cout.flush();
-  Timer timer;
+  nanogui::init();
+  auto screen = new Screen(result);
 
-  tbb::parallel_for(tbb::blocked_range<int>(0, nTiles.x * nTiles.y), [&, camera, integrator, filter](auto& range) {
-    ImageBlock block(Vector2i(BLOCK_SIZE), filter);
-    auto sampler = scene.sampler->clone();
-    for (auto i = range.begin(); i < range.end(); ++i) {
-      Vector2i tile(i % nTiles.x, i / nTiles.x);
-      block.offset = tile * BLOCK_SIZE;
-      block.size = min(outputSize - block.offset, Vector2i(BLOCK_SIZE));
-      sampler->prepare(tile);
-      block.clear();
-      for (auto y = 0; y < block.size.y; ++y)
-        for (auto x = 0; x < block.size.x; ++x) {
-          sampler->startPixel();
-          do {
-            auto cameraSample = sampler->getCameraSample(Vector2i(x, y) + block.offset);
-            auto ray = camera->generateRay(cameraSample);
-            block.put(cameraSample.pFilm, integrator->li(ray, scene, *sampler));
-          } while (sampler->startNextSample());
-        }
-      result.put(block);
-    }
+  std::thread renderThread([&] {
+    constexpr auto BLOCK_SIZE = 16;
+    Vector2i nTiles(
+      (outputSize.x + BLOCK_SIZE - 1) / BLOCK_SIZE,
+      (outputSize.y + BLOCK_SIZE - 1) / BLOCK_SIZE);
+    std::cout << "Rendering ..";
+    std::cout.flush();
+    Timer timer;
+
+    tbb::parallel_for(tbb::blocked_range<int>(0, nTiles.x * nTiles.y), [&, camera, integrator, filter](auto& range) {
+      ImageBlock block(Vector2i(BLOCK_SIZE), filter);
+      auto sampler = scene.sampler->clone();
+      for (auto i = range.begin(); i < range.end(); ++i) {
+        Vector2i tile(i % nTiles.x, i / nTiles.x);
+        block.offset = tile * BLOCK_SIZE;
+        block.size = min(outputSize - block.offset, Vector2i(BLOCK_SIZE));
+        sampler->prepare(tile);
+        block.clear();
+        for (auto y = 0; y < block.size.y; ++y)
+          for (auto x = 0; x < block.size.x; ++x) {
+            sampler->startPixel();
+            do {
+              auto cameraSample = sampler->getCameraSample(Vector2i(x, y) + block.offset);
+              auto ray = camera->generateRay(cameraSample);
+              block.put(cameraSample.pFilm, integrator->li(ray, scene, *sampler));
+            } while (sampler->startNextSample());
+          }
+        result.put(block);
+      }
+    });
+    std::cout << " done. (took " << timer.elapsedString() << ")" << std::endl;
   });
-  std::cout << " done. (took " << timer.elapsedString() << ")" << std::endl;
+
+  nanogui::mainloop();
+  renderThread.join();
+  delete screen;
+  nanogui::shutdown();
+
   result.toBitmap().save(outputName);
 }
 
