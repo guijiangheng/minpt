@@ -18,8 +18,8 @@ static void render(const Scene& scene, const std::string& outputName) {
 
   integrator->preprocess(scene);
 
-  constexpr auto BLOCK_SIZE = 32;
-  BlockGenerator generator(outputSize, BLOCK_SIZE);
+  constexpr auto BlockSize = 32;
+  BlockGenerator generator(outputSize, BlockSize);
 
   ImageBlock result(outputSize, filter);
   result.clear();
@@ -33,7 +33,7 @@ static void render(const Scene& scene, const std::string& outputName) {
     Timer timer;
 
     tbb::parallel_for(tbb::blocked_range<int>(0, generator.getBlockCount()), [&, camera, integrator, filter](auto& range) {
-      ImageBlock block(Vector2i(BLOCK_SIZE), filter);
+      ImageBlock block(Vector2i(BlockSize), filter);
       auto sampler = scene.sampler->clone();
       for (auto i = range.begin(); i < range.end(); ++i) {
         generator.next(block);

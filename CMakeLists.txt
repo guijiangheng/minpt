@@ -47,6 +47,7 @@ add_executable(minpt
   include/minpt/core/object.h
   include/minpt/core/parser.h
   include/minpt/core/block.h
+  include/minpt/core/distribution.h
   include/minpt/core/timer.h
   include/minpt/core/ray.h
   include/minpt/core/bsdf.h
