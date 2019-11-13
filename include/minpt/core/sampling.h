@@ -1,6 +1,13 @@
+#pragma once
+
 #include <minpt/math/math.h>
 
 namespace minpt {
+
+inline Vector2f uniformSampleTriangle(const Vector2f& u) {
+  auto x = std::sqrt(u[0]);
+  return Vector2f(1 - x, u[1] * x);
+}
 
 inline Vector2f uniformSampleDisk(const Vector2f& u) {
   auto r = std::sqrt(u[0]);

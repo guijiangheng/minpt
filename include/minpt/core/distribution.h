@@ -30,7 +30,7 @@ public:
 
   float normalize() {
     sum = cdf.back();
-    sumInv = 1 / sum;
+    auto sumInv = 1 / sum;
     for (std::size_t i = 1; i < cdf.size() - 1; ++i)
       cdf[i] *= sumInv;
     cdf.back() = 1.0f;
@@ -68,7 +68,7 @@ public:
   }
 
 public:
-  float sum, sumInv;
+  float sum;
   std::vector<float> cdf;
 };
 

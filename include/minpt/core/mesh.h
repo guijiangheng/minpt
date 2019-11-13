@@ -1,9 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <minpt/math/math.h>
 #include <minpt/core/bsdf.h>
+#include <minpt/core/sampling.h>
 #include <minpt/core/interaction.h>
+#include <minpt/core/distribution.h>
 
 namespace minpt {
 
@@ -33,6 +34,14 @@ public:
     }
   }
 
+  void activate() override {
+    auto nPrims = getPrimitiveCount();
+    pdf.reserve(nPrims);
+    for (std::uint32_t i = 0; i < nPrims; ++i)
+      pdf.append(getSurfaceArea(i));
+    pdf.normalize();
+  }
+
   std::uint32_t getPrimitiveCount() const {
     return nTriangles;
   }
@@ -51,6 +60,24 @@ public:
     auto& b = p[f[offset + 1]];
     auto& c = p[f[offset + 2]];
     return merge(Bounds3f(min(a, b), max(a, b)), c);
+  }
+
+  Interaction sample(Vector2f& u, float& _pdf) const {
+    _pdf = 1.0f / pdf.sum;
+
+    auto index = pdf.sampleReuse(u.x);
+    auto uv = uniformSampleTriangle(u);
+
+    auto offset = 3 * index;
+    auto& a = p[f[offset]];
+    auto& b = p[f[offset + 1]];
+    auto& c = p[f[offset + 2]];
+
+    Interaction isect;
+    isect.p = barycentric(a, b, c, uv);
+    isect.n = normalize(cross(b - a, c - a));
+
+    return isect;
   }
 
   bool intersect(std::uint32_t index, const Ray& ray) const;
@@ -88,6 +115,7 @@ public:
   std::unique_ptr<Vector2f[]> uv;
   std::unique_ptr<std::uint32_t[]> f;
   Bounds3f bounds;
+  Distribution1D pdf;
   BSDF* bsdf = nullptr;
 };
 
