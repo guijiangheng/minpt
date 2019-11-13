@@ -6,14 +6,14 @@ namespace minpt {
 ImageBlock::ImageBlock(const Vector2i& size, const Filter* filter)
     : offset(0, 0), size(size) {
   if (filter) {
-    static constexpr auto FILTER_RESOLUTION = 16;
+    static constexpr auto FilterResolution = 16;
     filterRadius = filter->radius;
     borderSize = (int)std::ceil(filterRadius - 0.5f);
-    filters = new float[FILTER_RESOLUTION + 1];
-    filters[FILTER_RESOLUTION] = 0.0f;
-    for (auto i = 0; i < FILTER_RESOLUTION; ++i)
-      filters[i] = filter->eval(filterRadius * i / FILTER_RESOLUTION);
-    lookupFactor = FILTER_RESOLUTION / filterRadius;
+    filters = new float[FilterResolution + 1];
+    filters[FilterResolution] = 0.0f;
+    for (auto i = 0; i < FilterResolution; ++i)
+      filters[i] = filter->eval(filterRadius * i / FilterResolution);
+    lookupFactor = FilterResolution / filterRadius;
     auto weightSize = (int)std::ceil(2 * filterRadius) + 1;
     weightsX = new float[weightSize];
     weightsY = new float[weightSize];

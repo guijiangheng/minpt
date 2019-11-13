@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <minpt/math/math.h>
 
 namespace minpt {
 
@@ -9,6 +10,14 @@ public:
   explicit Distribution1D(std::size_t nEntries = 0) {
     cdf.reserve(nEntries + 1);
     cdf.push_back(0.0f);
+  }
+
+  std::size_t size() const {
+    return cdf.size() - 1;
+  }
+
+  void reserve(std::size_t nEntries) {
+    cdf.reserve(nEntries + 1);
   }
 
   float operator[](size_t index) const {
@@ -20,9 +29,9 @@ public:
   }
 
   float normalize() {
-    auto sum = cdf.back();
-    auto sumInv = 1 / sum;
-    for (std::size_t i = 1, len = cdf.size() - 1; i < len; ++i)
+    sum = cdf.back();
+    sumInv = 1 / sum;
+    for (std::size_t i = 1; i < cdf.size() - 1; ++i)
       cdf[i] *= sumInv;
     cdf.back() = 1.0f;
     return sum;
@@ -51,8 +60,52 @@ public:
     return index;
   }
 
+  float sampleContinuous(float u, float& pdf, std::size_t& index) const {
+    index = sampleReuse(u, pdf);
+    auto nEntries = cdf.size() - 1;
+    pdf *= nEntries;
+    return (index + u) / nEntries;
+  }
+
 public:
+  float sum, sumInv;
   std::vector<float> cdf;
+};
+
+class Distribution2D {
+public:
+  Distribution2D(const float* pdf, int width, int height) {
+    pMarginal.reserve(height);
+    pConditional.reserve(height);
+    for (auto y = 0; y < height; ++y) {
+      pConditional.emplace_back(width);
+      for (auto x = 0; x < width; ++x)
+        pConditional.back().append(pdf[y * width + x]);
+      pMarginal.append(pConditional.back().normalize());
+    }
+    pMarginal.normalize();
+  }
+
+  Vector2f sampleContinuous(const Vector2f& sample, float& pdf) const {
+    std::size_t x, y;
+    float pdfs[2];
+    auto v = pMarginal.sampleContinuous(sample[0], pdfs[0], y);
+    auto u = pConditional[y].sampleContinuous(sample[1], pdfs[1], x);
+    pdf = pdfs[0] * pdfs[1];
+    return Vector2f(u, v);
+  }
+
+  float pdf(const Vector2f& uv) const {
+    auto width = pConditional[0].size();
+    auto height = pMarginal.size();
+    auto x = (int)(width * uv[0]);
+    auto y = (int)(height * uv[1]);
+    return pConditional[y][x] * pConditional[y].sum / pMarginal.sum;
+  }
+
+private:
+  Distribution1D pMarginal;
+  std::vector<Distribution1D> pConditional;
 };
 
 }
