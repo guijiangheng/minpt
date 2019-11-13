@@ -30,6 +30,7 @@ public:
 
   enum WarpType {
     None = 0,
+    Triangle,
     Disk,
     UniformHemisphere,
     CosineHemisphere
@@ -48,7 +49,7 @@ public:
     auto xres = 51;
     auto yres = 51;
     auto warpType = (WarpType)warpTypeBox->selectedIndex();
-    if (warpType != None && warpType != Disk) xres *= 2;
+    if (warpType != None && warpType != Triangle && warpType != Disk) xres *= 2;
 
     auto res = xres * yres;
     auto sampleCount = res * 1000;
@@ -63,7 +64,7 @@ public:
     for (auto i = 0; i < sampleCount; ++i) {
       float x, y;
       Vector3f sample = points.col(i);
-      if (warpType == None) {
+      if (warpType == None || warpType == Triangle) {
         x = sample.x();
         y = sample.y();
       } else if (warpType == Disk) {
@@ -80,7 +81,10 @@ public:
     }
 
     auto integrand = [&](double y, double x) -> double {
-      if (warpType == None) return 1.0f;
+      if (warpType == None)
+        return 1.0f;
+      else if (warpType == Triangle)
+        return minpt::uniformSampleTrianglePdf(minpt::Vector2f(x, y));
       else if (warpType == Disk) {
         x = x * 2 - 1;
         y = y * 2 - 1;
@@ -99,7 +103,7 @@ public:
     };
 
     double scale = sampleCount;
-    if (warpType == None) scale *= 1;
+    if (warpType == None || warpType == Triangle) scale *= 1;
     else if (warpType == Disk) scale *= 4;
     else scale *= 4 * minpt::Pi;
 
@@ -155,6 +159,11 @@ public:
     switch (warpType) {
       case None:
         result << point, 0.0f;
+        break;
+      case Triangle: {
+          auto temp = minpt::uniformSampleTriangle(u);
+          result << temp.x, temp.y, 0.0f;
+        }
         break;
       case Disk: {
           auto temp = minpt::uniformSampleDisk(u);
@@ -228,7 +237,7 @@ public:
       return;
     }
 
-    if (warpType != None) {
+    if (warpType != None && warpType != Triangle) {
       for (auto i = 0; i < pointCount; ++i) {
         positions.col(i) = positions.col(i) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
       }
@@ -385,7 +394,7 @@ public:
 
     new Label(window, "Warping method", "sans-bold");
 
-    warpTypeBox = new ComboBox(window, { "None", "Disk", "Hemisphere (uni)", "Hemisphere (cos)" });
+    warpTypeBox = new ComboBox(window, { "None", "Triangle", "Disk", "Hemisphere (uni)", "Hemisphere (cos)" });
     warpTypeBox->setCallback([=](int) { refresh(); });
 
     panel = new Widget(window);

@@ -27,6 +27,10 @@ inline Vector3f cosineSampleHemisphere(const Vector2f& u) {
   return Vector3f(p.x, p.y, std::sqrt(std::max(0.0f, 1 - p.lengthSquared())));
 }
 
+inline float uniformSampleTrianglePdf(const Vector2f& v) {
+  return v.x + v.y > 1.0f ? 0 : 2.0f;
+}
+
 inline float uniformSampleDiskPdf(const Vector2f& v) {
   return v.length() < 1.0f ? InvPi : 0;
 }
