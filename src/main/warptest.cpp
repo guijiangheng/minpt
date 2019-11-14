@@ -15,6 +15,7 @@
 #include <nanogui/messagedialog.h>
 
 #include <minpt/math/math.h>
+#include <minpt/utils/bitmap.h>
 #include <minpt/core/sampling.h>
 #include <minpt/core/exception.h>
 
@@ -33,15 +34,19 @@ public:
     Triangle,
     Disk,
     UniformHemisphere,
-    CosineHemisphere
+    CosineHemisphere,
+    HDR
   };
 
-  WarpTest(): Screen(Vector2i(800, 600), "Sampling and Warping") {
+  WarpTest()
+      : Screen(Vector2i(800, 600), "Sampling and Warping")
+      , hdrBitmap("../assets/lightprobe.exr") {
     initializeGUI();
     shouldDrawHistogram = false;
   }
 
   ~WarpTest() {
+    glDeleteTextures(1, &hdrTexture);
     glDeleteTextures(2, &textures[0]);
   }
 
@@ -158,6 +163,7 @@ public:
 
     switch (warpType) {
       case None:
+      case HDR:
         result << point, 0.0f;
         break;
       case Triangle: {
@@ -225,6 +231,15 @@ public:
   void refresh() {
     auto pointType = (PointType)pointTypeBox->selectedIndex();
     auto warpType = (WarpType)warpTypeBox->selectedIndex();
+
+    if (warpType == HDR) {
+      setSize(Vector2i(hdrBitmap.cols(), hdrBitmap.rows()));
+      gridCheckBox->setEnabled(false);
+      gridCheckBox->setChecked(false);
+    } else {
+      gridCheckBox->setEnabled(true);
+    }
+
     pointCount = (int)std::pow(2.0f, 15 * pointCountSlider->value() + 5);
 
     MatrixXf positions, values;
@@ -237,10 +252,12 @@ public:
       return;
     }
 
-    if (warpType != None && warpType != Triangle) {
-      for (auto i = 0; i < pointCount; ++i) {
+    if (warpType == HDR) {
+      for (auto i = 0; i < pointCount; ++i)
+        positions.col(i) = positions.col(i) * 2.0f - Vector3f(1.0f, 1.0f, 0.0f);
+    } else if (warpType != None && warpType != Triangle) {
+      for (auto i = 0; i < pointCount; ++i)
         positions.col(i) = positions.col(i) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
-      }
     }
 
     // Generate a color gradient
@@ -348,6 +365,18 @@ public:
         width() - 2 * spacer, testResult.second.c_str(), nullptr);
       nvgEndFrame(ctx);
     } else {
+      auto warpType = (WarpType)warpTypeBox->selectedIndex();
+
+      if (warpType == HDR) {
+        glDisable(GL_DEPTH_TEST);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, hdrTexture);
+        hdrShader.bind();
+        hdrShader.setUniform("source", 0);
+        hdrShader.drawIndexed(GL_TRIANGLES, 0, 2);
+        glEnable(GL_DEPTH_TEST);
+      }
+
       constexpr float viewAngle = 30.0f, near = 0.01f, far = 100.0f;
       auto fH = std::tan(viewAngle / 360.0f * M_PI) * near;
       auto fW = fH * mSize.x() / mSize.y();
@@ -355,6 +384,9 @@ public:
       Matrix4f project = frustum(-fW, fW, -fH, fH, near, far);
       Matrix4f model = arcball.matrix() * translate(Vector3f(-0.5f, -0.5f, 0.0f));
       Matrix4f mvp = project * view * model;
+
+      if (warpType == HDR)
+        mvp = Matrix4f::Identity();
 
       pointShader.bind();
       pointShader.setUniform("mvp", mvp);
@@ -394,7 +426,7 @@ public:
 
     new Label(window, "Warping method", "sans-bold");
 
-    warpTypeBox = new ComboBox(window, { "None", "Triangle", "Disk", "Hemisphere (uni)", "Hemisphere (cos)" });
+    warpTypeBox = new ComboBox(window, { "None", "Triangle", "Disk", "Hemisphere (uni)", "Hemisphere (cos)", "HDR" });
     warpTypeBox->setCallback([=](int) { refresh(); });
 
     panel = new Widget(window);
@@ -537,6 +569,43 @@ public:
 
     glGenTextures(2, &textures[0]);
 
+    hdrShader.init(
+      "HDR Shader",
+
+      "#version 330\n"
+      "in vec2 position;\n"
+      "out vec2 uv;\n"
+      "void main() {\n"
+      "  gl_Position = vec4(position.x * 2 - 1.0f, position.y * 2 - 1.0f, 0.0f, 1.0f);\n"
+      "  uv = vec2(position.x, 1 - position.y);\n"
+      "}",
+
+      "#version 330\n"
+      "uniform sampler2D source;\n"
+      "in vec2 uv;\n"
+      "out vec4 out_color;\n"
+      "float toSRGB(float value) {\n"
+      "  if (value < 0.0031308)\n"
+      "    return 12.92f * value;\n"
+      "  return 1.055f * pow(value, 0.41666f) - 0.055f;\n"
+      "}\n"
+      "void main() {\n"
+      "  vec4 color = texture(source, uv);\n"
+      "  color /= color.w;\n"
+      "  out_color = vec4(toSRGB(color.r), toSRGB(color.g), toSRGB(color.b), 1.0f);\n"
+      "}"
+    );
+
+    hdrShader.bind();
+    histogramShader.uploadAttrib("position", positions);
+    histogramShader.uploadIndices(indices);
+
+    glGenTextures(1, &hdrTexture);
+    glBindTexture(GL_TEXTURE_2D, hdrTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, hdrBitmap.cols(), hdrBitmap.rows(), 0, GL_RGB, GL_FLOAT, (uint8_t*)hdrBitmap.data());
+
     mBackground.setZero();
     pointCountSlider->setValue(0.5f);
 
@@ -574,6 +643,7 @@ private:
   int lineCount;
   int pointCount;
   GLuint textures[2];
+  GLuint hdrTexture;
   std::pair<bool, std::string> testResult;
   Arcball arcball;
   Window* window;
@@ -588,6 +658,8 @@ private:
   GLShader gridShader;
   GLShader pointShader;
   GLShader histogramShader;
+  GLShader hdrShader;
+  minpt::Bitmap hdrBitmap;
 };
 
 int main() {

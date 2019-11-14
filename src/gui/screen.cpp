@@ -65,8 +65,8 @@ void Screen::drawContents() {
   glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLuint)block.cols());
   block.lock();
   glTexImage2D(
-    GL_TEXTURE_2D, 0, GL_RGBA32F, size.x, size.y,
-    0, GL_RGBA, GL_FLOAT, (uint8_t*)block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f));
+    GL_TEXTURE_2D, 0, GL_RGBA32F, size.x, size.y, 0, GL_RGBA, GL_FLOAT,
+    (uint8_t*)block.data() + (borderSize * block.cols() + borderSize) * sizeof(Color4f));
   block.unlock();
 
   glDisable(GL_DEPTH_TEST);
