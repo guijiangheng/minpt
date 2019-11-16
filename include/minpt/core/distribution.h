@@ -38,8 +38,9 @@ public:
   }
 
   std::size_t sample(float u) const {
-    auto itr = std::lower_bound(cdf.begin(), cdf.end(), u);
-    return itr - cdf.begin() - 1;
+    auto itr = std::upper_bound(cdf.begin(), cdf.end(), u);
+    std::size_t index = itr - cdf.begin() - 1;
+    return std::min(index, cdf.size() - 2);
   }
 
   std::size_t sampleReuse(float& u) const {
@@ -74,6 +75,8 @@ public:
 
 class Distribution2D {
 public:
+  Distribution2D() = default;
+
   Distribution2D(const float* pdf, int width, int height) {
     pMarginal.reserve(height);
     pConditional.reserve(height);
@@ -103,7 +106,7 @@ public:
     return pConditional[y][x] * pConditional[y].sum / pMarginal.sum;
   }
 
-private:
+public:
   Distribution1D pMarginal;
   std::vector<Distribution1D> pConditional;
 };

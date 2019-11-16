@@ -16,8 +16,9 @@
 
 #include <minpt/math/math.h>
 #include <minpt/utils/bitmap.h>
-#include <minpt/core/sampling.h>
 #include <minpt/core/exception.h>
+#include <minpt/core/sampling.h>
+#include <minpt/core/distribution.h>
 
 using namespace nanogui;
 
@@ -41,6 +42,21 @@ public:
   WarpTest()
       : Screen(Vector2i(800, 600), "Sampling and Warping")
       , hdrBitmap("../assets/lightprobe.exr") {
+
+    auto data = std::make_unique<float[]>(hdrBitmap.size());
+    auto width = (int)hdrBitmap.cols();
+    auto height = (int)hdrBitmap.rows();
+    for (auto y = 0; y < height; ++y)
+      for (auto x = 0; x < width; ++x)
+        data[y * width + x] = hdrBitmap(y, x).y();
+    distrib = minpt::Distribution2D(data.get(), width, height);
+
+    luminance = std::make_unique<double[]>(hdrBitmap.size());
+    auto sumInv = 1.0f / distrib.pMarginal.sum;
+    for (auto y = 0; y < height; ++y)
+      for (auto x = 0; x < width; ++x)
+        luminance[y * width + x] = data[y * width + x] * sumInv;
+
     initializeGUI();
     shouldDrawHistogram = false;
   }
@@ -56,8 +72,13 @@ public:
     auto warpType = (WarpType)warpTypeBox->selectedIndex();
     if (warpType != None && warpType != Triangle && warpType != Disk) xres *= 2;
 
+    if (warpType == HDR) {
+      xres = hdrBitmap.cols();
+      yres = hdrBitmap.rows();
+    }
+
     auto res = xres * yres;
-    auto sampleCount = res * 1000;
+    auto sampleCount = res * (warpType == HDR ? 100 : 1000);
     auto obsFrequencies = std::make_unique<double[]>(res);
     auto expFrequencies = std::make_unique<double[]>(res);
     std::memset(obsFrequencies.get(), 0, res * sizeof(double));
@@ -72,6 +93,9 @@ public:
       if (warpType == None || warpType == Triangle) {
         x = sample.x();
         y = sample.y();
+      } else if (warpType == HDR) {
+        x = sample.x();
+        y = 1.0f - sample.y();
       } else if (warpType == Disk) {
         x = sample.x() * 0.5f + 0.5f;
         y = sample.y() * 0.5f + 0.5f;
@@ -108,21 +132,27 @@ public:
     };
 
     double scale = sampleCount;
-    if (warpType == None || warpType == Triangle) scale *= 1;
-    else if (warpType == Disk) scale *= 4;
-    else scale *= 4 * minpt::Pi;
 
-    auto p = expFrequencies.get();
-    constexpr auto Epsilon = 1e-4;
-    for (auto y = 0; y < yres; ++y) {
-      auto ybeg = y / (double)yres;
-      auto yend = (y + 1 - Epsilon) / (double)yres;
-      for (auto x = 0; x < xres; ++x) {
-        auto xbeg = x / (double)xres;
-        auto xend = (x + 1 - Epsilon) / (double)xres;
-        p[y * xres + x] = hypothesis::adaptiveSimpson2D(integrand, ybeg, xbeg, yend, xend) * scale;
-        if (p[y * xres + x] < 0)
-          throw minpt::Exception("The Pdf() function returned negative values!");
+    if (warpType == HDR) {
+      for (auto y = 0; y < yres; ++y)
+        for (auto x = 0; x < xres; ++x)
+          expFrequencies[y * xres + x] = luminance[y * xres + x] * scale;
+    } else {
+      if (warpType == None || warpType == Triangle) scale *= 1;
+      else if (warpType == Disk) scale *= 4;
+      else scale *= 4 * minpt::Pi;
+
+      constexpr auto Epsilon = 1e-4;
+      for (auto y = 0; y < yres; ++y) {
+        auto ybeg = y / (double)yres;
+        auto yend = (y + 1 - Epsilon) / (double)yres;
+        for (auto x = 0; x < xres; ++x) {
+          auto xbeg = x / (double)xres;
+          auto xend = (x + 1 - Epsilon) / (double)xres;
+          expFrequencies[y * xres + x] = hypothesis::adaptiveSimpson2D(integrand, ybeg, xbeg, yend, xend) * scale;
+          if (expFrequencies[y * xres + x] < 0)
+            throw minpt::Exception("The Pdf() function returned negative values!");
+        }
       }
     }
 
@@ -163,9 +193,14 @@ public:
 
     switch (warpType) {
       case None:
-      case HDR:
         result << point, 0.0f;
         break;
+      case HDR: {
+        float pdf;
+        auto temp = distrib.sampleContinuous(u, pdf);
+        result << temp.x, 1.0f - temp.y, 0.0f;
+        break;
+      }
       case Triangle: {
           auto temp = minpt::uniformSampleTriangle(u);
           result << temp.x, temp.y, 0.0f;
@@ -332,7 +367,7 @@ public:
       constexpr int spacer = 20;
       constexpr int lineHeight = (int)24 * 1.2f;
       const int histWidth = (width() - 3 * spacer) / 2;
-      const int histHeight = (warpType == None || warpType == Disk) ? histWidth : histWidth / 2;
+      const int histHeight = (warpType == None || warpType == Triangle || warpType == Disk) ? histWidth : histWidth / 2;
       const int verticalOffset = (height() - histHeight - lineHeight - 70 - 2 * spacer) / 2;
       drawHistogram(Vector2i(spacer, verticalOffset + lineHeight + spacer), Vector2i(histWidth, histHeight), textures[0]);
       drawHistogram(Vector2i(2 * spacer + histWidth, verticalOffset + lineHeight + spacer), Vector2i(histWidth, histHeight), textures[1]);
@@ -660,6 +695,8 @@ private:
   GLShader histogramShader;
   GLShader hdrShader;
   minpt::Bitmap hdrBitmap;
+  minpt::Distribution2D distrib;
+  std::unique_ptr<double[]> luminance;
 };
 
 int main() {
