@@ -8,6 +8,11 @@
 
 namespace minpt {
 
+struct LightSample {
+  Vector3f p;
+  Vector3f n;
+};
+
 /**
  * \brief Triangle mesh
  *
@@ -62,22 +67,22 @@ public:
     return merge(Bounds3f(min(a, b), max(a, b)), c);
   }
 
-  Interaction sample(Vector2f& u, float& _pdf) const {
+  LightSample sample(Vector2f& u, float& _pdf) const {
     _pdf = 1.0f / pdf.sum;
-
     auto index = pdf.sampleReuse(u.x);
     auto uv = uniformSampleTriangle(u);
+    auto& a = p[f[3 * index]];
+    auto& b = p[f[3 * index + 1]];
+    auto& c = p[f[3 * index + 2]];
+    return { barycentric(a, b, c, uv), normalize(cross(b - a, c - a)) };
+  }
 
-    auto offset = 3 * index;
-    auto& a = p[f[offset]];
-    auto& b = p[f[offset + 1]];
-    auto& c = p[f[offset + 2]];
-
-    Interaction isect;
-    isect.p = barycentric(a, b, c, uv);
-    isect.n = normalize(cross(b - a, c - a));
-
-    return isect;
+  LightSample sample(const Vector3f& ref, Vector2f& u, float& _pdf) const {
+    auto pLight = sample(u, _pdf);
+    auto d = pLight.p - ref;
+    auto w = normalize(d);
+    _pdf *= d.lengthSquared() / absdot(pLight.n, w);
+    return pLight;
   }
 
   bool intersect(std::uint32_t index, const Ray& ray) const;

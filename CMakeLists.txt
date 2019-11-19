@@ -88,6 +88,7 @@ add_executable(minpt
   src/core/visibilitytester.cpp
   src/gui/screen.cpp
   src/lights/point.cpp
+  src/lights/area.cpp
   src/bsdfs/diffuse.cpp
   src/meshes/obj.cpp
   src/samplers/random.cpp
