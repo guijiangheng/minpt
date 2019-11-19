@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/scene.h>
 
 namespace minpt {
@@ -18,7 +20,5 @@ public:
     return "NormalIntegrator[]";
   }
 };
-
-MINPT_REGISTER_CLASS(NormalIntegrator, "normals");
 
 }

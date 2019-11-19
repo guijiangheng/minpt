@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/filter.h>
 
 namespace minpt {
@@ -24,7 +26,5 @@ private:
   float alpha;
   float radiusSquared;
 };
-
-MINPT_REGISTER_CLASS(GaussianFilter, "gaussian");
 
 }

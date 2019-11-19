@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/utils/utils.h>
 #include <minpt/math/math.h>
 #include <minpt/core/bsdf.h>
@@ -40,7 +42,5 @@ public:
 private:
   Color3f albedo;
 };
-
-MINPT_REGISTER_CLASS(Diffuse, "diffuse");
 
 }

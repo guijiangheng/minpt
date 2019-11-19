@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/filter.h>
 
 namespace minpt {
@@ -16,7 +18,5 @@ public:
     return "BoxFilter[]";
   }
 };
-
-MINPT_REGISTER_CLASS(BoxFilter, "box");
 
 }

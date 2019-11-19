@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/light.h>
 #include <minpt/core/visibilitytester.h>
 
@@ -42,7 +44,5 @@ public:
   Vector3f pLight;
   Color3f intensity;
 };
-
-MINPT_REGISTER_CLASS(PointLight, "point");
 
 }

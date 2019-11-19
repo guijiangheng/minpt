@@ -1,3 +1,5 @@
+#pragma once
+
 #include <pcg32.h>
 #include <minpt/core/sampler.h>
 
@@ -39,7 +41,5 @@ protected:
 private:
   pcg32 random;
 };
-
-MINPT_REGISTER_CLASS(RandomSampler, "random");
 
 }

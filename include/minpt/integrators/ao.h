@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/scene.h>
 #include <minpt/core/sampling.h>
 
@@ -43,7 +45,5 @@ private:
   int shadingSamples;
   float rayLength;
 };
-
-MINPT_REGISTER_CLASS(AmbientOcclusionIntegrator, "ao");
 
 }

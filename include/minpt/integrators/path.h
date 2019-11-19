@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/scene.h>
 
 namespace minpt {
@@ -31,7 +33,5 @@ public:
     return "PathIntegrator[]";
   }
 };
-
-MINPT_REGISTER_CLASS(PathIntegrator, "path");
 
 }

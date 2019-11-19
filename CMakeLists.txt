@@ -76,6 +76,19 @@ add_executable(minpt
   include/minpt/math/matrix4.h
   include/minpt/math/frame.h
 
+  include/minpt/accels/bvh.h
+  include/minpt/bsdfs/diffuse.h
+  include/minpt/cameras/perspective.h
+  include/minpt/filters/box.h
+  include/minpt/filters/gaussian.h
+  include/minpt/samplers/random.h
+  include/minpt/integrators/ao.h
+  include/minpt/integrators/normals.h
+  include/minpt/integrators/path.h
+  include/minpt/lights/point.h
+  include/minpt/lights/area.h
+  include/minpt/meshes/obj.h
+
   src/main/main.cpp
   src/math/matrix4.cpp
   src/utils/utils.cpp
@@ -87,18 +100,9 @@ add_executable(minpt
   src/core/block.cpp
   src/core/visibilitytester.cpp
   src/gui/screen.cpp
-  src/lights/point.cpp
-  src/lights/area.cpp
-  src/bsdfs/diffuse.cpp
   src/meshes/obj.cpp
-  src/samplers/random.cpp
   src/accelerators/bvh.cpp
   src/cameras/perspective.cpp
-  src/integrators/ao.cpp
-  src/integrators/path.cpp
-  src/integrators/normals.cpp
-  src/filters/box.cpp
-  src/filters/gaussian.cpp
 )
 
 target_compile_features(minpt PRIVATE cxx_std_17)

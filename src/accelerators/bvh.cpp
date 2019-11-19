@@ -4,7 +4,7 @@
 #include <tbb/tbb.h>
 
 #include <minpt/core/timer.h>
-#include <minpt/core/accelerator.h>
+#include <minpt/accels/bvh.h>
 
 namespace minpt {
 
@@ -26,26 +26,6 @@ struct Bins {
   Bins() {
     memset(counts, 0, sizeof(std::uint32_t) * BinCount);
   }
-};
-
-struct BVHNode {
-  Bounds3f bounds;
-  std::uint16_t nPrims;
-  std::uint16_t splitAxis;
-  union {
-    std::uint32_t primsOffset;
-    std::uint32_t rightChild;
-  };
-
-  BVHNode() = default;
-
-  BVHNode(const Bounds3f& bounds, std::uint32_t primsOffset, std::uint16_t nPrims)
-    : bounds(bounds), nPrims(nPrims), primsOffset(primsOffset)
-  { }
-
-  BVHNode(const Bounds3f& bounds, std::uint16_t splitAxis, std::uint32_t rightChild)
-    : bounds(bounds), nPrims(0), splitAxis(splitAxis), rightChild(rightChild)
-  { }
 };
 
 class BVHBuildTask : public tbb::task {
@@ -251,165 +231,152 @@ private:
   std::uint32_t* buffer;
 };
 
-class BVHAccel : public Accelerator {
-public:
-  BVHAccel(const PropertyList& props)
-  { }
 
-  void build() override {
-    auto nPrims = getPrimitiveCount();
 
-    std::cout
-      << "Constructing a SAH BVH (" << meshes.size()
-      << (meshes.size() == 1 ? " shape, " : " shapes, ")
-      << nPrims << " primitives) .. ";
+void BVHAccel::build() {
+  auto nPrims = getPrimitiveCount();
 
-    Timer timer;
+  std::cout
+    << "Constructing a SAH BVH (" << meshes.size()
+    << (meshes.size() == 1 ? " shape, " : " shapes, ")
+    << nPrims << " primitives) .. ";
 
-    auto primInfos = std::make_unique<PrimInfo[]>(nPrims);
-    indices.resize(nPrims);
-    auto primIndex = 0u;
-    for (auto mesh : meshes)
-      for (std::uint32_t i = 0, n = mesh->getPrimitiveCount(); i < n; ++i) {
-        primInfos[primIndex] = PrimInfo(mesh->getBounds(i));
-        indices[primIndex] = primIndex;
-        ++primIndex;
-      }
+  Timer timer;
 
-    auto buffer = std::make_unique<std::uint32_t[]>(nPrims);
-    nodes.resize(nPrims * 2);
-    nodes[0].bounds = bounds;
-    auto& task = *new(tbb::task::allocate_root()) BVHBuildTask(
-      nodes, indices.data(), primInfos.get(),
-      0u, indices.data(), indices.data() + nPrims, buffer.get());
-    tbb::task::spawn_root_and_wait(task);
+  auto primInfos = std::make_unique<PrimInfo[]>(nPrims);
+  indices.resize(nPrims);
+  auto primIndex = 0u;
+  for (auto mesh : meshes)
+    for (std::uint32_t i = 0, n = mesh->getPrimitiveCount(); i < n; ++i) {
+      primInfos[primIndex] = PrimInfo(mesh->getBounds(i));
+      indices[primIndex] = primIndex;
+      ++primIndex;
+    }
 
-    auto stats = statistics(0u);
-    std::vector<BVHNode> packedNodes;
-    packedNodes.reserve(stats.second);
-    compactNodes(0u, packedNodes);
-    nodes = std::move(packedNodes);
+  auto buffer = std::make_unique<std::uint32_t[]>(nPrims);
+  nodes.resize(nPrims * 2);
+  nodes[0].bounds = bounds;
+  auto& task = *new(tbb::task::allocate_root()) BVHBuildTask(
+    nodes, indices.data(), primInfos.get(),
+    0u, indices.data(), indices.data() + nPrims, buffer.get());
+  tbb::task::spawn_root_and_wait(task);
 
-    std::cout
-      << "done (took " << timer.elapsedString() << " and "
-      << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
-      << ", node count = " << stats.second
-      << ", SAH cost = " << stats.first << ")." << std::endl;
-  }
+  auto stats = statistics(0u);
+  std::vector<BVHNode> packedNodes;
+  packedNodes.reserve(stats.second);
+  compactNodes(0u, packedNodes);
+  nodes = std::move(packedNodes);
 
-  std::pair<float, std::uint32_t> statistics(std::uint32_t nodeIndex) const {
-    auto& node = nodes[nodeIndex];
-    if (node.nPrims)
-      return std::make_pair((float)node.nPrims, 1u);
-    auto left = statistics(nodeIndex + 1);
-    auto right = statistics(node.rightChild);
-    auto totalArea = node.bounds.area();
-    auto leftArea = nodes[nodeIndex + 1].bounds.area();
-    auto rightArea = nodes[node.rightChild].bounds.area();
-    return std::make_pair(
-      BVHBuildTask::TraversalCost + (left.first * leftArea + right.first * rightArea) / totalArea,
-      left.second + right.second + 1
-    );
-  }
+  std::cout
+    << "done (took " << timer.elapsedString() << " and "
+    << memString(sizeof(BVHNode) * nodes.size() + sizeof(std::uint32_t) * indices.size())
+    << ", node count = " << stats.second
+    << ", SAH cost = " << stats.first << ")." << std::endl;
+}
 
-  void compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) const {
-    packedNodes.push_back(nodes[nodeIndex]);
-    auto& node = packedNodes.back();
-    if (node.nPrims) return;
-    compactNodes(nodeIndex + 1, packedNodes);
-    auto rightChild = node.rightChild;
-    node.rightChild = packedNodes.size();
-    compactNodes(rightChild, packedNodes);
-  }
+std::pair<float, std::uint32_t> BVHAccel::statistics(std::uint32_t nodeIndex) const {
+  auto& node = nodes[nodeIndex];
+  if (node.nPrims)
+    return std::make_pair((float)node.nPrims, 1u);
+  auto left = statistics(nodeIndex + 1);
+  auto right = statistics(node.rightChild);
+  auto totalArea = node.bounds.area();
+  auto leftArea = nodes[nodeIndex + 1].bounds.area();
+  auto rightArea = nodes[node.rightChild].bounds.area();
+  return std::make_pair(
+    BVHBuildTask::TraversalCost + (left.first * leftArea + right.first * rightArea) / totalArea,
+    left.second + right.second + 1
+  );
+}
 
-  bool intersect(const Ray& ray, Interaction& isect) const override {
-    Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
-    const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
+void BVHAccel::compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packedNodes) const {
+  packedNodes.push_back(nodes[nodeIndex]);
+  auto& node = packedNodes.back();
+  if (node.nPrims) return;
+  compactNodes(nodeIndex + 1, packedNodes);
+  auto rightChild = node.rightChild;
+  node.rightChild = packedNodes.size();
+  compactNodes(rightChild, packedNodes);
+}
 
-    auto hit = false;
-    std::uint32_t index;
-    std::uint32_t nodesToVisit[64];
-    nodesToVisit[0] = 0u;
-    std::uint32_t currentIndex;
-    int toVisitOffset = 0;
+bool BVHAccel::intersect(const Ray& ray, Interaction& isect) const {
+  Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
+  const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
 
-    while (toVisitOffset != -1) {
-      currentIndex = nodesToVisit[toVisitOffset--];
-      auto& node = nodes[currentIndex];
-      if (node.bounds.intersect(ray, invDir, dirIsNeg)) {
-        if (node.nPrims) {
-          for (std::uint32_t i = 0, n = (std::uint32_t)node.nPrims; i < n; ++i) {
-            auto triIndex = indices[node.primsOffset + i];
-            auto mesh = findMesh(triIndex);
-            if (mesh->intersect(triIndex, ray, isect)) {
-              index = triIndex;
-              hit = true;
-              isect.mesh = mesh;
-            }
+  auto hit = false;
+  std::uint32_t index;
+  std::uint32_t nodesToVisit[64];
+  nodesToVisit[0] = 0u;
+  std::uint32_t currentIndex;
+  int toVisitOffset = 0;
+
+  while (toVisitOffset != -1) {
+    currentIndex = nodesToVisit[toVisitOffset--];
+    auto& node = nodes[currentIndex];
+    if (node.bounds.intersect(ray, invDir, dirIsNeg)) {
+      if (node.nPrims) {
+        for (std::uint32_t i = 0, n = (std::uint32_t)node.nPrims; i < n; ++i) {
+          auto triIndex = indices[node.primsOffset + i];
+          auto mesh = findMesh(triIndex);
+          if (mesh->intersect(triIndex, ray, isect)) {
+            index = triIndex;
+            hit = true;
+            isect.mesh = mesh;
           }
+        }
+      } else {
+        if (dirIsNeg[node.splitAxis]) {
+          nodesToVisit[++toVisitOffset] = currentIndex + 1;
+          nodesToVisit[++toVisitOffset] = node.rightChild;
         } else {
-          if (dirIsNeg[node.splitAxis]) {
-            nodesToVisit[++toVisitOffset] = currentIndex + 1;
-            nodesToVisit[++toVisitOffset] = node.rightChild;
-          } else {
-            nodesToVisit[++toVisitOffset] = node.rightChild;
-            nodesToVisit[++toVisitOffset] = currentIndex + 1;
-          }
+          nodesToVisit[++toVisitOffset] = node.rightChild;
+          nodesToVisit[++toVisitOffset] = currentIndex + 1;
         }
       }
     }
-
-    if (hit) {
-      isect.wo = -ray.d;
-      isect.mesh->computeIntersection(index, isect);
-    }
-
-    return hit;
   }
 
-  bool intersect(const Ray& ray) const override {
-    Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
-    const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
+  if (hit) {
+    isect.wo = -ray.d;
+    isect.mesh->computeIntersection(index, isect);
+  }
 
-    std::uint32_t nodesToVisit[64];
-    nodesToVisit[0] = 0u;
-    std::uint32_t currentIndex;
-    int toVisitOffset = 0;
+  return hit;
+}
 
-    while (toVisitOffset != -1) {
-      currentIndex = nodesToVisit[toVisitOffset--];
-      auto& node = nodes[currentIndex];
-      if (node.bounds.intersect(ray, invDir, dirIsNeg)) {
-        if (node.nPrims) {
-          for (std::uint32_t i = 0, n = (std::uint32_t)node.nPrims; i < n; ++i) {
-            auto triIndex = indices[node.primsOffset + i];
-            auto mesh = findMesh(triIndex);
-            if (mesh->intersect(triIndex, ray))
-              return true;
-          }
+bool BVHAccel::intersect(const Ray& ray) const {
+  Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
+  const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
+
+  std::uint32_t nodesToVisit[64];
+  nodesToVisit[0] = 0u;
+  std::uint32_t currentIndex;
+  int toVisitOffset = 0;
+
+  while (toVisitOffset != -1) {
+    currentIndex = nodesToVisit[toVisitOffset--];
+    auto& node = nodes[currentIndex];
+    if (node.bounds.intersect(ray, invDir, dirIsNeg)) {
+      if (node.nPrims) {
+        for (std::uint32_t i = 0, n = (std::uint32_t)node.nPrims; i < n; ++i) {
+          auto triIndex = indices[node.primsOffset + i];
+          auto mesh = findMesh(triIndex);
+          if (mesh->intersect(triIndex, ray))
+            return true;
+        }
+      } else {
+        if (dirIsNeg[node.splitAxis]) {
+          nodesToVisit[++toVisitOffset] = currentIndex + 1;
+          nodesToVisit[++toVisitOffset] = node.rightChild;
         } else {
-          if (dirIsNeg[node.splitAxis]) {
-            nodesToVisit[++toVisitOffset] = currentIndex + 1;
-            nodesToVisit[++toVisitOffset] = node.rightChild;
-          } else {
-            nodesToVisit[++toVisitOffset] = node.rightChild;
-            nodesToVisit[++toVisitOffset] = currentIndex + 1;
-          }
+          nodesToVisit[++toVisitOffset] = node.rightChild;
+          nodesToVisit[++toVisitOffset] = currentIndex + 1;
         }
       }
     }
-
-    return false;
   }
 
-  std::string toString() const override {
-    return "BVHAccel[]";
-  }
-
-private:
-  std::vector<BVHNode> nodes;
-};
-
-MINPT_REGISTER_CLASS(BVHAccel, "bvh");
+  return false;
+}
 
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/mesh.h>
 #include <minpt/core/light.h>
 #include <minpt/core/visibilitytester.h>
@@ -46,7 +48,5 @@ public:
   Color3f radiance;
   bool twoSided;
 };
-
-MINPT_REGISTER_CLASS(AreaLight, "area");
 
 }
