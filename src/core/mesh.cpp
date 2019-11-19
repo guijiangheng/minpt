@@ -1,7 +1,31 @@
 #include <minpt/math/math.h>
 #include <minpt/core/mesh.h>
+#include <minpt/lights/area.h>
 
 namespace minpt {
+
+Mesh::~Mesh() {
+  delete bsdf;
+  delete light;
+}
+
+void Mesh::addChild(Object* object) {
+  switch (object->getClassType()) {
+    case EBSDF:
+      if (bsdf)
+        throw Exception("Mesh: tried to register multiple BSDF instances!");
+      bsdf = static_cast<BSDF*>(object);
+      break;
+    case ELight:
+      if (light)
+        throw Exception("Mesh: tried to register multiple Light instances!");
+      light = static_cast<AreaLight*>(object);
+      light->mesh = this;
+      break;
+    default:
+      throw Exception("Shape::addChild<%s> is not supported!", classTypeName(object->getClassType()));
+  }
+}
 
 bool Mesh::intersect(uint32_t index, const Ray& ray) const {
   auto offset = 3 * index;

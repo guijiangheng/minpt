@@ -8,6 +8,8 @@
 
 namespace minpt {
 
+class AreaLight;
+
 struct LightSample {
   Vector3f p;
   Vector3f n;
@@ -23,21 +25,9 @@ struct LightSample {
  */
 class Mesh : public Object {
 public:
-  virtual ~Mesh() {
-    delete bsdf;
-  };
+  virtual ~Mesh();
 
-  void addChild(Object* object) override {
-    switch (object->getClassType()) {
-      case EBSDF:
-        if (bsdf)
-          throw Exception("Mesh: tried to register multiple BSDF instances!");
-        bsdf = static_cast<BSDF*>(object);
-        break;
-      default:
-        throw Exception("Shape::addChild<%s> is not supported!", classTypeName(object->getClassType()));
-    }
-  }
+  void addChild(Object* object) override;
 
   void activate() override {
     auto nPrims = getPrimitiveCount();
@@ -122,6 +112,7 @@ public:
   Bounds3f bounds;
   Distribution1D pdf;
   BSDF* bsdf = nullptr;
+  AreaLight* light = nullptr;
 };
 
 }
