@@ -2,6 +2,7 @@
 #include <minpt/utils/bitmap.h>
 #include <minpt/core/timer.h>
 #include <minpt/core/scene.h>
+#include <minpt/lights/area.h>
 
 namespace minpt {
 
@@ -13,6 +14,8 @@ void Scene::addChild(Object* child) {
         auto mesh = static_cast<Mesh*>(child);
         accel->addMesh(mesh);
         meshes.push_back(mesh);
+        if (mesh->light)
+          lights.push_back(mesh->light);
       }
       break;
     case ESampler:

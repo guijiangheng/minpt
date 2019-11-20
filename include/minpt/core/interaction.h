@@ -23,6 +23,8 @@ public:
     return p + faceForward(n, w) * RayOriginOffsetEpsilon;
   }
 
+  Color3f le(const Vector3f& w) const;
+
   Ray spawnRay(const Vector3f& w, float tMax = Infinity) const {
     return Ray(offsetRayOrigin(w), w, tMax);
   }

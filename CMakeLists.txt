@@ -85,6 +85,7 @@ add_executable(minpt
   include/minpt/integrators/ao.h
   include/minpt/integrators/normals.h
   include/minpt/integrators/path.h
+  include/minpt/integrators/direct.h
   include/minpt/lights/point.h
   include/minpt/lights/area.h
   include/minpt/meshes/obj.h
@@ -98,6 +99,7 @@ add_executable(minpt
   src/core/parser.cpp
   src/core/object.cpp
   src/core/block.cpp
+  src/core/interaction.cpp
   src/core/visibilitytester.cpp
   src/gui/screen.cpp
   src/meshes/obj.cpp

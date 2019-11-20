@@ -109,4 +109,19 @@ void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
   }
 }
 
+std::string Mesh::toString() const {
+  return tfm::format(
+    "Mesh[\n"
+    "  name = \"%s\",\n"
+    "  vertexCount = %i,\n"
+    "  triangleCount = %i,\n"
+    "  bsdf = %s,\n"
+    "  light = %s"
+    "]",
+    name, nVertices, nTriangles,
+    bsdf ? indent(bsdf->toString()) : std::string("null"),
+    light ? indent(light->toString()) : std::string("null")
+  );
+}
+
 }

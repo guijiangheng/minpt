@@ -8,7 +8,7 @@ namespace minpt {
 class RandomSampler : public Sampler {
 public:
   RandomSampler(const PropertyList& props)
-    : Sampler(props.getInteger("sampleCount"))
+    : Sampler(props.getInteger("sampleCount", 1))
   { }
 
   void prepare(const Vector2i& block) override {

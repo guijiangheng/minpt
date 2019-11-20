@@ -35,6 +35,9 @@ public:
     for (std::uint32_t i = 0; i < nPrims; ++i)
       pdf.append(getSurfaceArea(i));
     pdf.normalize();
+
+    if (!light && !bsdf)
+      bsdf = static_cast<BSDF*>(ObjectFactory::createInstance("diffuse", PropertyList()));
   }
 
   std::uint32_t getPrimitiveCount() const {
@@ -85,18 +88,7 @@ public:
     return EMesh;
   }
 
-  std::string toString() const override {
-    return tfm::format(
-      "Mesh[\n"
-      "  name = \"%s\",\n"
-      "  vertexCount = %i,\n"
-      "  triangleCount = %i,\n"
-      "  bsdf = %s\n"
-      "]",
-      name, nVertices, nTriangles,
-      bsdf ? indent(bsdf->toString()) : std::string("null")
-    );
-  }
+  std::string toString() const override;
 
 protected:
   Mesh() = default;

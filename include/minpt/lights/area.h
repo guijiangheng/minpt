@@ -11,10 +11,17 @@ public:
   AreaLight(const PropertyList& props)
     : mesh(nullptr)
     , radiance(props.getColor3f("radiance"))
+    , twoSided(props.getBoolean("twoSided", true))
   { }
 
+  Color3f le(const Interaction& isect) const {
+    if (twoSided || dot(isect.n, isect.wo) > 0)
+      return radiance;
+    return Color3f(0.0f);
+  }
+
   Color3f le(const LightSample& pLight, const Vector3f& wo) const {
-    if (twoSided || dot(pLight.p, wo) > 0)
+    if (twoSided || dot(pLight.n, wo) > 0)
       return radiance;
     return Color3f(0.0f);
   }
