@@ -40,6 +40,14 @@ public:
     return le(pLight, -wi);
   }
 
+  float pdf(const Vector3f& ref, const Interaction& pLight) const {
+    auto p = 1.0f / mesh->getTotalArea();
+    auto d = pLight.p - ref;
+    auto w = normalize(d);
+    p *= d.lengthSquared() / absdot(pLight.n, w);
+    return p;
+  }
+
   std::string toString() const override {
     return tfm::format(
       "AreaLight[\n"

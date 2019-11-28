@@ -23,7 +23,7 @@ public:
     auto wiLocal = isect.toLocal(wi);
     auto woLocal = isect.toLocal(isect.wo);
 
-    if (li.isBlack() || !reflect || !sameHemisphere(wiLocal, woLocal) || tester.occluded(scene))
+    if (li.isBlack() || !reflect || !sameHemisphere(wiLocal, woLocal) || !tester.unoccluded(scene))
       return Color3f(0.0f);
 
     return li * absdot(wi, isect.shFrame.n) / pdf;

@@ -3,8 +3,8 @@
 
 namespace minpt {
 
-bool VisibilityTester::occluded(const Scene& scene) const {
-  return scene.intersect(ref->spawnRayTo(target));
+bool VisibilityTester::unoccluded(const Scene& scene) const {
+  return !scene.intersect(ref->spawnRayTo(target));
 }
 
 }

@@ -44,6 +44,10 @@ public:
     return nTriangles;
   }
 
+  float getTotalArea() const {
+    return pdf.sum;
+  }
+
   float getSurfaceArea(std::uint32_t index) const {
     auto offset = 3 * index;
     auto& a = p[f[offset]];

@@ -14,7 +14,7 @@ public:
     : ref(&ref), target(target)
   { }
 
-  bool occluded(const Scene& scene) const;
+  bool unoccluded(const Scene& scene) const;
 
 private:
   const Interaction* ref;
