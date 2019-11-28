@@ -105,6 +105,7 @@ add_executable(minpt
   src/meshes/obj.cpp
   src/accelerators/bvh.cpp
   src/cameras/perspective.cpp
+  src/integrators/direct.cpp
 )
 
 target_compile_features(minpt PRIVATE cxx_std_17)
