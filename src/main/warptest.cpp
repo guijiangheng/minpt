@@ -52,7 +52,7 @@ public:
     distrib = minpt::Distribution2D(data.get(), width, height);
 
     luminance = std::make_unique<double[]>(hdrBitmap.size());
-    auto sumInv = 1.0f / distrib.pMarginal.sum;
+    auto sumInv = 1.0f / distrib.pMarginal.getSum();
     for (auto y = 0; y < height; ++y)
       for (auto x = 0; x < width; ++x)
         luminance[y * width + x] = data[y * width + x] * sumInv;

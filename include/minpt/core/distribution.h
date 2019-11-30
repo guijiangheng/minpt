@@ -16,6 +16,10 @@ public:
     return cdf.size() - 1;
   }
 
+  float getSum() const {
+    return sum;
+  }
+
   void reserve(std::size_t nEntries) {
     cdf.reserve(nEntries + 1);
   }
@@ -68,7 +72,7 @@ public:
     return (index + u) / nEntries;
   }
 
-public:
+private:
   float sum;
   std::vector<float> cdf;
 };
@@ -103,7 +107,7 @@ public:
     auto height = pMarginal.size();
     auto x = (int)(width * uv[0]);
     auto y = (int)(height * uv[1]);
-    return pConditional[y][x] * pConditional[y].sum / pMarginal.sum;
+    return pConditional[y][x] * pConditional[y].getSum() / pMarginal.getSum();
   }
 
 public:

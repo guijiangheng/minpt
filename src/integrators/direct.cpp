@@ -7,8 +7,8 @@ Color3f DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sample
   if (!scene.intersect(ray, isect))
     return Color3f(0.0f);
 
-  if (isect.mesh->light)
-    return isect.mesh->light->le(isect);
+  if (isect.isLight())
+    return isect.le(-ray.d);
 
   Color3f l(0.0f);
 
@@ -24,27 +24,28 @@ Color3f DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sample
 
   if (!li.isBlack()) {
     auto wiLocal = isect.toLocal(wi);
-    auto f = isect.mesh->bsdf->f(woLocal, wiLocal);
+    auto f = isect.f(woLocal, wiLocal);
     if (!f.isBlack() && tester.unoccluded(scene)) {
-      auto scatteringPdf = isect.mesh->bsdf->pdf(woLocal, wiLocal);
+      auto scatteringPdf = isect.scatteringPdf(woLocal, wiLocal);
       l += f * li * absCosTheta(wiLocal) / lightPdf * weight(lightPdf, scatteringPdf);
     }
   }
 
   Vector3f wiLocal;
   float scatteringPdf;
-  auto f = isect.mesh->bsdf->sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf);
+  auto f = isect.sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf);
   if (f.isBlack()) return l;
 
-  Interaction pLight;
-  wi = isect.toLocal(wiLocal);
+  Interaction newIsect;
+  wi = isect.toWorld(wiLocal);
   auto newRay = isect.spawnRay(wi);
-  if (!scene.intersect(newRay, pLight)) return l;
-  if (!pLight.mesh->light) return l;
+  if (!scene.intersect(newRay, newIsect)) return l;
+  if (!newIsect.isLight()) return l;
 
-  li = pLight.le(-wi);
+  li = newIsect.le(-wi);
+
   if (!li.isBlack()) {
-    auto lightPdf = pLight.mesh->light->pdf(isect.p, pLight);
+    auto lightPdf = newIsect.lightPdf(isect.p);
     l += f * li * absCosTheta(wiLocal) / scatteringPdf * weight(scatteringPdf, lightPdf);
   }
 

@@ -36,6 +36,9 @@ public:
       pdf.append(getSurfaceArea(i));
     pdf.normalize();
 
+    totalArea = pdf.getSum();
+    totalAreaInv = 1 / totalArea;
+
     if (!light && !bsdf)
       bsdf = static_cast<BSDF*>(ObjectFactory::createInstance("diffuse", PropertyList()));
   }
@@ -45,7 +48,7 @@ public:
   }
 
   float getTotalArea() const {
-    return pdf.sum;
+    return totalArea;
   }
 
   float getSurfaceArea(std::uint32_t index) const {
@@ -65,7 +68,7 @@ public:
   }
 
   LightSample sample(Vector2f& u, float& _pdf) const {
-    _pdf = 1.0f / pdf.sum;
+    _pdf = totalAreaInv;
     auto index = pdf.sampleReuse(u.x);
     auto uv = uniformSampleTriangle(u);
     auto& a = p[f[3 * index]];
@@ -97,16 +100,20 @@ public:
 protected:
   Mesh() = default;
 
-public:
-  std::string name;
+protected:
+  float totalArea;
+  float totalAreaInv;
   std::uint32_t nVertices;
   std::uint32_t nTriangles;
   std::unique_ptr<Vector3f[]> p;
   std::unique_ptr<Vector3f[]> n;
   std::unique_ptr<Vector2f[]> uv;
   std::unique_ptr<std::uint32_t[]> f;
-  Bounds3f bounds;
   Distribution1D pdf;
+
+public:
+  std::string name;
+  Bounds3f bounds;
   BSDF* bsdf = nullptr;
   AreaLight* light = nullptr;
 };

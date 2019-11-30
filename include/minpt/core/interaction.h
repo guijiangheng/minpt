@@ -25,6 +25,14 @@ public:
 
   Color3f le(const Vector3f& w) const;
 
+  Color3f f(const Vector3f& woLocal, const Vector3f& wiLocal) const;
+
+  float lightPdf(const Vector3f& ref) const;
+
+  float scatteringPdf(const Vector3f& woLocal, const Vector3f& wiLocal) const;
+
+  Color3f sample(const Vector2f& u, const Vector3f& woLocal, Vector3f& wiLocal, float& scatteringPdf) const;
+
   Ray spawnRay(const Vector3f& w, float tMax = Infinity) const {
     return Ray(offsetRayOrigin(w), w, tMax);
   }
@@ -34,6 +42,8 @@ public:
     auto o = offsetRayOrigin(w);
     return Ray(o, w, 1.0f - ShadowEpsilon);
   }
+
+  bool isLight() const;
 
   std::string toString() const {
     return tfm::format(

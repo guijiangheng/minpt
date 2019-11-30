@@ -14,8 +14,8 @@ public:
     , twoSided(props.getBoolean("twoSided", true))
   { }
 
-  Color3f le(const Interaction& isect) const {
-    if (twoSided || dot(isect.n, isect.wo) > 0)
+  Color3f le(const Interaction& isect, const Vector3f& wo) const {
+    if (twoSided || dot(isect.n, wo) > 0)
       return radiance;
     return Color3f(0.0f);
   }
