@@ -10,11 +10,10 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
   auto foundIntersection = scene.intersect(r, isect);
 
   for (auto bounce = 0; bounce < maxDepth; ++bounce) {
-    if (!foundIntersection)
-      return l;
+    if (!foundIntersection) return l;
 
     if (bounce == 0 && isect.isLight())
-      return l + t * isect.le(-r.d);
+      return isect.le(-r.d);
 
     float pdf;
     auto& light = scene.sampleOneLight(sampler, pdf);

@@ -77,6 +77,7 @@ add_executable(minpt
   include/minpt/math/frame.h
 
   include/minpt/accels/bvh.h
+  include/minpt/bsdfs/glass.h
   include/minpt/bsdfs/mirror.h
   include/minpt/bsdfs/diffuse.h
   include/minpt/cameras/perspective.h
@@ -108,6 +109,7 @@ add_executable(minpt
   src/cameras/perspective.cpp
   src/integrators/path.cpp
   src/integrators/direct.cpp
+  src/bsdfs/glass.cpp
 )
 
 target_compile_features(minpt PRIVATE cxx_std_17)

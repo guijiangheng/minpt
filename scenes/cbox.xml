@@ -2,7 +2,9 @@
 <scene>
   <string name="outputName" value="cbox.png"/>
 	<accel type="bvh"/>
-	<integrator type="path"/>
+	<integrator type="path">
+		<integer name="maxDepth" value="10"/>
+	</integrator>
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
 		<transform name="toWorld">
@@ -15,7 +17,7 @@
 	</camera>
 
 	<sampler type="random">
-		<integer name="sampleCount" value="512"/>
+		<integer name="sampleCount" value="64"/>
 	</sampler>
 
 	<mesh type="obj">
@@ -41,14 +43,12 @@
 
 	<mesh type="obj">
 		<string name="filename" value="cbox/sphere1.obj"/>
-		<bsdf type="diffuse">
-			<color3f name="albedo" value="0.5 0.5 0.5"/>
-		</bsdf>
+		<bsdf type="mirror"/>
 	</mesh>
 
 	<mesh type="obj">
 		<string name="filename" value="cbox/sphere2.obj"/>
-		<bsdf type="mirror"/>
+		<bsdf type="glass"/>
 	</mesh>
 
 	<mesh type="obj">

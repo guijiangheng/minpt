@@ -52,14 +52,13 @@ static void render(const Scene& scene, const std::string& outputName) {
       }
     });
     std::cout << " done. (took " << timer.elapsedString() << ")" << std::endl;
+    result.toBitmap().save(outputName);
   });
 
   nanogui::mainloop();
   renderThread.join();
   delete screen;
   nanogui::shutdown();
-
-  result.toBitmap().save(outputName);
 }
 
 int main(int argc, char** argv) {
