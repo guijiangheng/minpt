@@ -46,7 +46,7 @@ Color3f DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sample
 
   if (!li.isBlack()) {
     auto lightPdf = newIsect.lightPdf(isect.p);
-    l += f * li * absCosTheta(wiLocal) / scatteringPdf * weight(scatteringPdf, lightPdf);
+    l += f * li * weight(scatteringPdf, lightPdf);
   }
 
   return l;

@@ -27,7 +27,7 @@ public:
     wi = cosineSampleHemisphere(u);
     pdf = wi.z * InvPi;
     if (wo.z < 0) wi.z = -wi.z;
-    return albedo * InvPi;
+    return albedo;
   }
 
   std::string toString() const override {
