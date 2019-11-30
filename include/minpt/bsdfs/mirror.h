@@ -7,6 +7,10 @@ public:
   Mirror(const PropertyList& props) : kr(props.getColor3f("kr", Color3f(1.0f)))
   { }
 
+  bool isDelta() const override {
+    return true;
+  }
+
   Color3f f(const Vector3f& wo, const Vector3f& wi) const override {
     return Color3f(0.0f);
   }

@@ -10,6 +10,10 @@ public:
     , eta(props.getFloat("eta", 1.4f))
   { }
 
+  bool isDelta() const override {
+    return true;
+  }
+
   Color3f f(const Vector3f& wo, const Vector3f& wi) const override {
     return Color3f(0.0f);
   }

@@ -2,10 +2,9 @@
 
 namespace minpt {
 
+// caller must ensure light exist
 Color3f Interaction::le(const Vector3f& w) const {
-  if (mesh->light)
-    return mesh->light->le(*this, w);
-  return Color3f(0.0f);
+  return mesh->light->le(*this, w);
 }
 
 Color3f Interaction::f(const Vector3f& woLocal, const Vector3f& wiLocal) const {
