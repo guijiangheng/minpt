@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <scene>
-  <string name="outputName" value="cbox-direct.png"/>
+  <string name="outputName" value="cbox.png"/>
 	<accel type="bvh"/>
-	<integrator type="direct"/>
+	<integrator type="path"/>
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
 		<transform name="toWorld">
@@ -42,14 +42,14 @@
 	<mesh type="obj">
 		<string name="filename" value="cbox/sphere1.obj"/>
 		<bsdf type="diffuse">
-			<color3f name="albedo" value="0.161 0.133 0.427"/>
+			<color3f name="albedo" value="0.5 0.5 0.5"/>
 		</bsdf>
 	</mesh>
 
 	<mesh type="obj">
 		<string name="filename" value="cbox/sphere2.obj"/>
 		<bsdf type="diffuse">
-			<color3f name="albedo" value="0.630 0.065 0.05"/>
+			<color3f name="albedo" value="0.5 0.5 0.5"/>
 		</bsdf>
 	</mesh>
 
