@@ -13,6 +13,10 @@ public:
 
   virtual Color3f li(const Ray& ray, const Scene&, Sampler& sampler) const = 0;
 
+  static float weight(float a, float b) {
+    return a / (a + b);
+  }
+
   EClassType getClassType() const override {
     return EIntegrator;
   }

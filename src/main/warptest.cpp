@@ -483,7 +483,7 @@ public:
     angleBox->setFixedSize(Eigen::Vector2i(80, 25));
     angleBox->setUnits(utf8(0x00B0).data());
 
-    brdfValueCheckBox = new CheckBox(window, "Visualize BRDF values");;
+    brdfValueCheckBox = new CheckBox(window, "Visualize BRDF values");
     brdfValueCheckBox->setCallback([=](bool) { refresh(); });
 
     new Label(

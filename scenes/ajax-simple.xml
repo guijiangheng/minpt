@@ -3,7 +3,7 @@
 	<accel type="bvh"/>
 	<integrator type="path"/>
 	<sampler type="random">
-		<integer name="sampleCount" value="32"/>
+		<integer name="sampleCount" value="512"/>
 	</sampler>
 
 	<light type="point">
@@ -13,7 +13,9 @@
 
 	<mesh type="obj">
 		<string name="filename" value="ajax.obj"/>
-		<bsdf type="diffuse"/>
+		<bsdf type="diffuse">
+			<color3f name="albedo" value="1 1 1"/>
+		</bsdf>
 	</mesh>
 
 	<camera type="perspective">

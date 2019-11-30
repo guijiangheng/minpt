@@ -43,16 +43,23 @@ public:
     accel->build();
   }
 
+  const Bounds3f& getBoundingBox() const {
+    return accel->getBoundingBox();
+  }
+
+  const Light& sampleOneLight(Sampler& sampler, float& pdf) const {
+    auto nLights = lights.size();
+    pdf = 1.0f / nLights;
+    auto index = std::min((std::size_t)(sampler.get1D() * nLights), nLights - 1);
+    return *lights[index];
+  }
+
   bool intersect(const Ray& ray) const {
     return accel->intersect(ray);
   }
 
   bool intersect(const Ray& ray, Interaction& isect) const {
     return accel->intersect(ray, isect);
-  }
-
-  const Bounds3f& getBoundingBox() const {
-    return accel->getBoundingBox();
   }
 
   EClassType getClassType() const override {

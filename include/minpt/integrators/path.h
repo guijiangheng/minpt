@@ -6,32 +6,17 @@ namespace minpt {
 
 class PathIntegrator : public Integrator {
 public:
-  PathIntegrator(const PropertyList& props)
+  PathIntegrator(const PropertyList& props) : maxDepth(props.getInteger("maxDepth", 3))
   { }
 
-  Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override {
-    Interaction isect;
-    if (!scene.intersect(ray, isect))
-      return Color3f(0.0f);
-
-    float pdf;
-    Vector3f wi;
-    VisibilityTester tester;
-    auto li = scene.lights[0]->sample(isect, sampler.get2D(), wi, pdf, tester);
-
-    auto reflect = dot(isect.n, isect.wo) * dot(isect.n, wi) > 0.0f;
-    auto wiLocal = isect.toLocal(wi);
-    auto woLocal = isect.toLocal(isect.wo);
-
-    if (li.isBlack() || !reflect || !sameHemisphere(wiLocal, woLocal) || !tester.unoccluded(scene))
-      return Color3f(0.0f);
-
-    return li * absdot(wi, isect.shFrame.n) / pdf;
-  }
+  Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override;
 
   std::string toString() const override {
-    return "PathIntegrator[]";
+    return tfm::format("DirectIntegrator[maxDepth = %d]", maxDepth);
   }
+
+public:
+  int maxDepth;
 };
 
 }

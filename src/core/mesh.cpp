@@ -116,7 +116,7 @@ std::string Mesh::toString() const {
     "  vertexCount = %i,\n"
     "  triangleCount = %i,\n"
     "  bsdf = %s,\n"
-    "  light = %s"
+    "  light = %s\n"
     "]",
     name, nVertices, nTriangles,
     bsdf ? indent(bsdf->toString()) : std::string("null"),

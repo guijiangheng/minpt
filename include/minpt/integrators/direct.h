@@ -17,10 +17,6 @@ public:
     return *scene.lights[index];
   }
 
-  static float weight(float a, float b) {
-    return a / (a + b);
-  }
-
   Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override;
 
   std::string toString() const override {

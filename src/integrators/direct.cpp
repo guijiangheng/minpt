@@ -13,7 +13,7 @@ Color3f DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sample
   Color3f l(0.0f);
 
   float pdf;
-  auto& light = getOneLight(scene, sampler, pdf);
+  auto& light = scene.sampleOneLight(sampler, pdf);
 
   float lightPdf;
   Vector3f wi;
