@@ -15,7 +15,7 @@ public:
 
   Color3f f(const Vector3f& wo, const Vector3f& wi) const override {
     if (!sameHemisphere(wo, wi))
-      return Color3f(0);
+      return Color3f(0.0f);
     return albedo * InvPi;
   }
 

@@ -1,4 +1,5 @@
 #include <minpt/accels/bvh.h>
+#include <minpt/bsdfs/mirror.h>
 #include <minpt/bsdfs/diffuse.h>
 #include <minpt/cameras/perspective.h>
 
@@ -21,6 +22,7 @@ namespace minpt {
 std::map<std::string, ObjectFactory::Constructor> *ObjectFactory::constructors = nullptr;
 
 MINPT_REGISTER_CLASS(BVHAccel, "bvh");
+MINPT_REGISTER_CLASS(Mirror, "mirror");
 MINPT_REGISTER_CLASS(Diffuse, "diffuse");
 MINPT_REGISTER_CLASS(PerspectiveCamera, "perspective");
 MINPT_REGISTER_CLASS(BoxFilter, "box");

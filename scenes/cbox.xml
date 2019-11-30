@@ -48,9 +48,7 @@
 
 	<mesh type="obj">
 		<string name="filename" value="cbox/sphere2.obj"/>
-		<bsdf type="diffuse">
-			<color3f name="albedo" value="0.5 0.5 0.5"/>
-		</bsdf>
+		<bsdf type="mirror"/>
 	</mesh>
 
 	<mesh type="obj">

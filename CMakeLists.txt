@@ -77,6 +77,7 @@ add_executable(minpt
   include/minpt/math/frame.h
 
   include/minpt/accels/bvh.h
+  include/minpt/bsdfs/mirror.h
   include/minpt/bsdfs/diffuse.h
   include/minpt/cameras/perspective.h
   include/minpt/filters/box.h
