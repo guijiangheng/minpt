@@ -59,6 +59,7 @@ add_executable(minpt
   include/minpt/core/light.h
   include/minpt/core/filter.h
   include/minpt/core/scene.h
+  include/minpt/microfacets/beckmann.h
   include/minpt/core/integrator.h
   include/minpt/core/accelerator.h
   include/minpt/core/visibilitytester.h
@@ -104,6 +105,7 @@ add_executable(minpt
   src/core/interaction.cpp
   src/core/visibilitytester.cpp
   src/gui/screen.cpp
+  src/microfacets/beckmann.cpp
   src/meshes/obj.cpp
   src/accelerators/bvh.cpp
   src/cameras/perspective.cpp

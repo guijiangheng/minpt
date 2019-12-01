@@ -16,6 +16,7 @@ public:
     EBSDF,
     ELight,
     EFilter,
+    EMicrofacet,
     EClassTypeCount
   };
 
@@ -37,16 +38,17 @@ public:
 
   static std::string classTypeName(EClassType type) {
     switch (type) {
-      case EScene:      return "scene";
-      case EAccel:      return "accel";
-      case EMesh:       return "mesh";
-      case ECamera:     return "camera";
-      case EIntegrator: return "integrator";
-      case ESampler:    return "sampler";
-      case EBSDF:       return "bsdf";
-      case ELight:      return "light";
-      case EFilter:     return "filter";
-      default:          return "<unknown>";
+      case EScene:        return "scene";
+      case EAccel:        return "accel";
+      case EMesh:         return "mesh";
+      case ECamera:       return "camera";
+      case EIntegrator:   return "integrator";
+      case ESampler:      return "sampler";
+      case EBSDF:         return "bsdf";
+      case ELight:        return "light";
+      case EFilter:       return "filter";
+      case EMicrofacet:   return "microfacet";
+      default:            return "<unknown>";
     }
   }
 };

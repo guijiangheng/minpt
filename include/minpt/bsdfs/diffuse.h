@@ -38,12 +38,7 @@ public:
   }
 
   std::string toString() const override {
-    return tfm::format(
-      "Diffuse[\n"
-      "  albedo = %s\n"
-      "]",
-      indent(albedo.toString())
-    );
+    return tfm::format("Diffuse[albedo = %s]", albedo.toString());
   }
 
 private:
