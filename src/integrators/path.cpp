@@ -8,13 +8,12 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
 
   Interaction isect;
   auto foundIntersection = scene.intersect(r, isect);
-  auto specularBounce = false;
 
   for (auto bounce = 0; bounce < maxDepth; ++bounce) {
     if (!foundIntersection) return l;
 
-    if ((bounce == 0 || specularBounce) && isect.isLight())
-      return l + t * isect.le(-r.d);
+    if (bounce == 0 && isect.isLight())
+      return isect.le(-r.d);
 
     float pdf;
     auto& light = scene.sampleOneLight(sampler, pdf);
@@ -53,20 +52,18 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
 
     Interaction newIsect;
     foundIntersection = scene.intersect(r, newIsect);
-    specularBounce = isect.mesh->bsdf->isDelta();
 
     if (foundIntersection) {
       if (!newIsect.isLight()) {
         isect = newIsect;
       } else {
-        if (!light.isDelta() && !isect.mesh->bsdf->isDelta()) {
-          li = newIsect.le(-wi);
-          if (!li.isBlack()) {
-            auto lightPdf = newIsect.lightPdf(isect.p);
-            l += t * li * weight(scatteringPdf, lightPdf);
-          }
-        }
-        return l;
+        if (light.isDelta()) return l;
+        auto li = newIsect.le(-wi);
+        if (li.isBlack()) return l;
+        if (isect.mesh->bsdf->isDelta())
+          return l + t * li;
+        auto lightPdf = newIsect.lightPdf(isect.p);
+        return l + t * li * weight(scatteringPdf, lightPdf);
       }
     }
   }

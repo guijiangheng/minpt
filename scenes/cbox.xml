@@ -17,7 +17,7 @@
 	</camera>
 
 	<sampler type="random">
-		<integer name="sampleCount" value="64"/>
+		<integer name="sampleCount" value="512"/>
 	</sampler>
 
 	<mesh type="obj">
