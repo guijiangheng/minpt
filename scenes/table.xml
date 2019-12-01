@@ -1,0 +1,106 @@
+<scene>
+  <string name="outputName" value="table.png"/>
+  <accel type="bvh"/>
+	<sampler type="random">
+		<integer name="sampleCount" value="512"/>
+	</sampler>
+
+  <integrator type="path">
+		<integer name="maxDepth" value="10"/>
+	</integrator>
+
+	<camera type="perspective">
+		<transform name="toWorld">
+			<lookat target="31.6866, -67.2776, 36.1392"
+				      origin="32.1259, -68.0505, 36.597"
+				      up="-0.22886, 0.39656, 0.889024"/>
+		</transform>
+
+		<float name="fov" value="35"/>
+		<vector2i name="outputSize" value="800, 600"/>
+	</camera>
+
+	<mesh type="obj">
+		<string name="filename" value="meshes/mesh_1.obj"/>
+		<light type="area">
+			<color3f name="radiance" value="3,3,2.5"/>
+		</light>
+		<bsdf type="diffuse">
+			<color3f name="albedo" value="0,0,0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<scale value="0.06,0.06,-1"/>
+			<translate value="10,0,25"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value="meshes/mesh_1.obj"/>
+		<light type="area">
+			<color3f name="radiance" value="1,1,1.6"/>
+		</light>
+		<bsdf type="diffuse">
+			<color3f name="albedo" value="0,0,0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<scale value="0.3,0.3,-1"/>
+			<translate value="0,0,60"/>
+		</transform>
+	</mesh>
+
+
+	<mesh type="obj">
+		<string name="filename" value="meshes/mesh_0.obj"/>
+		<bsdf type="microfacet">
+			<color3f name="kd" value="0, 0, 0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="3,0,0"/>
+		</transform>
+	</mesh>
+
+	<!-- Diffuse floor -->
+	<mesh type="obj">
+		<string name="filename" value="meshes/mesh_1.obj"/>
+		<bsdf type="diffuse">
+			<color3f name="albedo" value=".5,.5,.5"/>
+		</bsdf>
+		<transform name="toWorld">
+			<scale value="0.2,0.35,0.5"/>
+			<translate value="-35,25,0"/>
+		</transform>
+	</mesh>
+
+	<!-- Water<->Air interface -->
+	<mesh type="obj">
+		<string name="filename" value="meshes/mesh_2.obj"/>
+		<transform name="toWorld">
+			<translate value="-1,0,0"/>
+		</transform>
+		<bsdf type="glass">
+			<float name="eta" value="1.33"/>
+		</bsdf>
+	</mesh>
+
+	<!-- Glass<->Air interface -->
+	<mesh type="obj">
+		<string name="filename" value="meshes/mesh_3.obj"/>
+		<transform name="toWorld">
+			<translate value="-1,0,0"/>
+		</transform>
+		<bsdf type="glass">
+			<float name="eta" value="1.5"/>
+		</bsdf>
+	</mesh>
+
+	<!-- Glass<->Water interface -->
+	<mesh type="obj">
+		<string name="filename" value="meshes/mesh_4.obj"/>
+		<transform name="toWorld">
+			<translate value="-1,0,0"/>
+		</transform>
+		<bsdf type="glass">
+			<float name="eta" value="0.8867"/>
+		</bsdf>
+	</mesh>
+</scene>
