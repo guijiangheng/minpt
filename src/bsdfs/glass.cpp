@@ -2,7 +2,13 @@
 
 namespace minpt {
 
-Color3f Glass::sample(const Vector2f& u, const Vector3f& wo, Vector3f& wi, float& pdf) const {
+Color3f Glass::sample(
+    const Vector2f& u,
+    const Vector3f& wo,
+    Vector3f& wi,
+    float& pdf,
+    float& etaScale) const {
+
   auto nz = 1.0f;
   auto eta = this->eta;
   auto cosThetaI = cosTheta(wo);
@@ -30,9 +36,11 @@ Color3f Glass::sample(const Vector2f& u, const Vector3f& wo, Vector3f& wi, float
 
   if (u.x < fr) {
     pdf = fr;
+    etaScale = 1.0f;
     wi = Vector3f(-wo.x, -wo.y, wo.z);
     return kr;
   } else {
+    etaScale = eta * eta;
     auto etaInv = 1.0f / eta;
     pdf = 1.0f - fr;
     wi = Vector3f(-wo.x * etaInv, -wo.y * etaInv, -cosThetaT * nz);

@@ -19,8 +19,8 @@ float Interaction::scatteringPdf(const Vector3f& woLocal, const Vector3f& wiLoca
   return mesh->bsdf->pdf(woLocal, wiLocal);
 }
 
-Color3f Interaction::sample(const Vector2f& u, const Vector3f& woLocal, Vector3f& wiLocal, float& scatteringPdf) const {
-  return mesh->bsdf->sample(u, woLocal, wiLocal, scatteringPdf);
+Color3f Interaction::sample(const Vector2f& u, const Vector3f& woLocal, Vector3f& wiLocal, float& pdf, float& etaScale) const {
+  return mesh->bsdf->sample(u, woLocal, wiLocal, pdf, etaScale);
 }
 
 bool Interaction::isLight() const {

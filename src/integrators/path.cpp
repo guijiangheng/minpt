@@ -4,7 +4,8 @@ namespace minpt {
 
 Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler) const {
   Ray r(ray);
-  Color3f l(0.0f), t(1.0f);
+  auto etaScaleFix = 1.0f;
+  Color3f l(0.0f), t(1.0f), albedo(1.0f);
 
   Interaction isect;
   auto foundIntersection = scene.intersect(r, isect);
@@ -30,21 +31,22 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
       auto f = isect.f(woLocal, wiLocal);
       if (!f.isBlack() && tester.unoccluded(scene)) {
         if (light.isDelta())
-          l += t * f * absCosTheta(wiLocal) / lightPdf;
+          l += albedo * f * absCosTheta(wiLocal) / lightPdf;
         else {
           auto scatteringPdf = isect.scatteringPdf(woLocal, wiLocal);
-          l += t * f * li * absCosTheta(wiLocal) / lightPdf * weight(lightPdf, scatteringPdf);
+          l += albedo * f * li * absCosTheta(wiLocal) / lightPdf * weight(lightPdf, scatteringPdf);
         }
       }
     }
 
     Vector3f wiLocal;
+    float etaScale;
     float scatteringPdf;
-    auto f = isect.sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf);
+    auto f = isect.sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf, etaScale);
 
     // update throughput
-    t *= f;
-    if (t.isBlack()) return l;
+    albedo *= f;
+    if (albedo.isBlack()) return l;
 
     // shoot next ray
     wi = isect.toWorld(wiLocal);
@@ -61,10 +63,18 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
         auto li = newIsect.le(-wi);
         if (li.isBlack()) return l;
         if (isect.mesh->bsdf->isDelta())
-          return l + t * li;
+          return l + albedo * li;
         auto lightPdf = newIsect.lightPdf(isect.p);
-        return l + t * li * weight(scatteringPdf, lightPdf);
+        return l + albedo * li * weight(scatteringPdf, lightPdf);
       }
+    }
+
+    etaScaleFix *= etaScale;
+    t = albedo * etaScaleFix;
+    if (bounce > 3 && t.maxComponent() < 1.0f) {
+      auto q = std::max(0.05f, 1 - t.maxComponent());
+      if (sampler.get1D() < q) break;
+      albedo /= 1 - q;
     }
   }
 

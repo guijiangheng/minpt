@@ -19,7 +19,14 @@ public:
     return 0;
   }
 
-  Color3f sample(const Vector2f& u, const Vector3f& wo, Vector3f& wi, float& pdf) const override {
+  Color3f sample(
+      const Vector2f& u,
+      const Vector3f& wo,
+      Vector3f& wi,
+      float& pdf,
+      float& etaScale) const override {
+
+    etaScale = 1.0f;
     pdf = 1.0f;
     wi = Vector3f(-wo.x, -wo.y, wo.z);
     return kr;

@@ -32,8 +32,9 @@ Color3f DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sample
   }
 
   Vector3f wiLocal;
+  float etaScale;
   float scatteringPdf;
-  auto f = isect.sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf);
+  auto f = isect.sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf, etaScale);
   if (f.isBlack()) return l;
 
   Interaction newIsect;

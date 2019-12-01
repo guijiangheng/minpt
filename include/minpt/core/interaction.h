@@ -31,7 +31,7 @@ public:
 
   float scatteringPdf(const Vector3f& woLocal, const Vector3f& wiLocal) const;
 
-  Color3f sample(const Vector2f& u, const Vector3f& woLocal, Vector3f& wiLocal, float& scatteringPdf) const;
+  Color3f sample(const Vector2f& u, const Vector3f& woLocal, Vector3f& wiLocal, float& pdf, float& etaScale) const;
 
   Ray spawnRay(const Vector3f& w, float tMax = Infinity) const {
     return Ray(offsetRayOrigin(w), w, tMax);

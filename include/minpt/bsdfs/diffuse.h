@@ -23,7 +23,14 @@ public:
     return sameHemisphere(wo, wi) ? absCosTheta(wi) * InvPi : 0;
   }
 
-  Color3f sample(const Vector2f& u, const Vector3f& wo, Vector3f& wi, float& pdf) const override {
+  Color3f sample(
+      const Vector2f& u,
+      const Vector3f& wo,
+      Vector3f& wi,
+      float& pdf,
+      float& etaScale) const override {
+
+    etaScale = 1.0f;
     wi = cosineSampleHemisphere(u);
     pdf = wi.z * InvPi;
     if (wo.z < 0) wi.z = -wi.z;
