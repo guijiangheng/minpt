@@ -251,6 +251,12 @@ Object* loadFromXML(const std::string& filename) {
               transform = matrix * transform;
             }
             break;
+          case ETranslate: {
+              checkAttributes(node, { "value" });
+              auto translation = toVector3f(node.attribute("value").value());
+              transform = Matrix4f::translate(translation.x, translation.y, translation.z) * transform;
+            }
+            break;
           case EScale: {
               checkAttributes(node, { "value" });
               auto scale = toVector3f(node.attribute("value").value());

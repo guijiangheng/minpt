@@ -6,7 +6,7 @@
 	</sampler>
 
   <integrator type="path">
-		<integer name="maxDepth" value="10"/>
+		<integer name="maxDepth" value="30"/>
 	</integrator>
 
 	<camera type="perspective">
@@ -21,7 +21,7 @@
 	</camera>
 
 	<mesh type="obj">
-		<string name="filename" value="meshes/mesh_1.obj"/>
+		<string name="filename" value="table/meshes/mesh_1.obj"/>
 		<light type="area">
 			<color3f name="radiance" value="3,3,2.5"/>
 		</light>
@@ -35,7 +35,7 @@
 	</mesh>
 
 	<mesh type="obj">
-		<string name="filename" value="meshes/mesh_1.obj"/>
+		<string name="filename" value="table/meshes/mesh_1.obj"/>
 		<light type="area">
 			<color3f name="radiance" value="1,1,1.6"/>
 		</light>
@@ -50,9 +50,9 @@
 
 
 	<mesh type="obj">
-		<string name="filename" value="meshes/mesh_0.obj"/>
-		<bsdf type="microfacet">
-			<color3f name="kd" value="0, 0, 0"/>
+		<string name="filename" value="table/meshes/mesh_0.obj"/>
+		<bsdf type="diffuse">
+			<color3f name="albedo" value="0.1, 0.1, 0.1"/>
 		</bsdf>
 		<transform name="toWorld">
 			<translate value="3,0,0"/>
@@ -61,7 +61,7 @@
 
 	<!-- Diffuse floor -->
 	<mesh type="obj">
-		<string name="filename" value="meshes/mesh_1.obj"/>
+		<string name="filename" value="table/meshes/mesh_1.obj"/>
 		<bsdf type="diffuse">
 			<color3f name="albedo" value=".5,.5,.5"/>
 		</bsdf>
@@ -73,7 +73,7 @@
 
 	<!-- Water<->Air interface -->
 	<mesh type="obj">
-		<string name="filename" value="meshes/mesh_2.obj"/>
+		<string name="filename" value="table/meshes/mesh_2.obj"/>
 		<transform name="toWorld">
 			<translate value="-1,0,0"/>
 		</transform>
@@ -84,7 +84,7 @@
 
 	<!-- Glass<->Air interface -->
 	<mesh type="obj">
-		<string name="filename" value="meshes/mesh_3.obj"/>
+		<string name="filename" value="table/meshes/mesh_3.obj"/>
 		<transform name="toWorld">
 			<translate value="-1,0,0"/>
 		</transform>
@@ -95,7 +95,7 @@
 
 	<!-- Glass<->Water interface -->
 	<mesh type="obj">
-		<string name="filename" value="meshes/mesh_4.obj"/>
+		<string name="filename" value="table/meshes/mesh_4.obj"/>
 		<transform name="toWorld">
 			<translate value="-1,0,0"/>
 		</transform>

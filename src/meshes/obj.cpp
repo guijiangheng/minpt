@@ -41,10 +41,12 @@ struct VertexHash : public std::unary_function<Vertex, std::size_t> {
 WavefrontOBJ::WavefrontOBJ(const PropertyList& props) {
   auto filename = props.getString("filename");
   auto path = getFileResolver()->resolve(filename);
-  std::ifstream file(path.str());
 
+  std::ifstream file(path.str());
   if (file.fail())
     throw Exception("Unable to open OBJ file \"%s\"!", filename);
+
+  Matrix4f mat = props.getTransform("toWorld", Matrix4f());
 
   name = filename;
   std::cout << "Loading \"" << filename << "\" .. ";
@@ -66,6 +68,7 @@ WavefrontOBJ::WavefrontOBJ(const PropertyList& props) {
     if (prefix == "v") {
       Vector3f p;
       line >> p.x >> p.y >> p.z;
+      p = mat.applyP(p);
       bounds.merge(p);
       positions.push_back(p);
     } else if (prefix == "vt") {
@@ -75,7 +78,7 @@ WavefrontOBJ::WavefrontOBJ(const PropertyList& props) {
     } else if (prefix == "vn") {
       Vector3f n;
       line >> n.x >> n.y >> n.z;
-      normals.push_back(normalize(n));
+      normals.push_back(normalize(mat.applyN(n)));
     } else if (prefix == "f") {
       Vertex verts[6];
       auto nVerts = 3;
