@@ -19,6 +19,7 @@
 #include <minpt/core/exception.h>
 #include <minpt/core/sampling.h>
 #include <minpt/core/distribution.h>
+#include <minpt/microfacets/beckmann.h>
 
 using namespace nanogui;
 
@@ -36,6 +37,7 @@ public:
     Disk,
     UniformHemisphere,
     CosineHemisphere,
+    Beckmann,
     HDR
   };
 
@@ -66,10 +68,16 @@ public:
     glDeleteTextures(2, &textures[0]);
   }
 
+  static float mapParameter(float parameter) {
+    return std::exp(std::log(0.01f) * (1 - parameter) + std::log(1.0f) * parameter);
+  }
+
   void runTest() {
     auto xres = 51;
     auto yres = 51;
     auto warpType = (WarpType)warpTypeBox->selectedIndex();
+    auto parameterValue = mapParameter(parameterSlider->value());
+
     if (warpType != None && warpType != Triangle && warpType != Disk) xres *= 2;
 
     if (warpType == HDR) {
@@ -85,7 +93,7 @@ public:
     std::memset(expFrequencies.get(), 0, res * sizeof(double));
 
     MatrixXf points, values;
-    generatePoints(sampleCount, Independent, warpType, points, values);
+    generatePoints(sampleCount, Independent, warpType, parameterValue, points, values);
 
     for (auto i = 0; i < sampleCount; ++i) {
       float x, y;
@@ -126,6 +134,8 @@ public:
           return minpt::uniformSampleHemispherePdf(v);
         else if (warpType == CosineHemisphere)
           return minpt::cosineSampleHemispherePdf(v);
+        else if (warpType == Beckmann)
+          return v.z < 0 ? 0 : beckmannDistrib->pdf(v);
         else
           throw minpt::Exception("Invalid warp type");
       }
@@ -187,7 +197,7 @@ public:
     window->setVisible(false);
   }
 
-  std::pair<Vector3f, float> warpPoint(WarpType warpType, const Vector2f& point) {
+  std::pair<Vector3f, float> warpPoint(WarpType warpType, const Vector2f& point, float parameterValue) {
     Vector3f result;
     minpt::Vector2f u(point.x(), point.y());
 
@@ -221,12 +231,24 @@ public:
           result << temp.x, temp.y, temp.z;
         }
         break;
+      case Beckmann: {
+        auto temp = beckmannDistrib->sample(u);
+        result << temp.x, temp.y, temp.z;
+      }
+      break;
     }
 
     return std::make_pair(result, 1.0f);
   }
 
-  void generatePoints(int& pointCount, PointType pointType, WarpType warpType, MatrixXf& positions, MatrixXf& weights) {
+  void generatePoints(
+      int& pointCount,
+      PointType pointType,
+      WarpType warpType,
+      float parameterValue,
+      MatrixXf& positions,
+      MatrixXf& weights) {
+
     auto sqrtValue = (int)(std::sqrt((float)pointCount) + 0.5f);
     auto invSqrtValue = 1.0f / sqrtValue;
 
@@ -257,7 +279,7 @@ public:
           break;
       }
 
-      auto result = warpPoint(warpType, sample);
+      auto result = warpPoint(warpType, sample, parameterValue);
       positions.col(i) = result.first;
       weights(0, i) = result.second;
     }
@@ -267,6 +289,9 @@ public:
     auto pointType = (PointType)pointTypeBox->selectedIndex();
     auto warpType = (WarpType)warpTypeBox->selectedIndex();
 
+    auto parameterValue = mapParameter(parameterSlider->value());
+    pointCount = (int)std::pow(2.0f, 15 * pointCountSlider->value() + 5);
+
     if (warpType == HDR) {
       setSize(Vector2i(hdrBitmap.cols(), hdrBitmap.rows()));
       gridCheckBox->setEnabled(false);
@@ -275,11 +300,14 @@ public:
       gridCheckBox->setEnabled(true);
     }
 
-    pointCount = (int)std::pow(2.0f, 15 * pointCountSlider->value() + 5);
+    if (warpType == Beckmann) {
+      auto alpha = minpt::BeckmannDistribution::roughnessToAlpha(parameterValue);
+      beckmannDistrib = std::make_unique<minpt::BeckmannDistribution>(alpha, alpha);
+    }
 
     MatrixXf positions, values;
     try {
-      generatePoints(pointCount, pointType, warpType, positions, values);
+      generatePoints(pointCount, pointType, warpType, parameterValue, positions, values);
     } catch (const minpt::Exception& e) {
       warpTypeBox->setSelectedIndex(0);
       refresh();
@@ -316,10 +344,10 @@ public:
       auto index = 0;
       for (auto i = 0; i <= gridRes; ++i)
         for (auto j = 0; j <= fineGridRes; ++j) {
-          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, j * fineScale)).first;
-          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, (j + 1) * fineScale)).first;
-          positions.col(index++) = warpPoint(warpType, Vector2f(j * fineScale, i * coarseScale)).first;
-          positions.col(index++) = warpPoint(warpType, Vector2f((j + 1) * fineScale, i * coarseScale)).first;
+          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, j * fineScale), parameterValue).first;
+          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, (j + 1) * fineScale), parameterValue).first;
+          positions.col(index++) = warpPoint(warpType, Vector2f(j * fineScale, i * coarseScale), parameterValue).first;
+          positions.col(index++) = warpPoint(warpType, Vector2f((j + 1) * fineScale, i * coarseScale), parameterValue).first;
         }
 
       if (warpType != None) {
@@ -346,6 +374,8 @@ public:
 
     pointCountBox->setValue(str);
     pointCountSlider->setValue((std::log((float)pointCount) / std::log(2.f) - 5) / 15);
+    parameterBox->setValue(tfm::format("%.1g", parameterValue));
+    parameterSlider->setEnabled(warpType == Beckmann);
   }
 
   void drawHistogram(const Vector2i& pos, const Vector2i& size_, GLuint tex) {
@@ -461,8 +491,16 @@ public:
 
     new Label(window, "Warping method", "sans-bold");
 
-    warpTypeBox = new ComboBox(window, { "None", "Triangle", "Disk", "Hemisphere (uni)", "Hemisphere (cos)", "HDR" });
+    warpTypeBox = new ComboBox(window, { "None", "Triangle", "Disk", "Hemisphere (uni)", "Hemisphere (cos)", "Beckmann", "HDR" });
     warpTypeBox->setCallback([=](int) { refresh(); });
+
+    panel = new Widget(window);
+    panel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 20));
+    parameterSlider = new Slider(panel);
+    parameterSlider->setFixedWidth(55);
+    parameterSlider->setCallback([=](bool) { refresh(); });
+    parameterBox = new TextBox(panel);
+    parameterBox->setFixedSize(Vector2i(80, 25));
 
     panel = new Widget(window);
     panel->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 20));
@@ -643,6 +681,7 @@ public:
 
     mBackground.setZero();
     pointCountSlider->setValue(0.5f);
+    parameterSlider->setValue(0.5f);
 
     resizeEvent(mSize);
     refresh();
@@ -684,6 +723,8 @@ private:
   Window* window;
   Slider* pointCountSlider;
   TextBox* pointCountBox;
+  Slider* parameterSlider;
+  TextBox* parameterBox;
   ComboBox* pointTypeBox;
   ComboBox* warpTypeBox;
   CheckBox* gridCheckBox;
@@ -697,6 +738,7 @@ private:
   minpt::Bitmap hdrBitmap;
   minpt::Distribution2D distrib;
   std::unique_ptr<double[]> luminance;
+  std::unique_ptr<minpt::MicrofacetDistribution> beckmannDistrib;
 };
 
 int main() {

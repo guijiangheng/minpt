@@ -23,7 +23,7 @@ Color3f Glass::sample(
   auto sinThetaT = sinThetaI / eta;
 
   float fr;
-  float cosThetaT;
+  float cosThetaT = 0.0f;
 
   if (sinThetaT >= 1.0f)
     fr = 1.0f;

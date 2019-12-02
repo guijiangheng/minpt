@@ -16,7 +16,6 @@ public:
     EBSDF,
     ELight,
     EFilter,
-    EMicrofacet,
     EClassTypeCount
   };
 
@@ -47,7 +46,6 @@ public:
       case EBSDF:         return "bsdf";
       case ELight:        return "light";
       case EFilter:       return "filter";
-      case EMicrofacet:   return "microfacet";
       default:            return "<unknown>";
     }
   }

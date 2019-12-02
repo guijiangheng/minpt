@@ -55,7 +55,7 @@ inline float sinTheta(const Vector3f& w) {
 }
 
 inline float sin2Theta(const Vector3f& w) {
-  return std::max(0.0f, 1 - cos2Theta(w));
+  return std::max(0.0f, 1.0f - cos2Theta(w));
 }
 
 inline float cosTheta(const Vector3f& w) {
@@ -84,8 +84,8 @@ inline float sinPhi(const Vector3f& w) {
 }
 
 inline float sin2Phi(const Vector3f& w) {
-  auto sinPhi_ = sinPhi(w);
-  return sinPhi_ * sinPhi_;
+  auto sinPhi = minpt::sinPhi(w);
+  return sinPhi * sinPhi;
 }
 
 inline float cosPhi(const Vector3f& w) {

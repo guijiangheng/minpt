@@ -1,6 +1,20 @@
+#include <minpt/math/math.h>
 #include <minpt/microfacets/beckmann.h>
 
 namespace minpt {
+
+ float BeckmannDistribution::d(const Vector3f& wh) const {
+  auto tan2Theta = minpt::tan2Theta(wh);
+  if (std::isinf(tan2Theta)) return 0;
+  auto cos4Theta = cos2Theta(wh) * cos2Theta(wh);
+  if (alphaX == alphaY) {
+    auto inv = 1 / (alphaX * alphaX);
+    return std::exp(-tan2Theta * inv) * InvPi * inv / cos4Theta;
+  }
+  return std::exp(-tan2Theta * (cos2Theta(wh) / (alphaX * alphaX) +
+                                sin2Theta(wh) / (alphaY * alphaY))) /
+         (Pi * alphaX * alphaY * cos4Theta);
+ }
 
 Vector3f BeckmannDistribution::sample(const Vector2f& u) const {
   float phi, tan2Theta;
