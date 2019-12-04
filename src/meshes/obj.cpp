@@ -46,7 +46,7 @@ WavefrontOBJ::WavefrontOBJ(const PropertyList& props) {
   if (file.fail())
     throw Exception("Unable to open OBJ file \"%s\"!", filename);
 
-  Matrix4f mat = props.getTransform("toWorld", Matrix4f());
+  Matrix4f mat = props.getTransform("toWorld", Matrix4f::identity());
 
   name = filename;
   std::cout << "Loading \"" << filename << "\" .. ";
