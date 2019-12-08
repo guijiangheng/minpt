@@ -1,9 +1,10 @@
 #include <minpt/accels/bvh.h>
 #include <minpt/cameras/perspective.h>
 
+#include <minpt/bsdfs/diffuse.h>
 #include <minpt/bsdfs/glass.h>
 #include <minpt/bsdfs/mirror.h>
-#include <minpt/bsdfs/diffuse.h>
+#include <minpt/bsdfs/plastic.h>
 
 #include <minpt/filters/box.h>
 #include <minpt/filters/gaussian.h>
@@ -28,9 +29,10 @@ MINPT_REGISTER_CLASS(BVHAccel, "bvh");
 MINPT_REGISTER_CLASS(PerspectiveCamera, "perspective");
 MINPT_REGISTER_CLASS(WavefrontOBJ, "obj");
 
+MINPT_REGISTER_CLASS(Diffuse, "diffuse");
 MINPT_REGISTER_CLASS(Glass, "glass");
 MINPT_REGISTER_CLASS(Mirror, "mirror");
-MINPT_REGISTER_CLASS(Diffuse, "diffuse");
+MINPT_REGISTER_CLASS(Plastic, "plastic");
 
 MINPT_REGISTER_CLASS(BoxFilter, "box");
 MINPT_REGISTER_CLASS(GaussianFilter, "gaussian");

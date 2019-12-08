@@ -33,7 +33,7 @@ public:
     etaScale = 1.0f;
     wi = cosineSampleHemisphere(u);
     pdf = wi.z * InvPi;
-    if (wo.z < 0) wi.z = -wi.z;
+    if (wo.z < 0.0f) wi.z = -wi.z;
     return albedo;
   }
 

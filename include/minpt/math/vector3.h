@@ -183,6 +183,10 @@ inline Vector3f faceForward(const Vector3f& n, const Vector3f& v) {
   return dot(n, v) > 0 ? n : -n;
 }
 
+inline Vector3f reflect(const Vector3f& w, const Vector3f& n) {
+  return -w + n * dot(w, n) * 2;
+}
+
 inline void coordinateSystem(const Vector3f& a, Vector3f& b, Vector3f& c) {
   b = std::abs(a.x) > std::abs(a.y) ?
     Vector3f(-a.z, 0, a.x) / std::sqrt(a.x * a.x + a.z * a.z) :

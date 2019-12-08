@@ -81,6 +81,7 @@ add_executable(minpt
   include/minpt/bsdfs/glass.h
   include/minpt/bsdfs/mirror.h
   include/minpt/bsdfs/diffuse.h
+  include/minpt/bsdfs/plastic.h
   include/minpt/cameras/perspective.h
   include/minpt/filters/box.h
   include/minpt/filters/gaussian.h
@@ -112,6 +113,7 @@ add_executable(minpt
   src/integrators/path.cpp
   src/integrators/direct.cpp
   src/bsdfs/glass.cpp
+  src/bsdfs/plastic.cpp
 )
 
 target_compile_features(minpt PRIVATE cxx_std_17)
