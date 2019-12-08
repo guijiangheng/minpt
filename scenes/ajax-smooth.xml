@@ -1,0 +1,37 @@
+<scene>
+  <string name="outputName" value="ajax-smooth.png"/>
+  <accel type="bvh"/>
+	<sampler type="random">
+		<integer name="sampleCount" value="1024"/>
+	</sampler>
+
+  <integrator type="path"/>
+
+	<mesh type="obj">
+		<string name="filename" value="ajax.obj"/>
+		<bsdf type="plastic">
+      <float name="eta" value="1.7"/>
+      <color3f name="kd" value="0.2 0.2 0.4"/>
+      <float name="alpha" value="0.08"/>
+      <boolean name="remapRoughness" value="false"/>
+      <!-- <float name="alpha" value="0.28"/> -->
+		</bsdf>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value="light.obj"/>
+		<light type="area">
+      <color3f name="radiance" value="20 20 20"/>
+		</light>
+	</mesh>
+
+	<camera type="perspective">
+		<transform name="toWorld">
+      <lookat target="-64.8161, 47.2211, 23.8576"
+              origin="-65.6055, 47.5762, 24.3583"
+              up="0.299858, 0.934836, -0.190177"/>
+		</transform>
+		<float name="fov" value="30"/>
+		<vector2i name="outputSize" value="768, 768"/>
+	</camera>
+</scene>

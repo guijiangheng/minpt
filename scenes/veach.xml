@@ -5,7 +5,7 @@
 	<integrator type="path"/>
 
 	<sampler type="random">
-		<integer name="sampleCount" value="256"/>
+		<integer name="sampleCount" value="4096"/>
 	</sampler>
 
 	<camera type="perspective">
@@ -75,7 +75,7 @@
 		<string name="filename" value="veach/plate1.obj"/>
 		<bsdf type="plastic">
 			<color3f name="kd" value="0.0175, 0.0225, 0.0325"/>
-			<float name="alpha" value="0.005"/>
+			<float name="roughness" value="0.005"/>
 			<boolean name="remapRoughness" value="false"/>
 		</bsdf>
 	</mesh>
@@ -84,7 +84,7 @@
 		<string name="filename" value="veach/plate2.obj"/>
 		<bsdf type="plastic">
 			<color3f name="kd" value="0.0175, 0.0225, 0.0325"/>
-			<float name="alpha" value="0.02"/>
+			<float name="roughness" value="0.02"/>
 			<boolean name="remapRoughness" value="false"/>
 		</bsdf>
 	</mesh>
@@ -93,7 +93,7 @@
 		<string name="filename" value="veach/plate3.obj"/>
 		<bsdf type="plastic">
 			<color3f name="kd" value="0.0175, 0.0225, 0.0325"/>
-			<float name="alpha" value="0.05"/>
+			<float name="roughness" value="0.05"/>
 			<boolean name="remapRoughness" value="false"/>
 		</bsdf>
 	</mesh>
@@ -102,7 +102,7 @@
 		<string name="filename" value="veach/plate4.obj"/>
 		<bsdf type="plastic">
 			<color3f name="kd" value="0.0175, 0.0225, 0.0325"/>
-			<float name="alpha" value="0.1"/>
+			<float name="roughness" value="0.1"/>
 			<boolean name="remapRoughness" value="false"/>
 		</bsdf>
 	</mesh>

@@ -2,7 +2,7 @@
   <string name="outputName" value="table.png"/>
   <accel type="bvh"/>
 	<sampler type="random">
-		<integer name="sampleCount" value="512"/>
+		<integer name="sampleCount" value="4096"/>
 	</sampler>
 
   <integrator type="path">
@@ -51,8 +51,9 @@
 
 	<mesh type="obj">
 		<string name="filename" value="table/meshes/mesh_0.obj"/>
-		<bsdf type="diffuse">
-			<color3f name="albedo" value="0.1, 0.1, 0.1"/>
+		<bsdf type="plastic">
+			<color3f name="kd" value="0 0 0"/>
+			<boolean name="remapRoughness" value="false"/>
 		</bsdf>
 		<transform name="toWorld">
 			<translate value="3,0,0"/>

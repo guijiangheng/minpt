@@ -3,7 +3,7 @@
   <string name="outputName" value="cbox.png"/>
 	<accel type="bvh"/>
 	<integrator type="path">
-		<integer name="maxDepth" value="10"/>
+		<integer name="maxDepth" value="50"/>
 	</integrator>
 	<camera type="perspective">
 		<float name="fov" value="27.7856"/>
@@ -17,7 +17,7 @@
 	</camera>
 
 	<sampler type="random">
-		<integer name="sampleCount" value="512"/>
+		<integer name="sampleCount" value="4096"/>
 	</sampler>
 
 	<mesh type="obj">
