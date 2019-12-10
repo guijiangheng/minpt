@@ -99,6 +99,4 @@ std::string Scene::toString() const {
   );
 }
 
-MINPT_REGISTER_CLASS(Scene, "scene");
-
 }

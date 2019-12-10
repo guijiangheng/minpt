@@ -38,7 +38,7 @@ set(
 
 add_definitions(${NANOGUI_EXTRA_DEFS})
 
-add_executable(minpt
+set(MINPT_HEADERS
   include/minpt/utils/utils.h
   include/minpt/utils/bitmap.h
 
@@ -78,26 +78,36 @@ add_executable(minpt
   include/minpt/math/frame.h
 
   include/minpt/accels/bvh.h
+
   include/minpt/bsdfs/glass.h
   include/minpt/bsdfs/mirror.h
   include/minpt/bsdfs/diffuse.h
   include/minpt/bsdfs/plastic.h
+
   include/minpt/cameras/perspective.h
+
   include/minpt/filters/box.h
   include/minpt/filters/gaussian.h
+
   include/minpt/samplers/random.h
+
   include/minpt/integrators/ao.h
   include/minpt/integrators/normals.h
   include/minpt/integrators/path.h
   include/minpt/integrators/direct.h
+
   include/minpt/lights/point.h
   include/minpt/lights/area.h
-  include/minpt/meshes/obj.h
 
-  src/main/main.cpp
+  include/minpt/meshes/obj.h
+)
+
+set(MINPT_SRCS
   src/math/matrix4.cpp
+
   src/utils/utils.cpp
   src/utils/bitmap.cpp
+
   src/core/scene.cpp
   src/core/mesh.cpp
   src/core/parser.cpp
@@ -105,28 +115,31 @@ add_executable(minpt
   src/core/block.cpp
   src/core/interaction.cpp
   src/core/visibilitytester.cpp
+
   src/gui/screen.cpp
+
   src/microfacets/beckmann.cpp
+
   src/meshes/obj.cpp
+
   src/accelerators/bvh.cpp
+
   src/cameras/perspective.cpp
+
   src/integrators/path.cpp
   src/integrators/direct.cpp
+
   src/bsdfs/glass.cpp
   src/bsdfs/plastic.cpp
 )
 
-target_compile_features(minpt PRIVATE cxx_std_17)
-target_include_directories(minpt PRIVATE ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(minpt PRIVATE tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng)
+add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})
+target_compile_features(minpt PUBLIC cxx_std_17)
+target_include_directories(minpt PUBLIC ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_link_libraries(minpt PUBLIC tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng)
 
-add_executable(
-  warptest
-  src/main/warptest.cpp
-  src/utils/bitmap.cpp
-  src/utils/utils.cpp
-  src/microfacets/beckmann.cpp
-)
-target_compile_features(warptest PRIVATE cxx_std_17)
-target_include_directories(warptest PRIVATE ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(warptest PRIVATE tbb_static IlmImf nanogui lodepng ${NANOGUI_EXTRA_LIBS})
+add_executable(main src/main/main.cpp)
+target_link_libraries(main minpt)
+
+add_executable(warptest src/main/warptest.cpp)
+target_link_libraries(warptest minpt)

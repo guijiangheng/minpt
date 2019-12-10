@@ -24,6 +24,7 @@ namespace minpt {
 
 std::map<std::string, ObjectFactory::Constructor> *ObjectFactory::constructors = nullptr;
 
+MINPT_REGISTER_CLASS(Scene, "scene");
 MINPT_REGISTER_CLASS(RandomSampler, "random");
 MINPT_REGISTER_CLASS(BVHAccel, "bvh");
 MINPT_REGISTER_CLASS(PerspectiveCamera, "perspective");

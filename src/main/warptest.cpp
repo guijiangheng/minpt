@@ -20,6 +20,7 @@
 #include <minpt/core/sampling.h>
 #include <minpt/core/distribution.h>
 #include <minpt/microfacets/beckmann.h>
+#include <minpt/bsdfs/plastic.h>
 
 using namespace nanogui;
 
@@ -38,6 +39,7 @@ public:
     UniformHemisphere,
     CosineHemisphere,
     Beckmann,
+    MicrofacetBRDF,
     HDR
   };
 
@@ -236,6 +238,11 @@ public:
         result << temp.x, temp.y, temp.z;
       }
       break;
+      case MicrofacetBRDF: {
+        minpt::Vector3f wi;
+        float pdf, etaScale;
+        brdf->sample(u, wo, wi, pdf, etaScale);
+      }
     }
 
     return std::make_pair(result, 1.0f);
@@ -294,15 +301,20 @@ public:
 
     if (warpType == HDR) {
       setSize(Vector2i(hdrBitmap.cols(), hdrBitmap.rows()));
-      gridCheckBox->setEnabled(false);
       gridCheckBox->setChecked(false);
-    } else {
-      gridCheckBox->setEnabled(true);
     }
 
     if (warpType == Beckmann) {
       auto alpha = minpt::BeckmannDistribution::roughnessToAlpha(parameterValue);
       beckmannDistrib = std::make_unique<minpt::BeckmannDistribution>(alpha, alpha);
+    } else if (warpType == MicrofacetBRDF) {
+      float angle = (angleSlider->value() - 0.5f) * M_PI;
+      wo = minpt::Vector3f(std::sin(angle), 0.0f, std::max(std::cos(angle), 0.0001f));
+      minpt::PropertyList props;
+      props.setFloat("roughness", parameterValue);
+      props.setColor3f("kd", minpt::Color3f(0.0f));
+      props.setBoolean("remapRoughness", false);
+      brdf = std::unique_ptr<minpt::BSDF>((minpt::BSDF*)minpt::ObjectFactory::createInstance("plastic", props));
     }
 
     MatrixXf positions, values;
@@ -359,6 +371,21 @@ public:
       gridShader.uploadAttrib("position", positions);
     }
 
+    auto index = 0;
+    positions.resize(3, 106);
+    for (auto i = 0; i <= 50; ++i) {
+      auto angle1 = i * 2.0f * M_PI / 50.0f;
+      auto angle2 = (i + 1) * 2.0f * M_PI / 50.0f;
+      positions.col(index++) << std::cos(angle1) * 0.5f + 0.5f, std::sin(angle1) * 0.5f + 0.5f, 0.0f;
+      positions.col(index++) << std::cos(angle2) * 0.5f + 0.5f, std::sin(angle2) * 0.5f + 0.5f, 0.0f;
+    }
+    positions.col(index++) << 0.5f, 0.5f, 0.0f;
+    positions.col(index++) <<  wo.x * 0.5f + 0.5f,  wo.y * 0.5f + 0.5f, wo.z * 0.5f;
+    positions.col(index++) << 0.5f, 0.5f, 0.0f;
+    positions.col(index++) << -wo.x * 0.5f + 0.5f, -wo.y * 0.5f + 0.5f, wo.z * 0.5f;
+    arrowShader.bind();
+    arrowShader.uploadAttrib("position", positions);
+
     // Update user interface
     std::string str;
     if (pointCount > 1000000) {
@@ -372,10 +399,13 @@ public:
       str = tfm::format("%i", pointCount);
     }
 
+    gridCheckBox->setEnabled(warpType != HDR);
     pointCountBox->setValue(str);
     pointCountSlider->setValue((std::log((float)pointCount) / std::log(2.f) - 5) / 15);
+    parameterSlider->setEnabled(warpType == Beckmann || warpType == MicrofacetBRDF);
     parameterBox->setValue(tfm::format("%.1g", parameterValue));
-    parameterSlider->setEnabled(warpType == Beckmann);
+    angleSlider->setEnabled(warpType == MicrofacetBRDF);
+    angleBox->setValue(tfm::format("%.1f", angleSlider->value() * 180.0f - 90.f));
   }
 
   void drawHistogram(const Vector2i& pos, const Vector2i& size_, GLuint tex) {
@@ -467,6 +497,12 @@ public:
         gridShader.drawArray(GL_LINES, 0, lineCount);
         glDisable(GL_BLEND);
       }
+
+      if (warpType == MicrofacetBRDF) {
+        arrowShader.bind();
+        arrowShader.setUniform("mvp", mvp);
+        arrowShader.drawArray(GL_LINES, 0, 106);
+      }
     }
   }
 
@@ -491,7 +527,12 @@ public:
 
     new Label(window, "Warping method", "sans-bold");
 
-    warpTypeBox = new ComboBox(window, { "None", "Triangle", "Disk", "Hemisphere (uni)", "Hemisphere (cos)", "Beckmann", "HDR" });
+    warpTypeBox = new ComboBox(window, {
+      "None", "Triangle", "Disk",
+      "Hemisphere (uni)", "Hemisphere (cos)",
+      "Beckmann", "Microfacet BRDF",
+      "HDR"
+    });
     warpTypeBox->setCallback([=](int) { refresh(); });
 
     panel = new Widget(window);
@@ -566,6 +607,23 @@ public:
 
     gridShader.init(
       "Grid Shader",
+
+      "#version 330\n"
+      "uniform mat4 mvp;\n"
+      "in vec3 position;\n"
+      "void main() {\n"
+      "  gl_Position = mvp * vec4(position, 1.0);\n"
+      "}",
+
+      "#version 330\n"
+      "out vec4 out_color;\n"
+      "void main() {\n"
+      "  out_color = vec4(vec3(1.0), 0.4);\n"
+      "}"
+    );
+
+    arrowShader.init(
+      "Arrow Shader",
 
       "#version 330\n"
       "uniform mat4 mvp;\n"
@@ -682,6 +740,7 @@ public:
     mBackground.setZero();
     pointCountSlider->setValue(0.5f);
     parameterSlider->setValue(0.5f);
+    angleSlider->setValue(0.5f);
 
     resizeEvent(mSize);
     refresh();
@@ -733,10 +792,13 @@ private:
   CheckBox* brdfValueCheckBox;
   GLShader gridShader;
   GLShader pointShader;
+  GLShader arrowShader;
   GLShader histogramShader;
   GLShader hdrShader;
+  minpt::Vector3f wo;
   minpt::Bitmap hdrBitmap;
   minpt::Distribution2D distrib;
+  std::unique_ptr<minpt::BSDF> brdf;
   std::unique_ptr<double[]> luminance;
   std::unique_ptr<minpt::MicrofacetDistribution> beckmannDistrib;
 };
