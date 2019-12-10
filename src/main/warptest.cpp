@@ -98,6 +98,7 @@ public:
     generatePoints(sampleCount, Independent, warpType, parameterValue, points, values);
 
     for (auto i = 0; i < sampleCount; ++i) {
+      if (values(0, i) == 0.0f) continue;
       float x, y;
       Vector3f sample = points.col(i);
       if (warpType == None || warpType == Triangle) {
@@ -138,6 +139,8 @@ public:
           return minpt::cosineSampleHemispherePdf(v);
         else if (warpType == Beckmann)
           return v.z < 0 ? 0 : beckmannDistrib->pdf(v);
+        else if (warpType == MicrofacetBRDF)
+          return brdf->pdf(wo, v);
         else
           throw minpt::Exception("Invalid warp type");
       }
@@ -241,8 +244,11 @@ public:
       case MicrofacetBRDF: {
         minpt::Vector3f wi;
         float pdf, etaScale;
-        brdf->sample(u, wo, wi, pdf, etaScale);
+        auto f = brdf->sample(u, wo, wi, pdf, etaScale);
+        result << wi.x, wi.y, wi.z;
+        return std::make_pair(result, f.isBlack() ? 0.0f : f[0]);
       }
+      break;
     }
 
     return std::make_pair(result, 1.0f);
@@ -327,12 +333,25 @@ public:
       return;
     }
 
+    auto valueScale = 0.0f;
+    for (auto i = 0; i < pointCount; ++i)
+      valueScale = std::max(valueScale, values(0, i));
+    valueScale = 1.0f / valueScale;
+
+    if (!brdfValueCheckBox->checked() || warpType != MicrofacetBRDF)
+      valueScale = 0.0f;
+
     if (warpType == HDR) {
       for (auto i = 0; i < pointCount; ++i)
         positions.col(i) = positions.col(i) * 2.0f - Vector3f(1.0f, 1.0f, 0.0f);
     } else if (warpType != None && warpType != Triangle) {
-      for (auto i = 0; i < pointCount; ++i)
-        positions.col(i) = positions.col(i) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
+      for (auto i = 0; i < pointCount; ++i) {
+        if (values(0, i) == 0.0f) {
+          positions.col(i) = Vector3f::Constant(std::numeric_limits<float>::quiet_NaN());
+          continue;
+        }
+        positions.col(i) = (valueScale == 0.0f ? 1.0f : valueScale * values(0, i)) * positions.col(i) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
+      }
     }
 
     // Generate a color gradient
@@ -406,6 +425,7 @@ public:
     parameterBox->setValue(tfm::format("%.1g", parameterValue));
     angleSlider->setEnabled(warpType == MicrofacetBRDF);
     angleBox->setValue(tfm::format("%.1f", angleSlider->value() * 180.0f - 90.f));
+    brdfValueCheckBox->setEnabled(warpType == MicrofacetBRDF);
   }
 
   void drawHistogram(const Vector2i& pos, const Vector2i& size_, GLuint tex) {
