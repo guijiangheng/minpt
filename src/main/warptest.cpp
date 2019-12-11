@@ -74,6 +74,10 @@ public:
     return std::exp(std::log(0.01f) * (1 - parameter) + std::log(1.0f) * parameter);
   }
 
+  static Vector3f scalePoint(float valueScale, const Vector3f& p, float weight) {
+    return valueScale == 0.0f ? p : valueScale * weight * p;
+  }
+
   void runTest() {
     auto xres = 51;
     auto yres = 51;
@@ -311,8 +315,7 @@ public:
     }
 
     if (warpType == Beckmann) {
-      auto alpha = minpt::BeckmannDistribution::roughnessToAlpha(parameterValue);
-      beckmannDistrib = std::make_unique<minpt::BeckmannDistribution>(alpha, alpha);
+      beckmannDistrib = std::make_unique<minpt::BeckmannDistribution>(parameterValue, parameterValue);
     } else if (warpType == MicrofacetBRDF) {
       float angle = (angleSlider->value() - 0.5f) * M_PI;
       wo = minpt::Vector3f(std::sin(angle), 0.0f, std::max(std::cos(angle), 0.0001f));
@@ -350,7 +353,7 @@ public:
           positions.col(i) = Vector3f::Constant(std::numeric_limits<float>::quiet_NaN());
           continue;
         }
-        positions.col(i) = (valueScale == 0.0f ? 1.0f : valueScale * values(0, i)) * positions.col(i) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
+        positions.col(i) = scalePoint(valueScale, positions.col(i), values(0, i)) * 0.5f + Vector3f(0.5f, 0.5f, 0.0f);
       }
     }
 
@@ -375,10 +378,14 @@ public:
       auto index = 0;
       for (auto i = 0; i <= gridRes; ++i)
         for (auto j = 0; j <= fineGridRes; ++j) {
-          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, j * fineScale), parameterValue).first;
-          positions.col(index++) = warpPoint(warpType, Vector2f(i * coarseScale, (j + 1) * fineScale), parameterValue).first;
-          positions.col(index++) = warpPoint(warpType, Vector2f(j * fineScale, i * coarseScale), parameterValue).first;
-          positions.col(index++) = warpPoint(warpType, Vector2f((j + 1) * fineScale, i * coarseScale), parameterValue).first;
+          auto p = warpPoint(warpType, Vector2f(i * coarseScale, j * fineScale), parameterValue);
+          positions.col(index++) = scalePoint(valueScale, p.first, p.second);
+          p = warpPoint(warpType, Vector2f(i * coarseScale, (j + 1) * fineScale), parameterValue);
+          positions.col(index++) = scalePoint(valueScale, p.first, p.second);
+          p = warpPoint(warpType, Vector2f(j * fineScale, i * coarseScale), parameterValue);
+          positions.col(index++) = scalePoint(valueScale, p.first, p.second);
+          p = warpPoint(warpType, Vector2f((j + 1) * fineScale, i * coarseScale), parameterValue);
+          positions.col(index++) = scalePoint(valueScale, p.first, p.second);
         }
 
       if (warpType != None) {
