@@ -19,6 +19,7 @@
 
 #include <minpt/meshes/obj.h>
 #include <minpt/samplers/random.h>
+#include <minpt/textures/constant.h>
 
 namespace minpt {
 
@@ -45,5 +46,8 @@ MINPT_REGISTER_CLASS(PathIntegrator, "path");
 
 MINPT_REGISTER_CLASS(PointLight, "point");
 MINPT_REGISTER_CLASS(AreaLight, "area");
+
+MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float");
+MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, Color3f, "constant_color");
 
 }

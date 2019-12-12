@@ -16,6 +16,7 @@ public:
     EBSDF,
     ELight,
     EFilter,
+    ETexture,
     EClassTypeCount
   };
 
@@ -46,6 +47,7 @@ public:
       case EBSDF:         return "bsdf";
       case ELight:        return "light";
       case EFilter:       return "filter";
+      case ETexture:      return "texture";
       default:            return "<unknown>";
     }
   }
@@ -80,5 +82,15 @@ private:
       ObjectFactory::registerClass(name, cls ##_create);    \
     }                                                       \
   } cls ##_MINPT_;
+
+#define MINPT_REGISTER_TEMPLATED_CLASS(cls, T, name)              \
+  cls<T>* cls ##_## T ##_create(const PropertyList& props) {      \
+    return new cls<T>(props);                                     \
+  }                                                               \
+  static struct cls ##_## T ##_ {                                 \
+    cls ##_## T ##_() {                                           \
+      ObjectFactory::registerClass(name, cls ##_## T ##_create);  \
+    }                                                             \
+  } cls ## T ##__MINPT_;
 
 }

@@ -58,13 +58,11 @@ set(MINPT_HEADERS
   include/minpt/core/camera.h
   include/minpt/core/light.h
   include/minpt/core/filter.h
+  include/minpt/core/texture.h
   include/minpt/core/scene.h
-  include/minpt/microfacets/beckmann.h
   include/minpt/core/integrator.h
   include/minpt/core/accelerator.h
   include/minpt/core/visibilitytester.h
-
-  include/minpt/gui/screen.h
 
   include/minpt/math/math.h
   include/minpt/math/common.h
@@ -89,7 +87,7 @@ set(MINPT_HEADERS
   include/minpt/filters/box.h
   include/minpt/filters/gaussian.h
 
-  include/minpt/samplers/random.h
+  include/minpt/gui/screen.h
 
   include/minpt/integrators/ao.h
   include/minpt/integrators/normals.h
@@ -100,6 +98,12 @@ set(MINPT_HEADERS
   include/minpt/lights/area.h
 
   include/minpt/meshes/obj.h
+
+  include/minpt/microfacets/beckmann.h
+
+  include/minpt/samplers/random.h
+
+  include/minpt/textures/constant.h
 )
 
 set(MINPT_SRCS
