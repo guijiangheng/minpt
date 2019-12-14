@@ -36,7 +36,7 @@ CheckerboardTexture<Color3f>::CheckerboardTexture(const PropertyList& props) {
   delta = props.getVector2f("delta", Vector2f(0.0f));
   scale = props.getVector2f("scale", Vector2f(1.0f));
   value1 = props.getColor3f("value1", Color3f(0.0f));
-  value2 = props.getColor3f("value2", Color3f(0.0f));
+  value2 = props.getColor3f("value2", Color3f(1.0f));
 }
 
 template <>

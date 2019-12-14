@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <minpt/core/bsdf.h>
 #include <minpt/core/sampling.h>
 #include <minpt/core/interaction.h>
 #include <minpt/core/distribution.h>

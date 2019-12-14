@@ -44,7 +44,7 @@ public:
   void activate() override {
     if (!albedo) {
       PropertyList props;
-      props.setColor3f("value", props.getColor3f("albedo"));
+      props.setColor3f("value", Color3f(0.0f));
       albedo = static_cast<Texture<Color3f>*>(ObjectFactory::createInstance("constant_color", props));
     }
   }
@@ -71,7 +71,7 @@ public:
       "Diffuse[\n"
       "  albedo = %s\n"
       "]",
-      albedo->toString()
+      indent(albedo->toString())
     );
   }
 

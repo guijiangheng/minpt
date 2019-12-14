@@ -1,7 +1,6 @@
 #pragma once
 
 #include <minpt/utils/utils.h>
-#include <minpt/math/math.h>
 #include <minpt/core/bsdf.h>
 
 namespace minpt {

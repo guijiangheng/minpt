@@ -178,9 +178,11 @@ Object* loadFromXML(const std::string& filename) {
 
     try {
       if (currentIsObject) {
-        checkAttributes(node, { "type" });
         if (tag == ETexture)
-          checkAttributes(node, { "name" });
+          checkAttributes(node, { "type", "name" });
+        else
+          checkAttributes(node, { "type" });
+
         result = ObjectFactory::createInstance(node.attribute("type").value(), props);
         result->setName(node.attribute("name").value());
         for (auto child : children)
