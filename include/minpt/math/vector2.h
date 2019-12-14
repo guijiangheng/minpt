@@ -142,4 +142,8 @@ Vector2<T> max(const Vector2<T>& a, const Vector2<T>& b) {
   );
 }
 
+inline Vector2f floor(const Vector2f& v) {
+  return Vector2f(std::floor(v.x), std::floor(v.y));
+}
+
 }

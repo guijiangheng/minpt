@@ -104,6 +104,7 @@ set(MINPT_HEADERS
   include/minpt/samplers/random.h
 
   include/minpt/textures/constant.h
+  include/minpt/textures/checkerboard.h
 )
 
 set(MINPT_SRCS

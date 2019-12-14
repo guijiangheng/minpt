@@ -19,7 +19,9 @@
 
 #include <minpt/meshes/obj.h>
 #include <minpt/samplers/random.h>
+
 #include <minpt/textures/constant.h>
+#include <minpt/textures/checkerboard.h>
 
 namespace minpt {
 
@@ -49,5 +51,7 @@ MINPT_REGISTER_CLASS(AreaLight, "area");
 
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float");
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, Color3f, "constant_color");
+MINPT_REGISTER_TEMPLATED_CLASS(CheckerboardTexture, float, "checkerboard_float");
+MINPT_REGISTER_TEMPLATED_CLASS(CheckerboardTexture, Color3f, "checkerboard_color");
 
 }

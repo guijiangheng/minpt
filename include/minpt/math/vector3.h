@@ -179,6 +179,10 @@ Vector3<T> max(const Vector3<T>& a, const Vector3<T>& b) {
   );
 }
 
+inline Vector3f floor(const Vector3f& v) {
+  return Vector3f(std::floor(v.x), std::floor(v.y), std::floor(v.z));
+}
+
 inline Vector3f faceForward(const Vector3f& n, const Vector3f& v) {
   return dot(n, v) > 0 ? n : -n;
 }

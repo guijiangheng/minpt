@@ -19,22 +19,22 @@ public:
   T value;
 };
 
-template<>
+template <>
 ConstantTexture<float>::ConstantTexture(const PropertyList& props)
   : value(props.getFloat("value", 0.0f))
 { }
 
-template<>
+template <>
 ConstantTexture<Color3f>::ConstantTexture(const PropertyList& props)
   : value(props.getColor3f("value", Color3f(0.0f)))
 { }
 
-template<>
+template <>
 std::string ConstantTexture<float>::toString() const {
   return tfm::format("ConstantTexture[value = %f]", value);
 }
 
-template<>
+template <>
 std::string ConstantTexture<Color3f>::toString() const {
   return tfm::format("ConstantTexture[value = %s]", value.toString());
 }
