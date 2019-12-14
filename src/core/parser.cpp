@@ -28,6 +28,7 @@ enum ETag {
   EFloat,
   EString,
   EVector2i,
+  EVector2f,
   EVector3f,
   EColor3f,
   EBounds2f,
@@ -57,6 +58,7 @@ static std::map<std::string, ETag> tags = {
   { "float",      EFloat },
   { "string",     EString },
   { "vector2i",   EVector2i },
+  { "vector2f",   EVector2f },
   { "vector3f",   EVector3f },
   { "color3f",    EColor3f },
   { "bounds2f",   EBounds2f },
@@ -219,6 +221,12 @@ Object* loadFromXML(const std::string& filename) {
             parentProps.setVector2i(
               node.attribute("name").value(),
               toVector2i(node.attribute("value").value()));
+            break;
+          case EVector2f:
+            checkAttributes(node, { "name", "value" });
+            parentProps.setVector2f(
+              node.attribute("name").value(),
+              toVector2f(node.attribute("value").value()));
             break;
           case EVector3f:
             checkAttributes(node, { "name", "value" });

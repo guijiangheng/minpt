@@ -13,7 +13,7 @@ public:
 
   T eval(const Vector2f& uv) const override {
     auto value = Vector2i(floor(Vector2f(uv.x * scale.x + delta.x, uv.y * scale.y + delta.y)));
-    return (value.x ^ value.y) ? value2 : value1;
+    return ((value.x % 2) ^ (value.y % 2)) ? value2 : value1;
   }
 
 public:
