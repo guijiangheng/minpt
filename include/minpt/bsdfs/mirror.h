@@ -11,24 +11,18 @@ public:
     return true;
   }
 
-  Color3f f(const Vector3f& wo, const Vector3f& wi) const override {
+  Color3f f(const BSDFQueryRecord& bRec) const override {
     return Color3f(0.0f);
   }
 
-  float pdf(const Vector3f& wo, const Vector3f& wi) const override {
+  float pdf(const BSDFQueryRecord& bRec) const override {
     return 0;
   }
 
-  Color3f sample(
-      const Vector2f& u,
-      const Vector3f& wo,
-      Vector3f& wi,
-      float& pdf,
-      float& etaScale) const override {
-
-    etaScale = 1.0f;
+  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override {
+    bRec.isDelta = true;
     pdf = 1.0f;
-    wi = Vector3f(-wo.x, -wo.y, wo.z);
+    bRec.wi = Vector3f(-bRec.wo.x, -bRec.wo.y, bRec.wo.z);
     return kr;
   }
 

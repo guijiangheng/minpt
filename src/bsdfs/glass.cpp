@@ -2,16 +2,12 @@
 
 namespace minpt {
 
-Color3f Glass::sample(
-    const Vector2f& u,
-    const Vector3f& wo,
-    Vector3f& wi,
-    float& pdf,
-    float& etaScale) const {
+Color3f Glass::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
+  bRec.isDelta = true;
 
   auto nz = 1.0f;
   auto eta = this->eta;
-  auto cosThetaI = cosTheta(wo);
+  auto cosThetaI = cosTheta(bRec.wo);
 
   if (cosThetaI < 0.0f) {
     nz = -1.0f;
@@ -36,14 +32,13 @@ Color3f Glass::sample(
 
   if (u.x < fr) {
     pdf = fr;
-    etaScale = 1.0f;
-    wi = Vector3f(-wo.x, -wo.y, wo.z);
+    bRec.wi = Vector3f(-bRec.wo.x, -bRec.wo.y, bRec.wo.z);
     return kr;
   } else {
-    etaScale = eta * eta;
+    bRec.etaScale = eta * eta;
     auto etaInv = 1.0f / eta;
     pdf = 1.0f - fr;
-    wi = Vector3f(-wo.x * etaInv, -wo.y * etaInv, -cosThetaT * nz);
+    bRec.wi = Vector3f(-bRec.wo.x * etaInv, -bRec.wo.y * etaInv, -cosThetaT * nz);
     return kt * etaInv * etaInv;
   }
 }

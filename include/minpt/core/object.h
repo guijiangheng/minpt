@@ -22,6 +22,14 @@ public:
 
   virtual ~Object() = default;
 
+  void setName(const std::string& name) {
+    this->name = name;
+  }
+
+  std::string getName() const {
+    return name;
+  }
+
   virtual void addChild(Object* child) {
     throw Exception(
       "Object::addChild() is not implemented for objects of type '%s'!",
@@ -51,6 +59,9 @@ public:
       default:            return "<unknown>";
     }
   }
+
+protected:
+  std::string name;
 };
 
 class ObjectFactory {

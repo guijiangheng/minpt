@@ -144,7 +144,7 @@ public:
         else if (warpType == Beckmann)
           return v.z < 0 ? 0 : beckmannDistrib->pdf(v);
         else if (warpType == MicrofacetBRDF)
-          return brdf->pdf(wo, v);
+          return brdf->pdf(minpt::BSDFQueryRecord(wo, v));
         else
           throw minpt::Exception("Invalid warp type");
       }
@@ -246,10 +246,10 @@ public:
       }
       break;
       case MicrofacetBRDF: {
-        minpt::Vector3f wi;
-        float pdf, etaScale;
-        auto f = brdf->sample(u, wo, wi, pdf, etaScale);
-        result << wi.x, wi.y, wi.z;
+        float pdf;
+        minpt::BSDFQueryRecord bRec(wo);
+        auto f = brdf->sample(bRec, u, pdf);
+        result << bRec.wi.x, bRec.wi.y, bRec.wi.z;
         return std::make_pair(result, f.isBlack() ? 0.0f : f[0]);
       }
       break;

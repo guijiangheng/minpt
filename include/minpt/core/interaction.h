@@ -1,7 +1,8 @@
 #pragma once
 
-#include <minpt/math/math.h>
 #include <minpt/utils/utils.h>
+#include <minpt/math/math.h>
+#include <minpt/core/bsdf.h>
 
 namespace minpt {
 
@@ -25,13 +26,13 @@ public:
 
   Color3f le(const Vector3f& w) const;
 
-  Color3f f(const Vector3f& woLocal, const Vector3f& wiLocal) const;
+  Color3f f(const BSDFQueryRecord& bRec) const;
 
   float lightPdf(const Vector3f& ref) const;
 
-  float scatteringPdf(const Vector3f& woLocal, const Vector3f& wiLocal) const;
+  float scatteringPdf(const BSDFQueryRecord& bRec) const;
 
-  Color3f sample(const Vector2f& u, const Vector3f& woLocal, Vector3f& wiLocal, float& pdf, float& etaScale) const;
+  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const;
 
   Ray spawnRay(const Vector3f& w, float tMax = Infinity) const {
     return Ray(offsetRayOrigin(w), w, tMax);

@@ -27,29 +27,30 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
     auto woLocal = isect.toLocal(isect.wo);
 
     if (!li.isBlack()) {
-      auto wiLocal = isect.toLocal(wi);
-      auto f = isect.f(woLocal, wiLocal);
+      BSDFQueryRecord bRec(woLocal, isect.toLocal(wi));
+      bRec.p = isect.p;
+      bRec.uv = isect.uv;
+      auto f = isect.f(bRec);
       if (!f.isBlack() && tester.unoccluded(scene)) {
         if (light.isDelta())
-          l += albedo * f * absCosTheta(wiLocal) / lightPdf;
+          l += albedo * f * absCosTheta(bRec.wi) / lightPdf;
         else {
-          auto scatteringPdf = isect.scatteringPdf(woLocal, wiLocal);
-          l += albedo * f * li * absCosTheta(wiLocal) / lightPdf * weight(lightPdf, scatteringPdf);
+          auto scatteringPdf = isect.scatteringPdf(bRec);
+          l += albedo * f * li * absCosTheta(bRec.wi) / lightPdf * weight(lightPdf, scatteringPdf);
         }
       }
     }
 
-    Vector3f wiLocal;
-    float etaScale;
     float scatteringPdf;
-    auto f = isect.sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf, etaScale);
+    BSDFQueryRecord bRec(woLocal);
+    auto f = isect.sample(bRec, sampler.get2D(), scatteringPdf);
 
     // update throughput
     albedo *= f;
     if (albedo.isBlack()) return l;
 
     // shoot next ray
-    wi = isect.toWorld(wiLocal);
+    wi = isect.toWorld(bRec.wi);
     r = isect.spawnRay(wi);
 
     Interaction newIsect;
@@ -62,14 +63,14 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
         if (light.isDelta()) return l;
         auto li = newIsect.le(-wi);
         if (li.isBlack()) return l;
-        if (isect.mesh->bsdf->isDelta())
+        if (bRec.isDelta)
           return l + albedo * li;
         auto lightPdf = newIsect.lightPdf(isect.p);
         return l + albedo * li * weight(scatteringPdf, lightPdf);
       }
     }
 
-    etaScaleFix *= etaScale;
+    etaScaleFix *= bRec.etaScale;
     t = albedo * etaScaleFix;
     if (bounce >= 3 && t.maxComponent() < 1.0f) {
       auto q = std::max(0.05f, 1 - t.maxComponent());

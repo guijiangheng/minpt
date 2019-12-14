@@ -24,42 +24,34 @@ float Plastic::fr(float cosThetaI, float eta) {
   return (rs * rs + rp * rp) / 2.0f;
 }
 
-Color3f Plastic::f(const Vector3f& wo, const Vector3f& wi) const {
-  if (!sameHemisphere(wo, wi))
+Color3f Plastic::f(const BSDFQueryRecord& bRec) const {
+  if (!sameHemisphere(bRec.wo, bRec.wi))
     return Color3f(0.0f);
-  auto wh = normalize(wo + wi);
+  auto wh = normalize(bRec.wo + bRec.wi);
   auto d = distrib.d(wh);
-  auto g = distrib.g(wo, wi);
-  auto f = fr(dot(wo, wh), eta);
-  return kd * InvPi + Color3f(d * g * f * ks / (4 * cosTheta(wo) * cosTheta(wi)));
+  auto g = distrib.g(bRec.wo, bRec.wi);
+  auto f = fr(dot(bRec.wo, wh), eta);
+  return kd * InvPi + Color3f(d * g * f * ks / (4 * cosTheta(bRec.wo) * cosTheta(bRec.wi)));
 }
 
-Color3f Plastic::sample(
-    const Vector2f& u,
-    const Vector3f& wo,
-    Vector3f& wi,
-    float& pdf,
-    float& etaScale) const {
-
-  etaScale = 1.0f;
-
+Color3f Plastic::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
   if (u.x < ks) {
     auto uRemapped = Vector2f(u.x / ks, u.y);
     auto wh = distrib.sample(u);
-    wi = reflect(wo, wh);
-    if (!sameHemisphere(wo, wi)) {
+    bRec.wi = reflect(bRec.wo, wh);
+    if (!sameHemisphere(bRec.wo, bRec.wi)) {
       pdf = 0.0f;
       return Color3f(0.0f);
     }
   } else {
     auto uRemapped = Vector2f((u.x - ks) / (1.0f - ks), u.y);
-    wi = cosineSampleHemisphere(uRemapped);
-    if (wo.z < 0.0f) wi.z = -wi.z;
+    bRec.wi = cosineSampleHemisphere(uRemapped);
+    if (bRec.wo.z < 0.0f) bRec.wi.z = -bRec.wi.z;
   }
 
-  pdf = this->pdf(wo, wi);
+  pdf = this->pdf(bRec);
 
-  return f(wo, wi) / pdf * absCosTheta(wi);
+  return f(bRec) / pdf * absCosTheta(bRec.wi);
 }
 
 std::string Plastic::toString() const {

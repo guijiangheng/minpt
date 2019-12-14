@@ -23,22 +23,23 @@ Color3f DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sample
   auto woLocal = isect.toLocal(isect.wo);
 
   if (!li.isBlack()) {
-    auto wiLocal = isect.toLocal(wi);
-    auto f = isect.f(woLocal, wiLocal);
+    BSDFQueryRecord bRec(woLocal, isect.toLocal(wi));
+    bRec.p = isect.p;
+    bRec.uv = isect.uv;
+    auto f = isect.f(bRec);
     if (!f.isBlack() && tester.unoccluded(scene)) {
-      auto scatteringPdf = isect.scatteringPdf(woLocal, wiLocal);
-      l += f * li * absCosTheta(wiLocal) / lightPdf * weight(lightPdf, scatteringPdf);
+      auto scatteringPdf = isect.scatteringPdf(bRec);
+      l += f * li * absCosTheta(bRec.wi) / lightPdf * weight(lightPdf, scatteringPdf);
     }
   }
 
-  Vector3f wiLocal;
-  float etaScale;
   float scatteringPdf;
-  auto f = isect.sample(sampler.get2D(), woLocal, wiLocal, scatteringPdf, etaScale);
+  BSDFQueryRecord bRec(woLocal);
+  auto f = isect.sample(bRec, sampler.get2D(), scatteringPdf);
   if (f.isBlack()) return l;
 
   Interaction newIsect;
-  wi = isect.toWorld(wiLocal);
+  wi = isect.toWorld(bRec.wi);
   auto newRay = isect.spawnRay(wi);
   if (!scene.intersect(newRay, newIsect)) return l;
   if (!newIsect.isLight()) return l;

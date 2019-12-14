@@ -11,21 +11,16 @@ public:
 
   static float fr(float cosThetaI, float eta);
 
-  Color3f f(const Vector3f& wo, const Vector3f& wi) const override;
+  Color3f f(const BSDFQueryRecord& bRec) const override;
 
-  float pdf(const Vector3f& wo, const Vector3f& wi) const override {
-    if (!sameHemisphere(wo, wi))
+  float pdf(const BSDFQueryRecord& bRec) const override {
+    if (!sameHemisphere(bRec.wo, bRec.wi))
       return 0.0f;
-    auto wh = normalize(wo + wi);
-    return ks * distrib.pdf(wh) / (4.0f * dot(wh, wo)) + (1.0f - ks) * absCosTheta(wi) * InvPi;
+    auto wh = normalize(bRec.wo + bRec.wi);
+    return ks * distrib.pdf(wh) / (4.0f * dot(wh, bRec.wo)) + (1.0f - ks) * absCosTheta(bRec.wi) * InvPi;
   }
 
-  Color3f sample(
-    const Vector2f& u,
-    const Vector3f& wo,
-    Vector3f& wi,
-    float& pdf,
-    float& etaScale) const override;
+  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override;
 
   std::string toString() const override;
 

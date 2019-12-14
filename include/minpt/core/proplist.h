@@ -9,7 +9,7 @@ namespace minpt {
 
 #define DEFINE_PROPERTY_ACCESSOR(Type, TypeName)                                              \
   void set##TypeName(const std::string& name, const Type& value) {                            \
-    if (props.find(name) != props.end())                                                      \
+    if (has(name))                                                                            \
       std::cerr << "Property \""  << name << "\" was specified multiple times!" << std::endl; \
     props[name] = value;                                                                      \
   }                                                                                           \
@@ -32,6 +32,10 @@ namespace minpt {
 class PropertyList {
 public:
   PropertyList() = default;
+
+  bool has(const std::string& name) const {
+    return props.find(name) != props.end();
+  }
 
   DEFINE_PROPERTY_ACCESSOR(bool, Boolean);
   DEFINE_PROPERTY_ACCESSOR(int, Integer);

@@ -20,6 +20,7 @@ enum ETag {
   EBSDF,
   ELight,
   EFilter,
+  ETexture,
 
   // Properties
   EBoolean = Object::EClassTypeCount,
@@ -50,6 +51,7 @@ static std::map<std::string, ETag> tags = {
   { "bsdf",       EBSDF },
   { "light",      ELight },
   { "filter",     EFilter },
+  { "texture",    ETexture },
   { "boolean",    EBoolean },
   { "integer",    EInteger },
   { "float",      EFloat },
@@ -177,7 +179,10 @@ Object* loadFromXML(const std::string& filename) {
     try {
       if (currentIsObject) {
         checkAttributes(node, { "type" });
+        if (tag == ETexture)
+          checkAttributes(node, { "name" });
         result = ObjectFactory::createInstance(node.attribute("type").value(), props);
+        result->setName(node.attribute("name").value());
         for (auto child : children)
           result->addChild(child);
         result->activate();

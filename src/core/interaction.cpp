@@ -7,20 +7,20 @@ Color3f Interaction::le(const Vector3f& w) const {
   return mesh->light->le(*this, w);
 }
 
-Color3f Interaction::f(const Vector3f& woLocal, const Vector3f& wiLocal) const {
-  return mesh->bsdf->f(woLocal, wiLocal);
+Color3f Interaction::f(const BSDFQueryRecord& bRec) const {
+  return mesh->bsdf->f(bRec);
 }
 
 float Interaction::lightPdf(const Vector3f& ref) const {
   return mesh->light->pdf(ref, *this);
 }
 
-float Interaction::scatteringPdf(const Vector3f& woLocal, const Vector3f& wiLocal) const {
-  return mesh->bsdf->pdf(woLocal, wiLocal);
+float Interaction::scatteringPdf(const BSDFQueryRecord& bRec) const {
+  return mesh->bsdf->pdf(bRec);
 }
 
-Color3f Interaction::sample(const Vector2f& u, const Vector3f& woLocal, Vector3f& wiLocal, float& pdf, float& etaScale) const {
-  return mesh->bsdf->sample(u, woLocal, wiLocal, pdf, etaScale);
+Color3f Interaction::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
+  return mesh->bsdf->sample(bRec, u, pdf);
 }
 
 bool Interaction::isLight() const {

@@ -14,20 +14,15 @@ public:
     return true;
   }
 
-  Color3f f(const Vector3f& wo, const Vector3f& wi) const override {
+  Color3f f(const BSDFQueryRecord& bRec) const override {
     return Color3f(0.0f);
   }
 
-  float pdf(const Vector3f& wo, const Vector3f& wi) const override {
+  float pdf(const BSDFQueryRecord& bRec) const override {
     return 0;
   }
 
-  Color3f sample(
-    const Vector2f& u,
-    const Vector3f& wo,
-    Vector3f& wi,
-    float& pdf,
-    float& etaScale) const override;
+  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override;
 
   std::string toString() const override {
     return tfm::format(
