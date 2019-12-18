@@ -105,6 +105,7 @@ set(MINPT_HEADERS
 
   include/minpt/textures/constant.h
   include/minpt/textures/checkerboard.h
+  include/minpt/textures/image.h
 )
 
 set(MINPT_SRCS

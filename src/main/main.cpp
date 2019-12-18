@@ -74,12 +74,14 @@ int main(int argc, char** argv) {
         file resolver. That way, the XML file can reference
         resources (OBJ files, textures) using relative paths */
       getFileResolver()->prepend(path.parent_path());
+
       std::unique_ptr<Object> root(loadFromXML(argv[1]));
       if (root->getClassType() != Object::EScene)
         throw Exception(
           "Fatal error: root element must be scene, currently is %s!",
           Object::classTypeName(root->getClassType())
         );
+
       auto scene = static_cast<Scene*>(root.get());
       auto& outputName = scene->outputName;
       if (outputName.empty()) {
@@ -88,8 +90,8 @@ int main(int argc, char** argv) {
         if (lastDot != std::string::npos)
           outputName.erase(lastDot, std::string::npos);
         outputName += ".exr";
-        scene->outputName = outputName;
       }
+
       std::cout << "Configuration: " << scene->toString() << std::endl;
       render(*scene, outputName);
     } else if (path.extension() == "exr") {

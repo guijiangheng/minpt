@@ -22,6 +22,7 @@
 
 #include <minpt/textures/constant.h>
 #include <minpt/textures/checkerboard.h>
+#include <minpt/textures/image.h>
 
 namespace minpt {
 
@@ -53,5 +54,7 @@ MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float");
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, Color3f, "constant_color");
 MINPT_REGISTER_TEMPLATED_CLASS(CheckerboardTexture, float, "checkerboard_float");
 MINPT_REGISTER_TEMPLATED_CLASS(CheckerboardTexture, Color3f, "checkerboard_color");
+MINPT_REGISTER_TEMPLATED_CLASS(ImageTexture, float, "image_float");
+MINPT_REGISTER_TEMPLATED_CLASS(ImageTexture, Color3f, "image_color");
 
 }
