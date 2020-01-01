@@ -38,8 +38,10 @@ public:
     totalArea = pdf.getSum();
     totalAreaInv = 1 / totalArea;
 
-    if (!light && !bsdf)
-      bsdf = static_cast<BSDF*>(ObjectFactory::createInstance("diffuse", PropertyList()));
+    if (!light && !bsdf) {
+        bsdf = static_cast<BSDF*>(ObjectFactory::createInstance("diffuse", PropertyList()));
+        bsdf->activate();
+    }
   }
 
   std::uint32_t getPrimitiveCount() const {
