@@ -43,6 +43,8 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
 
     float scatteringPdf;
     BSDFQueryRecord bRec(woLocal);
+    bRec.p = isect.p;
+    bRec.uv = isect.uv;
     auto f = isect.sample(bRec, sampler.get2D(), scatteringPdf);
 
     // update throughput

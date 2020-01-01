@@ -7,8 +7,10 @@ public:
   Glass(const PropertyList& props)
     : kr(props.getColor3f("kr", Color3f(1.0f)))
     , kt(props.getColor3f("kt", Color3f(1.0f)))
-    , eta(props.getFloat("eta", 1.4f))
-  { }
+    , intIOR(props.getFloat("intIOR", 1.5046f))
+    , extIOR(props.getFloat("extIOR", 1.000277f)) {
+      eta = intIOR / extIOR;
+  }
 
   bool isDelta() const override {
     return true;
@@ -29,7 +31,8 @@ public:
       "Glass[\n"
       "  kr = %s,\n"
       "  kt = %s,\n"
-      "  eta = %f\n"
+      "  intIOR = %f,\n"
+      "  extIOR = %f\n"
       "]",
       kr.toString(), kt.toString(), eta
     );
@@ -38,6 +41,8 @@ public:
 public:
   Color3f kr, kt;
   float eta;
+  float intIOR;
+  float extIOR;
 };
 
 }
