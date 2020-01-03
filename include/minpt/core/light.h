@@ -27,4 +27,16 @@ public:
   }
 };
 
+class InfiniteLight : public Light {
+public:
+  bool isInfinite() const override {
+    return true;
+  }
+
+  virtual void preprocess(const Scene& scene)
+  { }
+
+  virtual float pdf(const Vector3f& w) const = 0;
+};
+
 }
