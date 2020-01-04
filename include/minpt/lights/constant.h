@@ -16,6 +16,10 @@ public:
     worldDiameter = scene.getBoundingBox().pMin.length() * 2.0f;
   }
 
+  Color3f le(const Ray& ray) const override {
+    return radiance;
+  }
+
   Color3f sample(
     const Interaction& ref,
     const Vector2f& u,

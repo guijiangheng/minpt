@@ -41,6 +41,9 @@ public:
     if (!accel)
       throw Exception("No accelerator was specified!");
     accel->build();
+    for (auto light : lights)
+      if (light->isInfinite())
+        infiniteLights.push_back(static_cast<InfiniteLight*>(light));
   }
 
   const Bounds3f& getBoundingBox() const {
@@ -76,6 +79,7 @@ public:
   std::string outputName;
   std::vector<Mesh*> meshes;
   std::vector<Light*> lights;
+  std::vector<InfiniteLight*> infiniteLights;
 };
 
 }

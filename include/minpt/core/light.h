@@ -36,6 +36,8 @@ public:
   virtual void preprocess(const Scene& scene)
   { }
 
+  virtual Color3f le(const Ray& ray) const = 0;
+
   virtual float pdf(const Vector3f& w) const = 0;
 };
 
