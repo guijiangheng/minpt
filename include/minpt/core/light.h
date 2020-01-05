@@ -33,8 +33,7 @@ public:
     return true;
   }
 
-  virtual void preprocess(const Scene& scene)
-  { }
+  virtual void preprocess(const Scene& scene) = 0;
 
   virtual Color3f le(const Ray& ray) const = 0;
 

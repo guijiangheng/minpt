@@ -50,7 +50,7 @@ MINPT_REGISTER_CLASS(PathIntegrator, "path");
 
 MINPT_REGISTER_CLASS(PointLight, "point");
 MINPT_REGISTER_CLASS(AreaLight, "area");
-MINPT_REGISTER_CLASS(ConstantEnvLight, "constant");
+MINPT_REGISTER_CLASS(ConstantEnvLight, "constant_env");
 
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float");
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, Color3f, "constant_color");

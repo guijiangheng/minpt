@@ -42,8 +42,6 @@ public:
 
   virtual EClassType getClassType() const = 0;
 
-  virtual std::string toString() const = 0;
-
   static std::string classTypeName(EClassType type) {
     switch (type) {
       case EScene:        return "scene";
@@ -59,6 +57,8 @@ public:
       default:            return "<unknown>";
     }
   }
+
+  virtual std::string toString() const = 0;
 
 protected:
   std::string name;

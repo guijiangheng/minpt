@@ -16,6 +16,7 @@ class Scene : public Object {
 public:
   Scene(const PropertyList& props)
     : outputName(props.getString("outputName", ""))
+    , envLight(nullptr)
   { }
 
   ~Scene() {
@@ -23,6 +24,8 @@ public:
     delete sampler;
     delete integrator;
     delete accel;
+    for (auto light : lights)
+      delete light;
   }
 
   void addChild(Object* child) override;
@@ -40,10 +43,16 @@ public:
       throw Exception("No sampler was specified!");
     if (!accel)
       throw Exception("No accelerator was specified!");
+
+    for (auto light : lights) {
+      if (light->isInfinite()) {
+        if (envLight)
+          throw Exception("Duplicate env light, only one is supported!");
+        envLight = static_cast<InfiniteLight*>(light);
+      }
+    }
+
     accel->build();
-    for (auto light : lights)
-      if (light->isInfinite())
-        infiniteLights.push_back(static_cast<InfiniteLight*>(light));
   }
 
   const Bounds3f& getBoundingBox() const {
@@ -79,7 +88,7 @@ public:
   std::string outputName;
   std::vector<Mesh*> meshes;
   std::vector<Light*> lights;
-  std::vector<InfiniteLight*> infiniteLights;
+  InfiniteLight* envLight;
 };
 
 }

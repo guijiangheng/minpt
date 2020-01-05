@@ -34,7 +34,7 @@ public:
       "  intIOR = %f,\n"
       "  extIOR = %f\n"
       "]",
-      kr.toString(), kt.toString(), eta
+      kr.toString(), kt.toString(), intIOR, extIOR
     );
   }
 

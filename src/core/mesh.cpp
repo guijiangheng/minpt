@@ -6,7 +6,6 @@ namespace minpt {
 
 Mesh::~Mesh() {
   delete bsdf;
-  delete light;
 }
 
 void Mesh::addChild(Object* object) {
