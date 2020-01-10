@@ -103,10 +103,10 @@ public:
   }
 
   float pdf(const Vector2f& uv) const {
-    auto width = pConditional[0].size();
-    auto height = pMarginal.size();
-    auto x = (int)(width * uv[0]);
-    auto y = (int)(height * uv[1]);
+    auto width = (int)pConditional[0].size();
+    auto height = (int)pMarginal.size();
+    auto x = clamp((int)(width * uv[0]), 0, width - 1);
+    auto y = clamp((int)(height * uv[1]), 0, height - 1);
     return pConditional[y][x] * pConditional[y].getSum() / pMarginal.getSum();
   }
 

@@ -21,7 +21,8 @@ constexpr float degrees(float rad) {
   return 180 / Pi * rad;
 }
 
-constexpr float clamp(float val, float low, float high) {
+template <typename T, typename U, typename V>
+constexpr T clamp(T val, U low, V high) {
   if (val < low) return low;
   if (val > high) return high;
   return val;
