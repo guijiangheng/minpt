@@ -97,6 +97,7 @@ set(MINPT_HEADERS
   include/minpt/lights/point.h
   include/minpt/lights/area.h
   include/minpt/lights/constant.h
+  include/minpt/lights/envlight.h
 
   include/minpt/meshes/obj.h
 

@@ -10,17 +10,6 @@ class ImageTexture : public Texture<T> {
 public:
   ImageTexture(const PropertyList& props);
 
-  std::string toString() const override {
-    return tfm::format(
-      "ImageTexture[\n"
-      "  filename = %s,\n"
-      "  width = %d,\n"
-      "  height = %d\n"
-      "]",
-      filename, std::to_string(width), std::to_string(height)
-    );
-  }
-
   T eval(const Vector2f& uv) const override {
     auto s = uv.x * width - 0.5f;
     auto t = uv.y * height - 0.5f;
@@ -42,7 +31,18 @@ public:
     return data[t * height + s];
   }
 
-private:
+  std::string toString() const override {
+    return tfm::format(
+      "ImageTexture[\n"
+      "  filename = %s,\n"
+      "  width = %d,\n"
+      "  height = %d\n"
+      "]",
+      filename, std::to_string(width), std::to_string(height)
+    );
+  }
+
+public:
   std::string filename;
   int width;
   int height;

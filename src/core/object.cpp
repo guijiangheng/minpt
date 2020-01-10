@@ -17,6 +17,7 @@
 #include <minpt/lights/area.h>
 #include <minpt/lights/point.h>
 #include <minpt/lights/constant.h>
+#include <minpt/lights/envlight.h>
 
 #include <minpt/meshes/obj.h>
 #include <minpt/samplers/random.h>
@@ -51,6 +52,7 @@ MINPT_REGISTER_CLASS(PathIntegrator, "path");
 MINPT_REGISTER_CLASS(PointLight, "point");
 MINPT_REGISTER_CLASS(AreaLight, "area");
 MINPT_REGISTER_CLASS(ConstantEnvLight, "constant_env");
+MINPT_REGISTER_CLASS(EnvironmentLight, "envmap");
 
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float");
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, Color3f, "constant_color");

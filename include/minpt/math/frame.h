@@ -102,6 +102,15 @@ inline bool sameHemisphere(const Vector3f& wo, const Vector3f& wi) {
   return wo.z * wi.z > 0;
 }
 
+inline float sphericalTheta(const Vector3f& w) {
+  return std::acos(w.z);
+}
+
+inline float sphericalPhi(const Vector3f& w) {
+  auto p = std::atan2(w.y, w.x);
+  return p < 0 ? (p + 2 * Pi) : p;
+}
+
 inline Vector3f sphericalDirection(float sinTheta, float cosTheta, float phi) {
   return Vector3f(sinTheta * std::cos(phi), sinTheta * std::sin(phi), cosTheta);
 }

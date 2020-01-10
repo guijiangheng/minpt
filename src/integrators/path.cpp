@@ -29,7 +29,7 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
       return l + albedo * isect.le(-r.d) * weight(scatteringPdf, lightPdf);
     }
 
-    if (bounce >=3 && t.maxComponent() < 1.0f) {
+    if (bounce >= 3 && t.maxComponent() < 1.0f) {
       auto q = std::max(0.05f, 1.0f - t.maxComponent());
       if (sampler.get1D() < q) break;
       albedo /= 1 - q;

@@ -21,11 +21,11 @@ public:
   }
 
   Color3f sample(
-    const Interaction& ref,
-    const Vector2f& u,
-    Vector3f& wi,
-    float& pdf,
-    VisibilityTester& tester) const override {
+      const Interaction& ref,
+      const Vector2f& u,
+      Vector3f& wi,
+      float& pdf,
+      VisibilityTester& tester) const override {
 
     auto wiLocal = cosineSampleHemisphere(u);
     pdf = cosTheta(wiLocal) * InvPi;

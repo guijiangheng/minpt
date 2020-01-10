@@ -159,15 +159,18 @@ Object* loadFromXML(const std::string& filename) {
         children.push_back(child);
     }
 
-    auto checkAttributes = [&](const pugi::xml_node& node, std::set<std::string> attrs) {
+    auto checkAttributes = [&](const pugi::xml_node& node, std::set<std::string> attrs, bool strict = true) {
       for (auto& attr : node.attributes()) {
         auto it = attrs.find(attr.name());
-        if (it == attrs.end())
-          throw Exception(
-            "Error while parsing \"%s\": unexpected attribute \"%s\" in \"%s\" at %s",
-            filename, attr.name(), node.name(), offset(node.offset_debug())
-          );
-        attrs.erase(it);
+        if (it == attrs.end()) {
+          if (strict)
+            throw Exception(
+              "Error while parsing \"%s\": unexpected attribute \"%s\" in \"%s\" at %s",
+              filename, attr.name(), node.name(), offset(node.offset_debug())
+            );
+        } else {
+          attrs.erase(it);
+        }
       }
       if (!attrs.empty())
         throw Exception(
@@ -180,11 +183,7 @@ Object* loadFromXML(const std::string& filename) {
 
     try {
       if (currentIsObject) {
-        if (tag == ETexture)
-          checkAttributes(node, { "type", "name" });
-        else
-          checkAttributes(node, { "type" });
-
+        checkAttributes(node, { "type" }, false);
         result = ObjectFactory::createInstance(node.attribute("type").value(), props);
         result->setName(node.attribute("name").value());
         for (auto child : children)
