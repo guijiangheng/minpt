@@ -20,7 +20,6 @@ public:
   }
 
   Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override {
-    bRec.isDelta = true;
     pdf = 1.0f;
     bRec.wi = Vector3f(-bRec.wo.x, -bRec.wo.y, bRec.wo.z);
     return kr;

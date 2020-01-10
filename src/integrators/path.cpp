@@ -18,14 +18,14 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
     auto ref = isect.p;
     if (!scene.intersect(r, isect)) {
       if (!envLight || isDeltaLight) break;
-      if (isDeltaBSDF) return l + albedo * envLight->le(r);
+      if (isDeltaBSDF || bounce == 0) return l + albedo * envLight->le(r);
       auto lightPdf = envLight->pdf(r.d);
       return l + albedo * envLight->le(r) * weight(scatteringPdf, lightPdf);
     }
 
-    if (isect.isLight()) {
-      if (isDeltaBSDF) return l + albedo * isect.le(-r.d);
-      auto lightPdf = (bounce == 0 ? 1.0f : isect.lightPdf(ref));
+    if (isect.isLight() && !isDeltaLight) {
+      if (isDeltaBSDF || bounce == 0) return l + albedo * isect.le(-r.d);
+      auto lightPdf = isect.lightPdf(ref);
       return l + albedo * isect.le(-r.d) * weight(scatteringPdf, lightPdf);
     }
 

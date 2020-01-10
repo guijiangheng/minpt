@@ -3,8 +3,6 @@
 namespace minpt {
 
 Color3f Glass::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
-  bRec.isDelta = true;
-
   auto nz = 1.0f;
   auto eta = this->eta;
   auto cosThetaI = cosTheta(bRec.wo);

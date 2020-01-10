@@ -10,9 +10,8 @@ struct BSDFQueryRecord {
   Vector3f p;
   Vector2f uv;
   float etaScale;
-  bool isDelta;
 
-  BSDFQueryRecord(const Vector3f& wo) : wo(wo), etaScale(1.0f), isDelta(false)
+  BSDFQueryRecord(const Vector3f& wo) : wo(wo), etaScale(1.0f)
   { }
 
   BSDFQueryRecord(const Vector3f& wo, const Vector3f& wi) : wo(wo), wi(wi)
