@@ -279,7 +279,7 @@ Object* loadFromXML(const std::string& filename) {
             break;
           case ERotate: {
               checkAttributes(node, { "angle", "axis" });
-              auto angle = radians(toFloat(node.attribute("angle").value()));
+              auto angle = toFloat(node.attribute("angle").value());
               auto axis = toVector3f(node.attribute("axis").value());
               transform = Matrix4f::rotate(axis, angle) * transform;
             }

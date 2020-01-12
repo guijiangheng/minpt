@@ -235,6 +235,7 @@ private:
 
 void BVHAccel::build() {
   auto nPrims = getPrimitiveCount();
+  if (!nPrims) return;
 
   std::cout
     << "Constructing a SAH BVH (" << meshes.size()
@@ -300,6 +301,8 @@ void BVHAccel::compactNodes(std::uint32_t nodeIndex, std::vector<BVHNode>& packe
 }
 
 bool BVHAccel::intersect(const Ray& ray, Interaction& isect) const {
+  if (nodes.empty()) return false;
+
   Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
   const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
 
@@ -345,6 +348,8 @@ bool BVHAccel::intersect(const Ray& ray, Interaction& isect) const {
 }
 
 bool BVHAccel::intersect(const Ray& ray) const {
+  if (nodes.empty()) return false;
+
   Vector3f invDir(1 / ray.d.x, 1 / ray.d.y, 1 / ray.d.z);
   const int dirIsNeg[3] = { invDir.x < 0, invDir.y < 0, invDir.z < 0 };
 

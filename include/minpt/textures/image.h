@@ -36,9 +36,10 @@ public:
       "ImageTexture[\n"
       "  filename = %s,\n"
       "  width = %d,\n"
-      "  height = %d\n"
+      "  height = %d,\n"
+      "  scale = %f\n"
       "]",
-      filename, std::to_string(width), std::to_string(height)
+      filename, width, height, scale
     );
   }
 
@@ -46,12 +47,14 @@ public:
   std::string filename;
   int width;
   int height;
+  float scale;
   std::unique_ptr<T[]> data;
 };
 
 template <>
 ImageTexture<float>::ImageTexture(const PropertyList& props)
-    : filename(getFileResolver()->resolve(props.getString("filename")).str()) {
+    : filename(getFileResolver()->resolve(props.getString("filename")).str())
+    , scale(props.getFloat("scale", 1.0f)) {
 
   Bitmap bitmap(filename);
   width = bitmap.cols();
@@ -61,12 +64,13 @@ ImageTexture<float>::ImageTexture(const PropertyList& props)
   auto i = 0;
   for (auto y = 0; y < height; ++y)
     for (auto x = 0; x < width; ++x)
-      data[i++] = bitmap(y, x).y();
+      data[i++] = scale * bitmap(y, x).y();
 }
 
 template <>
 ImageTexture<Color3f>::ImageTexture(const PropertyList& props)
-    : filename(getFileResolver()->resolve(props.getString("filename")).str()) {
+    : filename(getFileResolver()->resolve(props.getString("filename")).str())
+    , scale(props.getFloat("scale", 1.0f)) {
 
   Bitmap bitmap(filename);
   width = bitmap.cols();
@@ -76,7 +80,7 @@ ImageTexture<Color3f>::ImageTexture(const PropertyList& props)
   auto i = 0;
   for (auto y = 0; y < height; ++y)
     for (auto x = 0; x < width; ++x)
-      data[i++] = bitmap(y, x);
+      data[i++] = bitmap(y, x) * scale;
 }
 
 }

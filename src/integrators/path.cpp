@@ -15,7 +15,7 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
   auto envLight = scene.envLight;
 
   for (auto bounce = 0; bounce < maxDepth; ++bounce) {
-    auto& ref = isect.p;
+    auto ref = isect.p;
     if (!scene.intersect(r, isect)) {
       if (!envLight || isDeltaLight) break;
       if (isDeltaBSDF || bounce == 0) return l + albedo * envLight->le(r);
