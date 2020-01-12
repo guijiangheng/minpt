@@ -100,6 +100,7 @@ set(MINPT_HEADERS
   include/minpt/lights/envlight.h
 
   include/minpt/meshes/obj.h
+  include/minpt/meshes/ply.h
 
   include/minpt/microfacets/beckmann.h
 
@@ -129,6 +130,7 @@ set(MINPT_SRCS
   src/microfacets/beckmann.cpp
 
   src/meshes/obj.cpp
+  src/meshes/ply.cpp
 
   src/accelerators/bvh.cpp
 

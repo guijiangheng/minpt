@@ -20,6 +20,7 @@
 #include <minpt/lights/envlight.h>
 
 #include <minpt/meshes/obj.h>
+#include <minpt/meshes/ply.h>
 #include <minpt/samplers/random.h>
 
 #include <minpt/textures/constant.h>
@@ -34,6 +35,8 @@ MINPT_REGISTER_CLASS(Scene, "scene");
 MINPT_REGISTER_CLASS(RandomSampler, "random");
 MINPT_REGISTER_CLASS(BVHAccel, "bvh");
 MINPT_REGISTER_CLASS(PerspectiveCamera, "perspective");
+
+MINPT_REGISTER_CLASS(PLY, "ply");
 MINPT_REGISTER_CLASS(WavefrontOBJ, "obj");
 
 MINPT_REGISTER_CLASS(Diffuse, "diffuse");
