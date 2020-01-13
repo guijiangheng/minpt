@@ -28,7 +28,7 @@ public:
     t = t % height;
     s = s < 0 ? s + width : s;
     t = t < 0 ? t + height : t;
-    return data[t * height + s];
+    return data[t * width + s];
   }
 
   std::string toString() const override {
@@ -64,7 +64,7 @@ ImageTexture<float>::ImageTexture(const PropertyList& props)
   auto i = 0;
   for (auto y = 0; y < height; ++y)
     for (auto x = 0; x < width; ++x)
-      data[i++] = scale * bitmap(y, x).y();
+      data[i++] = scale * bitmap(height - 1 - y, x).y();
 }
 
 template <>
@@ -80,7 +80,7 @@ ImageTexture<Color3f>::ImageTexture(const PropertyList& props)
   auto i = 0;
   for (auto y = 0; y < height; ++y)
     for (auto x = 0; x < width; ++x)
-      data[i++] = bitmap(y, x) * scale;
+      data[i++] = bitmap(height - 1 - y, x) * scale;
 }
 
 }
