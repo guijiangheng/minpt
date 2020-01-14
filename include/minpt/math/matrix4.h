@@ -26,6 +26,13 @@ public:
     { m30, m31, m32, m33 }
   } { }
 
+  bool swapsHandedness() const {
+    auto det = e[0][0] * (e[1][1] * e[2][2] - e[1][2] * e[2][1]) -
+               e[0][1] * (e[1][0] * e[2][2] - e[1][2] * e[2][0]) +
+               e[0][2] * (e[1][0] * e[2][1] - e[1][1] * e[2][0]);
+    return det < 0;
+  }
+
   Matrix4f operator*(const Matrix4f& m) const {
     float r[4][4];
     for (auto i = 0; i < 4; ++i)
@@ -138,10 +145,10 @@ public:
     auto s = std::sin(radians(angle));
     auto c = std::cos(radians(angle));
     return Matrix4f(
-      1, 0,  0, 0,
-      0, c, -s, 0,
-      0, s,  c, 0,
-      0, 0,  0, 1
+      1,  0, 0, 0,
+      0,  c, s, 0,
+      0, -s, c, 0,
+      0,  0, 0, 1
     );
   }
 
@@ -149,10 +156,10 @@ public:
     auto s = std::sin(radians(angle));
     auto c = std::cos(radians(angle));
     return Matrix4f(
-       c, 0, s, 0,
-       0, 1, 0, 0,
-      -s, 0, c, 0,
-       0, 0, 0, 1
+      c, 0, -s, 0,
+      0, 1,  0, 0,
+      s, 0,  c, 0,
+      0, 0,  0, 1
     );
   }
 
@@ -160,10 +167,10 @@ public:
     auto s = std::sin(radians(angle));
     auto c = std::cos(radians(angle));
     return Matrix4f(
-      c, -s, 0, 0,
-      s,  c, 0, 0,
-      0,  0, 1, 0,
-      0,  0, 0, 1
+       c, s, 0, 0,
+      -s, c, 0, 0,
+       0, 0, 1, 0,
+       0, 0, 0, 1
     );
   }
 

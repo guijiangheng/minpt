@@ -113,6 +113,8 @@ protected:
   Distribution1D pdf;
 
 public:
+  bool reverseOrientation;
+  bool transformSwapsHandedness;
   std::string name;
   Bounds3f bounds;
   BSDF* bsdf = nullptr;

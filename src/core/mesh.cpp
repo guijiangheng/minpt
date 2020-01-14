@@ -103,6 +103,12 @@ void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
     isect.shFrame = Frame(isect.n);
   }
 
+  if (n) {
+    isect.n = faceForward(isect.n, isect.shFrame.n);
+  } else if (reverseOrientation ^ transformSwapsHandedness) {
+    isect.n = isect.shFrame.n = -isect.n;
+  }
+
   if (uv) {
     isect.uv = barycentric(uv[ia], uv[ib], uv[ic], isect.uv);
   }
@@ -112,12 +118,16 @@ std::string Mesh::toString() const {
   return tfm::format(
     "Mesh[\n"
     "  name = \"%s\",\n"
+    "  reverseOrientation = %s,\n"
     "  vertexCount = %i,\n"
     "  triangleCount = %i,\n"
     "  bsdf = %s,\n"
     "  light = %s\n"
     "]",
-    name, nVertices, nTriangles,
+    name,
+    reverseOrientation ? "true" : "false",
+    nVertices,
+    nTriangles,
     bsdf ? indent(bsdf->toString()) : std::string("null"),
     light ? indent(light->toString()) : std::string("null")
   );

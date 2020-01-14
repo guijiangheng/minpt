@@ -215,9 +215,11 @@ public:
 };
 
 PLY::PLY(const PropertyList& props) {
-  name = props.getString("filename");
+  reverseOrientation = props.getBoolean("reverseOrientation", false);
   auto mat = props.getTransform("toWorld", Matrix4f::identity());
+  transformSwapsHandedness = mat.swapsHandedness();
 
+  name = props.getString("filename");
   std::cout << "Loading \"" << name << "\" .. ";
   Timer timer;
 
@@ -253,14 +255,14 @@ PLY::PLY(const PropertyList& props) {
   memcpy(f.get(), indices.data(), sizeof(std::uint32_t) * indices.size());
 
   std::cout
-  << "done. (V=" << nVertices << ", F=" << nTriangles << ", took "
-  << timer.elapsedString() << " and "
-  << memString(
-    nTriangles * 3 * sizeof(uint32_t) +
-    nVertices * sizeof(Vector3f) +
-    (n ? nVertices * sizeof(Vector3f) : 0) +
-    (uv ? nVertices * sizeof(Vector2f) : 0))
-  << ")" << std::endl;
+    << "done. (V=" << nVertices << ", F=" << nTriangles << ", took "
+    << timer.elapsedString() << " and "
+    << memString(
+      nTriangles * 3 * sizeof(uint32_t) +
+      nVertices * sizeof(Vector3f) +
+      (n ? nVertices * sizeof(Vector3f) : 0) +
+      (uv ? nVertices * sizeof(Vector2f) : 0))
+    << ")" << std::endl;
 }
 
 }
