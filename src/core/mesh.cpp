@@ -99,14 +99,11 @@ void Mesh::computeIntersection(std::uint32_t index, Interaction& isect) const {
   if (n) {
     auto ns = normalize(barycentric(n[ia], n[ib], n[ic], isect.uv));
     isect.shFrame = Frame(ns);
-  } else {
-    isect.shFrame = Frame(isect.n);
-  }
-
-  if (n) {
     isect.n = faceForward(isect.n, isect.shFrame.n);
-  } else if (reverseOrientation ^ transformSwapsHandedness) {
-    isect.n = isect.shFrame.n = -isect.n;
+  } else {
+    if (reverseOrientation ^ transformSwapsHandedness)
+      isect.n = -isect.n;
+    isect.shFrame = Frame(isect.n);
   }
 
   if (uv) {
@@ -119,6 +116,7 @@ std::string Mesh::toString() const {
     "Mesh[\n"
     "  name = \"%s\",\n"
     "  reverseOrientation = %s,\n"
+    "  transformSwapsHandedness = %s,\n"
     "  vertexCount = %i,\n"
     "  triangleCount = %i,\n"
     "  bsdf = %s,\n"
@@ -126,6 +124,7 @@ std::string Mesh::toString() const {
     "]",
     name,
     reverseOrientation ? "true" : "false",
+    transformSwapsHandedness ? "true" : "false",
     nVertices,
     nTriangles,
     bsdf ? indent(bsdf->toString()) : std::string("null"),

@@ -75,7 +75,8 @@ public:
     auto& a = p[f[3 * index]];
     auto& b = p[f[3 * index + 1]];
     auto& c = p[f[3 * index + 2]];
-    return { barycentric(a, b, c, uv), normalize(cross(b - a, c - a)) };
+    auto n = normalize(cross(b - a, c - a));
+    return { barycentric(a, b, c, uv), (reverseOrientation ^ transformSwapsHandedness) ? -n : n };
   }
 
   LightSample sample(const Vector3f& ref, Vector2f& u, float& _pdf) const {

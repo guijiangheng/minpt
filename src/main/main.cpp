@@ -17,6 +17,7 @@ static void render(const Scene& scene, const std::string& outputName) {
   auto outputSize = camera->outputSize;
 
   integrator->preprocess(scene);
+  std::cout << "Configuration: " << scene.toString() << std::endl;
 
   constexpr auto BlockSize = 32;
   BlockGenerator generator(outputSize, BlockSize);
@@ -92,7 +93,6 @@ int main(int argc, char** argv) {
         outputName += ".exr";
       }
 
-      std::cout << "Configuration: " << scene->toString() << std::endl;
       render(*scene, outputName);
     } else if (path.extension() == "exr") {
       Bitmap bitmap(argv[1]);
