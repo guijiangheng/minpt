@@ -1,4 +1,4 @@
-#include <iostream>
+#include <cstdio>
 #include <thread>
 #include <tbb/parallel_for.h>
 #include <filesystem/resolver.h>
@@ -10,6 +10,18 @@
 
 using namespace minpt;
 
+static void usage(const char* msg = nullptr) {
+  if (msg)
+    fprintf(stderr, "minpt: %s\n\n", msg);
+  fprintf(stderr, R"(usage: minpt [<options>] <filename>
+Rendering options:
+    --help                        Print this help text.
+    --outfile <filename>          Write the final image to the given filename.
+    --transform <global|local>    Specify transform globally or locally, default globally.
+)");
+  exit(msg ? 1 : 0);
+}
+
 static void render(const Scene& scene, const std::string& outputName) {
   auto camera = scene.camera;
   auto integrator = scene.integrator;
@@ -17,7 +29,7 @@ static void render(const Scene& scene, const std::string& outputName) {
   auto outputSize = camera->outputSize;
 
   integrator->preprocess(scene);
-  std::cout << "Configuration: " << scene.toString() << std::endl;
+  printf("Configuration: %s\n", scene.toString().c_str());
 
   constexpr auto BlockSize = 32;
   BlockGenerator generator(outputSize, BlockSize);
@@ -29,10 +41,9 @@ static void render(const Scene& scene, const std::string& outputName) {
   auto screen = new Screen(result);
 
   std::thread renderThread([&] {
-    std::cout << "Rendering ..";
-    std::cout.flush();
+    printf("Rendering ..");
+    fflush(stdout);
     Timer timer;
-
     tbb::parallel_for(tbb::blocked_range<int>(0, generator.getBlockCount()), [&, camera, integrator, filter](auto& range) {
       ImageBlock block(Vector2i(BlockSize), filter);
       auto sampler = scene.sampler->clone();
@@ -52,7 +63,7 @@ static void render(const Scene& scene, const std::string& outputName) {
         result.put(block);
       }
     });
-    std::cout << " done. (took " << timer.elapsedString() << ")" << std::endl;
+    printf(" done. (took %s)\n", timer.elapsedString().c_str());
     result.toBitmap().save(outputName);
   });
 
@@ -63,20 +74,35 @@ static void render(const Scene& scene, const std::string& outputName) {
 }
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    std::cerr << "Syntax: " << argv[0] << " <scene.xml>" << std::endl;
-    return -1;
+  if (argc < 2) usage();
+
+  Options options;
+  options.transformType = TransformType::Global;
+
+  for (auto i = 1; i < argc; ++i) {
+    if (!strcmp(argv[i], "--outfile")) {
+      if (i + 1 == argc)
+        usage("missing value after --outfile argument");
+      options.outfile = argv[++i];
+    } else if (!strcmp(argv[i], "--transform")) {
+      if (i + 1 == argc)
+        usage("missing value after --transform argument");
+      options.transformType = !strcmp(argv[++i], "global") ? TransformType::Global : TransformType::Local;
+    } else if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
+      usage();
+    } else
+      options.filename = argv[i];
   }
 
   try {
-    filesystem::path path(argv[1]);
+    filesystem::path path(options.filename);
     if (path.extension() == "xml") {
       /* Add the parent directory of the scene file to the
         file resolver. That way, the XML file can reference
         resources (OBJ files, textures) using relative paths */
       getFileResolver()->prepend(path.parent_path());
 
-      std::unique_ptr<Object> root(loadFromXML(argv[1]));
+      std::unique_ptr<Object> root(loadFromXML(options));
       if (root->getClassType() != Object::EScene)
         throw Exception(
           "Fatal error: root element must be scene, currently is %s!",
@@ -85,8 +111,9 @@ int main(int argc, char** argv) {
 
       auto scene = static_cast<Scene*>(root.get());
       auto& outputName = scene->outputName;
+      if (!options.outfile.empty()) outputName = options.outfile;
       if (outputName.empty()) {
-        outputName = argv[1];
+        outputName = options.filename;
         auto lastDot = outputName.find_last_of(".");
         if (lastDot != std::string::npos)
           outputName.erase(lastDot, std::string::npos);
@@ -104,10 +131,7 @@ int main(int argc, char** argv) {
       delete screen;
       nanogui::shutdown();
     } else {
-      std::cerr
-        << "Fatal error: unknown file \"" << argv[1]
-        << "\", expected an extension of type .xml!" << std::endl;
-      return -1;
+      usage(tfm::format("unknow file \"%s\", expected an extension of type .xml", options.filename).c_str());
     }
   } catch (const std::exception& e) {
     std::cerr << "Fatal error: " << e.what() << std::endl;

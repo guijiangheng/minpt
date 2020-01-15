@@ -70,7 +70,8 @@ static std::map<std::string, ETag> tags = {
   { "lookat",     ELookAt }
 };
 
-Object* loadFromXML(const std::string& filename) {
+Object* loadFromXML(const Options& options) {
+  auto& filename = options.filename;
   pugi::xml_document doc;
   pugi::xml_parse_result result = doc.load_file(filename.c_str());
 
@@ -262,26 +263,38 @@ Object* loadFromXML(const std::string& filename) {
                 for (int i = 0; i < 4; ++i)
                   for (auto j = 0; j < 4; ++j)
                     matrix.e[i][j] = toFloat(tokens[i * 4 + j]);
-              transform = matrix * transform;
+              if (options.transformType == TransformType::Local)
+                transform *= matrix;
+              else
+                transform = matrix * transform;
             }
             break;
           case ETranslate: {
               checkAttributes(node, { "value" });
               auto translation = toVector3f(node.attribute("value").value());
-              transform = Matrix4f::translate(translation.x, translation.y, translation.z) * transform;
+              if (options.transformType == TransformType::Local)
+                transform *= Matrix4f::translate(translation.x, translation.y, translation.z);
+              else
+                transform = Matrix4f::translate(translation.x, translation.y, translation.z) * transform;
             }
             break;
           case EScale: {
               checkAttributes(node, { "value" });
               auto scale = toVector3f(node.attribute("value").value());
-              transform = Matrix4f::scale(scale.x, scale.y, scale.z) * transform;
+              if (options.transformType == TransformType::Local)
+                transform *= Matrix4f::scale(scale.x, scale.y, scale.z);
+              else
+                transform = Matrix4f::scale(scale.x, scale.y, scale.z) * transform;
             }
             break;
           case ERotate: {
               checkAttributes(node, { "angle", "axis" });
               auto angle = toFloat(node.attribute("angle").value());
               auto axis = toVector3f(node.attribute("axis").value());
-              transform = Matrix4f::rotate(axis, angle) * transform;
+              if (options.transformType == TransformType::Local)
+                transform *= Matrix4f::rotate(axis, angle);
+              else
+                transform = Matrix4f::rotate(axis, angle) * transform;
             }
             break;
           case ELookAt:{
@@ -289,7 +302,10 @@ Object* loadFromXML(const std::string& filename) {
               auto origin = toVector3f(node.attribute("origin").value());
               auto target = toVector3f(node.attribute("target").value());
               auto up = toVector3f(node.attribute("up").value());
-              transform = Matrix4f::lookAt(origin, target, up) * transform;
+              if (options.transformType == TransformType::Local)
+                transform *= Matrix4f::lookAt(origin, target, up);
+              else
+                transform = Matrix4f::lookAt(origin, target, up) * transform;
             }
             break;
           default:

@@ -4,6 +4,17 @@
 
 namespace minpt {
 
-Object* loadFromXML(const std::string& filename);
+enum class TransformType {
+  Local,
+  Global
+};
+
+struct Options {
+  std::string outfile;
+  std::string filename;
+  TransformType transformType;
+};
+
+Object* loadFromXML(const Options& options);
 
 }

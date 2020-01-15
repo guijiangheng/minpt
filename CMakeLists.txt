@@ -150,6 +150,7 @@ target_link_libraries(minpt PUBLIC tbb_static pugixml IlmImf nanogui ${NANOGUI_E
 
 add_executable(main src/main/main.cpp)
 target_link_libraries(main minpt)
+set_target_properties(main PROPERTIES OUTPUT_NAME minpt)
 
 add_executable(warptest src/main/warptest.cpp)
 target_link_libraries(warptest minpt)

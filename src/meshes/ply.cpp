@@ -232,8 +232,10 @@ PLY::PLY(const PropertyList& props) {
 
   nVertices = vertex->count;
   p.reset(new Vector3f[nVertices]);
-  for (auto i = 0u; i < nVertices; ++i)
+  for (auto i = 0u; i < nVertices; ++i) {
     p[i] = mat.applyP(Vector3f(px->data[i], py->data[i], pz->data[i]));
+    bounds.merge(p[i]);
+  }
 
   auto faces = (TypedListProperty<int>*)ply.getElement("face")->getProperty("vertex_indices");
   std::vector<int> indices;
