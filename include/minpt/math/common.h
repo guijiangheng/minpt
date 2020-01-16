@@ -21,6 +21,12 @@ constexpr float degrees(float rad) {
   return 180 / Pi * rad;
 }
 
+template <typename T>
+inline T mod(T a, T b) {
+  auto val = a % b;
+  return val < 0 ? val + b : val;
+}
+
 template <typename T, typename U, typename V>
 constexpr T clamp(T val, U low, V high) {
   if (val < low) return low;

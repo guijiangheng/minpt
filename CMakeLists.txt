@@ -58,6 +58,7 @@ set(MINPT_HEADERS
   include/minpt/core/camera.h
   include/minpt/core/light.h
   include/minpt/core/filter.h
+  include/minpt/core/mipmap.h
   include/minpt/core/texture.h
   include/minpt/core/scene.h
   include/minpt/core/integrator.h

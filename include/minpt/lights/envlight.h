@@ -11,41 +11,28 @@ namespace minpt {
 class EnvironmentLight : public InfiniteLight {
 public:
   EnvironmentLight(const PropertyList& props)
-    : envMap(nullptr)
-    , toWorld(props.getTransform("toWorld", Matrix4f::identity()))
-    , toLocal(toWorld.inverse())
-  { }
+      : filename(getFileResolver()->resolve(props.getString("filename")).str())
+      , scale(props.getFloat("scale", 1.0f))
+      , toWorld(props.getTransform("toWorld", Matrix4f::identity()))
+      , toLocal(inverse(toWorld)) {
 
-  ~EnvironmentLight() {
-    delete envMap;
-  }
+    Bitmap bitmap(filename);
+    auto width = bitmap.cols();
+    auto height = bitmap.rows();
+    mipmap.reset(new MIPMap<Color3f>(Vector2i(width, height)));
+    auto texels = mipmap->data.get();
 
-  void addChild(Object* child) override {
-    switch (child->getClassType()) {
-      case ETexture:
-        if (envMap)
-          throw Exception("There is already an envMap!");
-        envMap = static_cast<ImageTexture<Color3f>*>(child);
-        break;
-      default:
-        throw Exception(
-          "EnvironmentLight::addChild() is not implemented for objects of type '%s'!",
-          classTypeName(child->getClassType())
-        );
-    }
-  }
+    for (auto y = 0; y < height; ++y)
+      for (auto x = 0; x < width; ++x)
+        texels[y * width + x] = bitmap(y, x) * scale;
 
-  void activate() override {
-    if (!envMap)
-      throw Exception("No envMap was specified!");
-    auto width = envMap->width;
-    auto height = envMap->height;
     auto data = std::make_unique<float[]>(width * height);
     for (auto y = 0; y < height; ++y) {
       auto sinTheta = std::sin((y + 0.5f) / height * Pi);
       for (auto x = 0; x < width; ++x)
-        data[y * width + x] = envMap->data[y * width + x].y() * sinTheta;
+        data[y * width + x] = texels[y * width + x].y() * sinTheta;
     }
+
     distrib = Distribution2D(data.get(), width, height);
   }
 
@@ -55,7 +42,7 @@ public:
 
   Color3f le(const Ray& ray) const override {
     auto w = toLocal.applyV(ray.d);
-    return envMap->eval(Vector2f(sphericalPhi(w) * Inv2Pi, sphericalTheta(w) * InvPi));
+    return mipmap->lookup(Vector2f(sphericalPhi(w) * Inv2Pi, sphericalTheta(w) * InvPi));
   }
 
   Color3f sample(
@@ -78,7 +65,7 @@ public:
     pdf = mapPdf / (2 * Pi * Pi * sinTheta);
     tester = VisibilityTester(ref, ref.p + wi * worldDiameter);
 
-    return envMap->eval(uv);
+    return mipmap->lookup(uv);
   }
 
   float pdf(const Vector3f& _w) const override {
@@ -93,17 +80,20 @@ public:
   std::string toString() const override {
     return tfm::format(
       "EnvironmentLight[\n"
-      "  envMap = %s\n"
+      "  filename = %s,\n"
+      "  scale = %f\n"
       "]",
-      indent(envMap->toString())
+      filename, scale
     );
   }
 
 private:
+  std::string filename;
+  float scale;
   float worldDiameter;
-  ImageTexture<Color3f>* envMap;
-  Distribution2D distrib;
   Matrix4f toWorld, toLocal;
+  Distribution2D distrib;
+  std::unique_ptr<MIPMap<Color3f>> mipmap;
 };
 
 }

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <minpt/core/texture.h>
+#include <minpt/core/mipmap.h>
 #include <minpt/utils/bitmap.h>
+#include <minpt/core/texture.h>
 
 namespace minpt {
 
@@ -10,48 +11,32 @@ class ImageTexture : public Texture<T> {
 public:
   ImageTexture(const PropertyList& props);
 
-  T eval(const Vector2f& _uv) const override {
-    auto uv = mapping.map(_uv);
-    auto s = uv.x * width - 0.5f;
-    auto t = uv.y * height - 0.5f;
-    auto s0 = (int)std::floor(s);
-    auto t0 = (int)std::floor(t);
-    auto ds = s - s0;
-    auto dt = t - t0;
-    return texel(s0, t0) * (1 - ds) * (1 - dt) +
-           texel(s0, t0 + 1) * (1 - ds) * dt +
-           texel(s0 + 1, t0) * ds * (1 - dt) +
-           texel(s0 + 1, t0 + 1) * ds * dt;
-  }
-
-  T texel(int s, int t) const {
-    s = s % width;
-    t = t % height;
-    s = s < 0 ? s + width : s;
-    t = t < 0 ? t + height : t;
-    return data[t * width + s];
+  T eval(const Vector2f& uv) const override {
+    return mipmap->lookup(mapping.map(uv));
   }
 
   std::string toString() const override {
     return tfm::format(
       "ImageTexture[\n"
       "  filename = %s,\n"
-      "  width = %d,\n"
-      "  height = %d,\n"
       "  scale = %f,\n"
-      "  mapping = %s\n"
+      "  resolution = %s,\n"
+      "  wrapMode = %s,\n"
+      "  mapping = %s,\n"
       "]",
-      filename, width, height, scale, indent(mapping.toString())
+      filename,
+      scale,
+      mipmap->resolution.toString(),
+      minpt::toString(mipmap->wrapMode),
+      indent(mapping.toString())
     );
   }
 
 public:
   std::string filename;
-  int width;
-  int height;
   float scale;
   TextureMapping2D mapping;
-  std::unique_ptr<T[]> data;
+  std::unique_ptr<MIPMap<T>> mipmap;
 };
 
 template <>
@@ -63,9 +48,11 @@ ImageTexture<float>::ImageTexture(const PropertyList& props)
         props.getVector2f("delta", Vector2f(0.0f))) {
 
   Bitmap bitmap(filename);
-  width = bitmap.cols();
-  height = bitmap.rows();
-  data = std::make_unique<float[]>(width * height);
+  auto width = bitmap.cols();
+  auto height = bitmap.rows();
+  auto wrapMode = toImageWrap(props.getString("wrapMode", "Repeat"));
+  mipmap.reset(new MIPMap<float>(Vector2i(width, height), wrapMode));
+  auto data = mipmap->data.get();
 
   auto i = 0;
   for (auto y = 0; y < height; ++y)
@@ -82,9 +69,11 @@ ImageTexture<Color3f>::ImageTexture(const PropertyList& props)
         props.getVector2f("delta", Vector2f(0.0f))) {
 
   Bitmap bitmap(filename);
-  width = bitmap.cols();
-  height = bitmap.rows();
-  data = std::make_unique<Color3f[]>(width * height);
+  auto width = bitmap.cols();
+  auto height = bitmap.rows();
+  auto wrapMode = toImageWrap(props.getString("wrapMode", "Repeat"));
+  mipmap.reset(new MIPMap<Color3f>(Vector2i(width, height), wrapMode));
+  auto data = mipmap->data.get();
 
   auto i = 0;
   for (auto y = 0; y < height; ++y)

@@ -9,12 +9,12 @@ class CheckerboardTexture : public Texture<T> {
 public:
   CheckerboardTexture(const PropertyList& props);
 
-  std::string toString() const override;
-
   T eval(const Vector2f& uv) const override {
     auto value = Vector2i(floor(mapping.map(uv)));
     return ((value.x % 2) ^ (value.y % 2)) ? value2 : value1;
   }
+
+  std::string toString() const override;
 
 public:
   T value1;
