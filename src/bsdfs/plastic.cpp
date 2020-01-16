@@ -8,7 +8,7 @@ Plastic::Plastic(const PropertyList& props)
     , roughness(props.getFloat("roughness", 0.1f))
     , eta(props.getFloat("eta", 1.504183f))
     , kd(props.getColor3f("kd", Color3f(0.5f)))
-    , ks(1.0f - kd.maxComponent()) {
+    , ks(props.getFloat("ks", 1.0f - kd.maxComponent())) {
 
   auto alpha = remapRoughness ? BeckmannDistribution::roughnessToAlpha(roughness) : roughness;
   distrib.alphaX = distrib.alphaY = alpha;
