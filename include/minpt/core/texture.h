@@ -11,7 +11,7 @@ public:
   { }
 
   Vector2f map(const Vector2f& uv) const {
-    return Vector2f(uv.x * scale.x, uv.y + scale.y) + delta;
+    return Vector2f(uv.x * scale.x, uv.y * scale.y) + delta;
   }
 
   std::string toString() const {

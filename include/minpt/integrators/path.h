@@ -12,7 +12,7 @@ public:
   Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override;
 
   std::string toString() const override {
-    return tfm::format("DirectIntegrator[maxDepth = %d]", maxDepth);
+    return tfm::format("PathIntegrator[maxDepth = %d]", maxDepth);
   }
 
 public:

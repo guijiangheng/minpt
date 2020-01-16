@@ -61,12 +61,14 @@ std::string Plastic::toString() const {
     "  remapRoughness = %s,\n"
     "  eta = %f,\n"
     "  kd = %s,\n"
+    "  ks = %f,\n"
     "  microfacet = %s\n"
     "]",
     roughness,
     remapRoughness ? "true" : "false",
     eta,
     kd.toString(),
+    ks,
     distrib.toString()
   );
 }
