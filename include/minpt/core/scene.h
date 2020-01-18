@@ -53,6 +53,8 @@ public:
     }
 
     accel->build();
+    integrator->preprocess(*this);
+    if (envLight) envLight->preprocess(*this);
   }
 
   const Bounds3f& getBoundingBox() const {

@@ -14,7 +14,7 @@ public:
 
   void preprocess(const Scene& scene) override {
     if (rayLength < 0)
-      rayLength = scene.getBoundingBox().pMin.length() * 0.5f;
+      rayLength = scene.getBoundingBox().diag().length() * 0.5f;
   }
 
   Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override {

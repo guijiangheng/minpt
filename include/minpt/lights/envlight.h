@@ -37,7 +37,7 @@ public:
   }
 
   void preprocess(const Scene& scene) override {
-    worldDiameter = scene.getBoundingBox().pMin.length() * 2.0f;
+    worldDiameter = scene.getBoundingBox().diag().length();
   }
 
   Color3f le(const Ray& ray) const override {

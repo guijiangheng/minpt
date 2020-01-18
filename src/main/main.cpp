@@ -28,7 +28,6 @@ static void render(const Scene& scene, const std::string& outputName) {
   auto filter = camera->filter;
   auto outputSize = camera->outputSize;
 
-  integrator->preprocess(scene);
   printf("Configuration: %s\n", scene.toString().c_str());
 
   constexpr auto BlockSize = 32;
