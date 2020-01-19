@@ -27,6 +27,12 @@ inline Vector3f cosineSampleHemisphere(const Vector2f& u) {
   return Vector3f(p.x, p.y, std::sqrt(std::max(0.0f, 1 - p.lengthSquared())));
 }
 
+inline Vector3f uniformSampleSphere(const Vector2f& u) {
+  auto cosTheta = clamp(1.0f - u[0] * 2, -1.0f, 1.0f);
+  auto sinTheta = std::sqrt(1 - cosTheta * cosTheta);
+  return sphericalDirection(sinTheta, cosTheta, u[1] * Pi * 2);
+}
+
 inline float uniformSampleTrianglePdf(const Vector2f& v) {
   return v.x + v.y > 1.0f ? 0 : 2.0f;
 }
@@ -41,6 +47,10 @@ inline float uniformSampleHemispherePdf(const Vector3f& v) {
 
 inline float cosineSampleHemispherePdf(const Vector3f& v) {
   return v.z < 0 ? 0 : v.z * InvPi;
+}
+
+inline float uniformSampleSpherePdf(const Vector3f& w) {
+  return Inv4Pi;
 }
 
 }

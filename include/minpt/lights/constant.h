@@ -27,8 +27,8 @@ public:
       float& pdf,
       VisibilityTester& tester) const override {
 
-    auto wiLocal = cosineSampleHemisphere(u);
-    pdf = cosTheta(wiLocal) * InvPi;
+    auto wiLocal = uniformSampleSphere(u);
+    pdf = Inv4Pi;
     wi = ref.toWorld(wiLocal);
     tester = VisibilityTester(ref, ref.p + wi * worldDiameter);
     return radiance;
