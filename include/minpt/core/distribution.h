@@ -107,7 +107,7 @@ public:
     auto height = (int)pMarginal.size();
     auto x = clamp((int)(width * uv[0]), 0, width - 1);
     auto y = clamp((int)(height * uv[1]), 0, height - 1);
-    return pConditional[y][x] * pConditional[y].getSum() / pMarginal.getSum();
+    return pConditional[y][x] * pConditional[y].getSum() / pMarginal.getSum() * width * height;
   }
 
 public:
