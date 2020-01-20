@@ -13,6 +13,7 @@
 #include <minpt/integrators/normals.h>
 #include <minpt/integrators/direct.h>
 #include <minpt/integrators/path.h>
+#include <minpt/integrators/path_simple.h>
 
 #include <minpt/lights/area.h>
 #include <minpt/lights/point.h>
@@ -51,6 +52,7 @@ MINPT_REGISTER_CLASS(AmbientOcclusionIntegrator, "ao");
 MINPT_REGISTER_CLASS(NormalIntegrator, "normals");
 MINPT_REGISTER_CLASS(DirectIntegrator, "direct");
 MINPT_REGISTER_CLASS(PathIntegrator, "path");
+MINPT_REGISTER_CLASS(PathSimpleIntegrator, "path_simple");
 
 MINPT_REGISTER_CLASS(PointLight, "point");
 MINPT_REGISTER_CLASS(AreaLight, "area");

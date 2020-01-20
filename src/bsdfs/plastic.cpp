@@ -37,7 +37,7 @@ Color3f Plastic::f(const BSDFQueryRecord& bRec) const {
 Color3f Plastic::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
   if (u.x < ks) {
     auto uRemapped = Vector2f(u.x / ks, u.y);
-    auto wh = distrib.sample(u);
+    auto wh = distrib.sample(uRemapped);
     bRec.wi = reflect(bRec.wo, wh);
     if (!sameHemisphere(bRec.wo, bRec.wi)) {
       pdf = 0.0f;

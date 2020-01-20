@@ -17,8 +17,8 @@ public:
       , toLocal(inverse(toWorld)) {
 
     Bitmap bitmap(filename);
-    auto width = bitmap.cols();
-    auto height = bitmap.rows();
+    int width = bitmap.cols();
+    int height = bitmap.rows();
     mipmap.reset(new MIPMap<Color3f>(Vector2i(width, height)));
     auto texels = mipmap->data.get();
 
@@ -28,9 +28,12 @@ public:
 
     auto data = std::make_unique<float[]>(width * height);
     for (auto y = 0; y < height; ++y) {
-      auto sinTheta = std::sin((y + 0.5f) / height * Pi);
-      for (auto x = 0; x < width; ++x)
-        data[y * width + x] = texels[y * width + x].y() * sinTheta;
+      auto v = (y + 0.5f) / height;
+      auto sinTheta = std::sin(v * Pi);
+      for (auto x = 0; x < width; ++x) {
+        auto u = (x + 0.5f) / width;
+        data[y * width + x] = mipmap->lookup(Vector2f(u, v)).y() * sinTheta;
+      }
     }
 
     distrib = Distribution2D(data.get(), width, height);

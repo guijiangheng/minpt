@@ -92,8 +92,9 @@ set(MINPT_HEADERS
 
   include/minpt/integrators/ao.h
   include/minpt/integrators/normals.h
-  include/minpt/integrators/path.h
   include/minpt/integrators/direct.h
+  include/minpt/integrators/path.h
+  include/minpt/integrators/path_simple.h
 
   include/minpt/lights/point.h
   include/minpt/lights/area.h
