@@ -91,6 +91,9 @@ public:
       pMarginal.append(pConditional.back().normalize());
     }
     pMarginal.normalize();
+    factors.reserve(height);
+    for (auto y = 0; y < height; ++y)
+      factors.emplace_back(pConditional[y].getSum() / pMarginal.getSum() * width * height);
   }
 
   Vector2f sampleContinuous(const Vector2f& sample, float& pdf) const {
@@ -107,10 +110,11 @@ public:
     auto height = (int)pMarginal.size();
     auto x = clamp((int)(width * uv[0]), 0, width - 1);
     auto y = clamp((int)(height * uv[1]), 0, height - 1);
-    return pConditional[y][x] * pConditional[y].getSum() / pMarginal.getSum() * width * height;
+    return pConditional[y][x] * factors[y];
   }
 
 public:
+  std::vector<float> factors;
   Distribution1D pMarginal;
   std::vector<Distribution1D> pConditional;
 };
