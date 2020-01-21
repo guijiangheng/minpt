@@ -19,7 +19,7 @@
 #include <minpt/core/exception.h>
 #include <minpt/core/sampling.h>
 #include <minpt/core/distribution.h>
-#include <minpt/microfacets/beckmann.h>
+#include <minpt/microfacets/trowbridge.h>
 #include <minpt/bsdfs/plastic.h>
 
 using namespace nanogui;
@@ -38,7 +38,7 @@ public:
     Disk,
     UniformHemisphere,
     CosineHemisphere,
-    Beckmann,
+    Trowbridge,
     MicrofacetBRDF,
     HDR
   };
@@ -141,8 +141,8 @@ public:
           return minpt::uniformSampleHemispherePdf(v);
         else if (warpType == CosineHemisphere)
           return minpt::cosineSampleHemispherePdf(v);
-        else if (warpType == Beckmann)
-          return v.z < 0 ? 0 : beckmannDistrib->pdf(v);
+        else if (warpType == Trowbridge)
+          return v.z < 0 ? 0 : trowbridgeDistrib->pdf(v);
         else if (warpType == MicrofacetBRDF)
           return brdf->pdf(minpt::BSDFQueryRecord(wo, v));
         else
@@ -240,8 +240,8 @@ public:
           result << temp.x, temp.y, temp.z;
         }
         break;
-      case Beckmann: {
-        auto temp = beckmannDistrib->sample(u);
+      case Trowbridge: {
+        auto temp = trowbridgeDistrib->sample(u);
         result << temp.x, temp.y, temp.z;
       }
       break;
@@ -314,8 +314,8 @@ public:
       gridCheckBox->setChecked(false);
     }
 
-    if (warpType == Beckmann) {
-      beckmannDistrib = std::make_unique<minpt::BeckmannDistribution>(parameterValue, parameterValue);
+    if (warpType == Trowbridge) {
+      trowbridgeDistrib = std::make_unique<minpt::TrowbridgeReitzDistribution>(parameterValue, parameterValue);
     } else if (warpType == MicrofacetBRDF) {
       float angle = (angleSlider->value() - 0.5f) * M_PI;
       wo = minpt::Vector3f(std::sin(angle), 0.0f, std::max(std::cos(angle), 0.0001f));
@@ -428,7 +428,7 @@ public:
     gridCheckBox->setEnabled(warpType != HDR);
     pointCountBox->setValue(str);
     pointCountSlider->setValue((std::log((float)pointCount) / std::log(2.f) - 5) / 15);
-    parameterSlider->setEnabled(warpType == Beckmann || warpType == MicrofacetBRDF);
+    parameterSlider->setEnabled(warpType == Trowbridge || warpType == MicrofacetBRDF);
     parameterBox->setValue(tfm::format("%.1g", parameterValue));
     angleSlider->setEnabled(warpType == MicrofacetBRDF);
     angleBox->setValue(tfm::format("%.1f", angleSlider->value() * 180.0f - 90.f));
@@ -557,7 +557,7 @@ public:
     warpTypeBox = new ComboBox(window, {
       "None", "Triangle", "Disk",
       "Hemisphere (uni)", "Hemisphere (cos)",
-      "Beckmann", "Microfacet BRDF",
+      "Trowbridge", "Microfacet BRDF",
       "HDR"
     });
     warpTypeBox->setCallback([=](int) { refresh(); });
@@ -827,7 +827,7 @@ private:
   minpt::Distribution2D distrib;
   std::unique_ptr<minpt::BSDF> brdf;
   std::unique_ptr<double[]> luminance;
-  std::unique_ptr<minpt::MicrofacetDistribution> beckmannDistrib;
+  std::unique_ptr<minpt::MicrofacetDistribution> trowbridgeDistrib;
 };
 
 int main() {

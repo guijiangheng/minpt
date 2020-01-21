@@ -1,7 +1,7 @@
 #pragma once
 
 #include <minpt/core/bsdf.h>
-#include <minpt/microfacets/beckmann.h>
+#include <minpt/microfacets/trowbridge.h>
 
 namespace minpt {
 
@@ -30,7 +30,7 @@ private:
   float eta;
   Color3f kd;
   float ks;
-  BeckmannDistribution distrib;
+  TrowbridgeReitzDistribution distrib;
 };
 
 }

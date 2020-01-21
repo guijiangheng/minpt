@@ -10,7 +10,7 @@ Plastic::Plastic(const PropertyList& props)
     , kd(props.getColor3f("kd", Color3f(0.5f)))
     , ks(props.getFloat("ks", 1.0f - kd.maxComponent())) {
 
-  auto alpha = remapRoughness ? BeckmannDistribution::roughnessToAlpha(roughness) : roughness;
+  auto alpha = remapRoughness ? TrowbridgeReitzDistribution::roughnessToAlpha(roughness) : roughness;
   distrib.alphaX = distrib.alphaY = alpha;
 }
 
@@ -39,10 +39,8 @@ Color3f Plastic::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) co
     auto uRemapped = Vector2f(u.x / ks, u.y);
     auto wh = distrib.sample(uRemapped);
     bRec.wi = reflect(bRec.wo, wh);
-    if (!sameHemisphere(bRec.wo, bRec.wi)) {
-      pdf = 0.0f;
+    if (!sameHemisphere(bRec.wo, bRec.wi))
       return Color3f(0.0f);
-    }
   } else {
     auto uRemapped = Vector2f((u.x - ks) / (1.0f - ks), u.y);
     bRec.wi = cosineSampleHemisphere(uRemapped);

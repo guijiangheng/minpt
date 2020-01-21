@@ -105,6 +105,7 @@ set(MINPT_HEADERS
   include/minpt/meshes/ply.h
 
   include/minpt/microfacets/beckmann.h
+  include/minpt/microfacets/trowbridge.h
 
   include/minpt/samplers/random.h
 
@@ -130,6 +131,7 @@ set(MINPT_SRCS
   src/gui/screen.cpp
 
   src/microfacets/beckmann.cpp
+  src/microfacets/trowbridge.cpp
 
   src/meshes/obj.cpp
   src/meshes/ply.cpp
