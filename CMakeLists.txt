@@ -82,6 +82,7 @@ set(MINPT_HEADERS
   include/minpt/bsdfs/mirror.h
   include/minpt/bsdfs/diffuse.h
   include/minpt/bsdfs/plastic.h
+  include/minpt/bsdfs/roughdielectric.h
 
   include/minpt/cameras/perspective.h
 
@@ -115,11 +116,13 @@ set(MINPT_HEADERS
 )
 
 set(MINPT_SRCS
+  src/math/vector3.cpp
   src/math/matrix4.cpp
 
   src/utils/utils.cpp
   src/utils/bitmap.cpp
 
+  src/core/bsdf.cpp
   src/core/scene.cpp
   src/core/mesh.cpp
   src/core/parser.cpp
@@ -145,6 +148,7 @@ set(MINPT_SRCS
 
   src/bsdfs/glass.cpp
   src/bsdfs/plastic.cpp
+  src/bsdfs/roughdielectric.cpp
 )
 
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})

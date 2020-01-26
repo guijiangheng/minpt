@@ -4,6 +4,8 @@
 
 namespace minpt {
 
+float fr(float cosThetaI, float eta);
+
 struct BSDFQueryRecord {
   Vector3f wo;
   Vector3f wi;

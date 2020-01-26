@@ -14,16 +14,6 @@ Plastic::Plastic(const PropertyList& props)
   distrib.alphaX = distrib.alphaY = alpha;
 }
 
-float Plastic::fr(float cosThetaI, float eta) {
-  auto sinThetaI = std::sqrt(std::max(0.0f, 1.0f - cosThetaI * cosThetaI));
-  auto sinThetaT = sinThetaI / eta;
-  if (sinThetaT >= 1.0f) return 1.0f;
-  auto cosThetaT = std::sqrt(std::max(0.0f, 1.0f - sinThetaT * sinThetaT));
-  auto rs = (eta * cosThetaI - cosThetaT) / (eta * cosThetaI + cosThetaT);
-  auto rp = (cosThetaI - eta * cosThetaT) / (cosThetaI + eta * cosThetaT);
-  return (rs * rs + rp * rp) / 2.0f;
-}
-
 Color3f Plastic::f(const BSDFQueryRecord& bRec) const {
   if (!sameHemisphere(bRec.wo, bRec.wi))
     return Color3f(0.0f);

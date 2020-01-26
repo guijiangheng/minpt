@@ -9,8 +9,6 @@ class Plastic : public BSDF {
 public:
   Plastic(const PropertyList& props);
 
-  static float fr(float cosThetaI, float eta);
-
   Color3f f(const BSDFQueryRecord& bRec) const override;
 
   float pdf(const BSDFQueryRecord& bRec) const override {

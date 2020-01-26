@@ -191,6 +191,8 @@ inline Vector3f reflect(const Vector3f& w, const Vector3f& n) {
   return -w + n * dot(w, n) * 2;
 }
 
+bool refract(const Vector3f& wi, const Vector3f& n, float eta, Vector3f& wt);
+
 inline void coordinateSystem(const Vector3f& a, Vector3f& b, Vector3f& c) {
   b = std::abs(a.x) > std::abs(a.y) ?
     Vector3f(-a.z, 0, a.x) / std::sqrt(a.x * a.x + a.z * a.z) :
