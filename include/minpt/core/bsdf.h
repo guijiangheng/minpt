@@ -1,6 +1,6 @@
 #pragma once
 
-#include <minpt/core/object.h>
+#include <minpt/core/sampler.h>
 
 namespace minpt {
 
@@ -12,6 +12,7 @@ struct BSDFQueryRecord {
   Vector3f p;
   Vector2f uv;
   float etaScale;
+  Sampler* sampler;
 
   BSDFQueryRecord(const Vector3f& wo) : wo(wo), etaScale(1.0f)
   { }

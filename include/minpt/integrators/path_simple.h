@@ -36,6 +36,7 @@ public:
       BSDFQueryRecord bRec(woLocal);
       bRec.p = isect.p;
       bRec.uv = isect.uv;
+      bRec.sampler = &sampler;
       float scatteringPdf;
       auto f = isect.sample(bRec, sampler.get2D(), scatteringPdf);
 

@@ -2,20 +2,15 @@
 
 namespace minpt {
 
-bool refract(const Vector3f& wi, const Vector3f& _n, float eta, Vector3f& wt) {
-  auto n = _n;
+Vector3f refract(const Vector3f& wi, const Vector3f& n, float eta, float& cosThetaT) {
   auto cosThetaI = dot(wi, n);
-  if (cosThetaI < 0) {
-    n = -n;
-    eta = 1.0f / eta;
-    cosThetaI = -cosThetaI;
-  }
-  auto sin2ThetaI = std::max(0.0f, 1.0f - cosThetaI * cosThetaI);
-  auto sin2ThetaT = sin2ThetaI / (eta * eta);
-  if (sin2ThetaT > 1.0f) return false;
-  auto cosThetaT = std::sqrt(1.0f - sin2ThetaT);
-  wt = -wi / eta + n * (cosThetaI / eta - cosThetaT);
-  return true;
+  auto etaInv = cosThetaI > 0 ? 1.0f / eta : eta;
+  auto sin2ThetaI = 1.0f - cosThetaI * cosThetaI;
+  auto sin2ThetaT = sin2ThetaI * etaInv * etaInv;
+  cosThetaT = std::sqrt(std::max(0.0f, 1.0f - sin2ThetaT));
+  if (cosThetaI > 0)
+    cosThetaT = -cosThetaT;
+  return n * (cosThetaI * etaInv + cosThetaT) - wi * etaInv;
 }
 
 }

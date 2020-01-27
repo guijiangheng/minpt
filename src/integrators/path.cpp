@@ -52,6 +52,7 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
         BSDFQueryRecord bRec(woLocal, isect.toLocal(wi));
         bRec.p = isect.p;
         bRec.uv = isect.uv;
+        bRec.sampler = &sampler;
         auto f = isect.f(bRec);
         if (!f.isBlack() && tester.unoccluded(scene)) {
           if (isDeltaLight)
@@ -67,6 +68,7 @@ Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler)
     BSDFQueryRecord bRec(woLocal);
     bRec.p = isect.p;
     bRec.uv = isect.uv;
+    bRec.sampler = &sampler;
     auto f = isect.sample(bRec, sampler.get2D(), scatteringPdf);
 
     // update throughput
