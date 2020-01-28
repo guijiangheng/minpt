@@ -12,8 +12,8 @@ RoughDielectric::RoughDielectric(const PropertyList& props)
     , vRoughness(std::max(0.0001f, props.getFloat("vRoughness", 0.0001f))) {
 
   eta = intIOR / extIOR;
-  distrib.alphaX = remapRoughness ? TrowbridgeReitzDistribution::roughnessToAlpha(uRoughness) : uRoughness;
-  distrib.alphaY = remapRoughness ? TrowbridgeReitzDistribution::roughnessToAlpha(vRoughness) : vRoughness;
+  distrib.alphaU = remapRoughness ? TrowbridgeReitzDistribution::roughnessToAlpha(uRoughness) : uRoughness;
+  distrib.alphaV = remapRoughness ? TrowbridgeReitzDistribution::roughnessToAlpha(vRoughness) : vRoughness;
 }
 
 float RoughDielectric::pdf(const BSDFQueryRecord& bRec) const {
@@ -43,7 +43,7 @@ Color3f RoughDielectric::f(const BSDFQueryRecord& bRec) const {
     auto wh = normalize(bRec.wo + bRec.wi);
     if (wh.z < 0) wh = -wh;
     auto d = distrib.d(wh);
-    auto g = distrib.g(bRec.wo, bRec.wi);
+    auto g = distrib.g(bRec.wo, bRec.wi, wh);
     auto f = fr(dot(bRec.wo, wh), eta);
     return kr * d * g * f / (4 * cosTheta(bRec.wo) * cosTheta(bRec.wi));
   }
@@ -57,12 +57,15 @@ Color3f RoughDielectric::f(const BSDFQueryRecord& bRec) const {
     return Color3f(0.0f);
   auto cosThetaT = dot(bRec.wi, wh);
   auto sqrtDenom = cosThetaT + cosThetaH / eta;
-  return kt * ((1.0f - f) * distrib.d(wh) * distrib.g(bRec.wo, bRec.wi) *
+  return kt * ((1.0f - f) * distrib.d(wh) * distrib.g(bRec.wo, bRec.wi, wh) *
       std::abs(cosThetaH * cosThetaT / (cosTheta(bRec.wo) * cosTheta(bRec.wi) * sqrtDenom * sqrtDenom)));
 }
 
 Color3f RoughDielectric::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
-  auto wh = distrib.sample(u);
+  auto wh = distrib.sample(u, &pdf);
+  if (pdf == 0.0f)
+    return Color3f(0.0f);
+
   auto cosThetaH = dot(bRec.wo, wh);
   auto f = fr(cosThetaH, eta);
 
@@ -70,8 +73,8 @@ Color3f RoughDielectric::sample(BSDFQueryRecord& bRec, const Vector2f& u, float&
     bRec.wi = reflect(bRec.wo, wh);
     if (!sameHemisphere(bRec.wo, bRec.wi))
       return Color3f(0.0f);
-    pdf = f * distrib.pdf(wh) / (4.0f * std::abs(cosThetaH));
-    return kr * distrib.g(bRec.wo, bRec.wi) * std::abs(cosThetaH) / (std::abs(cosTheta(bRec.wo) * cosTheta(wh)));
+    pdf *= f / (4.0f * std::abs(cosThetaH));
+    return kr * distrib.g(bRec.wo, bRec.wi, wh) * std::abs(cosThetaH) / (std::abs(cosTheta(bRec.wo) * cosTheta(wh)));
   }
 
   float cosThetaT;
@@ -79,13 +82,14 @@ Color3f RoughDielectric::sample(BSDFQueryRecord& bRec, const Vector2f& u, float&
   if (sameHemisphere(bRec.wo, bRec.wi))
     return Color3f(0.0f);
   auto sqrtDenom = cosThetaT + cosThetaH / eta;
-  pdf = (1.0f - f) * distrib.pdf(wh) * std::abs(cosThetaT) / (sqrtDenom * sqrtDenom);
-  return kt * distrib.g(bRec.wo, bRec.wi) * absdot(bRec.wo, wh) / (std::abs(cosTheta(bRec.wo) * cosTheta(wh)));
+  pdf *= (1.0f - f) * std::abs(cosThetaT) / (sqrtDenom * sqrtDenom);
+  return kt * distrib.g(bRec.wo, bRec.wi, wh) * absdot(bRec.wo, wh) / (std::abs(cosTheta(bRec.wo) * cosTheta(wh)));
 }
 
 std::string RoughDielectric::toString() const {
   return tfm::format(
     "RoughDielectric[\n"
+    "  remaproughness = %s,\n"
     "  kr = %s,\n"
     "  kt = %s,\n"
     "  intIOR = %f,\n"
@@ -93,6 +97,7 @@ std::string RoughDielectric::toString() const {
     "  uRoughness = %f,\n"
     "  vRoughness = %f,\n"
     "]",
+    remapRoughness ? "true" : "false",
     kr.toString(), kt.toString(),
     intIOR, extIOR,
     uRoughness, vRoughness

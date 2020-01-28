@@ -16,22 +16,19 @@ public:
 
   TrowbridgeReitzDistribution() noexcept = default;
 
-  TrowbridgeReitzDistribution(float alphaX, float alphaY)
-    : alphaX(alphaX), alphaY(alphaY)
+  TrowbridgeReitzDistribution(float alphaU, float alphaV)
+    : MicrofacetDistribution(alphaU, alphaV)
   { }
 
-  float lambda(const Vector3f& w) const override;
+  float smithG1(const Vector3f& w, const Vector3f& wh) const override;
 
   float d(const Vector3f& wh) const override;
 
-  Vector3f sample(const Vector2f& u) const override;
+  Vector3f sample(const Vector2f& u, float* pdf = nullptr) const override;
 
   std::string toString() const override {
-    return tfm::format("TrowbridgeReitzDistribution[alphaX = %f, alphaY = %f]", alphaX, alphaY);
+    return tfm::format("TrowbridgeReitzDistribution[alphaU = %f, alphaV = %f]", alphaU, alphaV);
   }
-
-public:
-  float alphaX, alphaY;
 };
 
 }

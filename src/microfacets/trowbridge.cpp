@@ -2,41 +2,64 @@
 
 namespace minpt {
 
-float TrowbridgeReitzDistribution::lambda(const Vector3f& w) const {
-  auto absTanTheta = std::abs(tanTheta(w));
-  if (std::isinf(absTanTheta)) return 0.0f;
-  auto alpha = std::sqrt(cos2Phi(w) * alphaX * alphaX + sin2Phi(w) * alphaY * alphaY);
-  auto alpha2Tan2Theta = (alpha * absTanTheta) * (alpha * absTanTheta);
-  return (-1.0f + std::sqrt(1.0f + alpha2Tan2Theta)) / 2.0f;
+float TrowbridgeReitzDistribution::smithG1(const Vector3f& w, const Vector3f& wh) const {
+  if (dot(w, wh) * cosTheta(w) <= 0)
+    return 0.0f;
+
+  // Perpendicular incidence -- no shadowing/masking
+  auto tanTheta = std::abs(minpt::tanTheta(w));
+  if (tanTheta == 0.0f)
+    return 1.0f;
+
+  auto alpha = projectRoughness(w);
+  auto root = alpha * tanTheta;
+  return 2.0f / (1.0f + hypot2(1.0f, root));
 }
 
 float TrowbridgeReitzDistribution::d(const Vector3f& wh) const {
-  auto tan2Theta = minpt::tan2Theta(wh);
-  if (std::isinf(tan2Theta)) return 0.0f;
-  auto cos4Theta = cos2Theta(wh) * cos2Theta(wh);
-  auto e = (cos2Phi(wh) / (alphaX * alphaX) + sin2Phi(wh) / (alphaY * alphaY)) * tan2Theta;
-  return 1.0f / (Pi * alphaX * alphaY * cos4Theta * (1 + e) * (1 + e));
+  if (cosTheta(wh) <= 0)
+    return 0.0f;
+
+  auto cosTheta2 = cos2Theta(wh);
+  auto exponent = ((wh.x * wh.x) / (alphaU * alphaU) +
+                   (wh.y * wh.y) / (alphaV * alphaV)) / cosTheta2;
+  auto root = (1.0f + exponent) * cosTheta2;
+  auto ret = 1.0f / (Pi * alphaU * alphaV * root * root);
+
+  // Prevent potential numerical issues in other stages of the model
+  if (ret * cosTheta(wh) < 1e-20f)
+    return 0.0f;
+
+  return ret;
 }
 
-Vector3f TrowbridgeReitzDistribution::sample(const Vector2f& u) const {
-  auto cosTheta = 0.0f;
-  auto phi = u[1] * Pi * 2;
-  if (alphaX == alphaY) {
-    auto tan2Theta = alphaX * alphaX * u[0] / (1.0f - u[0]);
-    cosTheta = 1.0f / std::sqrt(1 + tan2Theta);
+Vector3f TrowbridgeReitzDistribution::sample(const Vector2f& u, float* pdf) const {
+  float alpha2, sinPhi, cosPhi;
+
+  if (isIsotropic()) {
+    sincos(u[1] * Pi * 2, sinPhi, cosPhi);
+    alpha2 = alphaU * alphaU;
   } else {
-    phi = std::atan(alphaY / alphaX * std::tan(2 * Pi * u[1] + 0.5f * Pi));
+    auto phi = std::atan(alphaV / alphaU * std::tan(2 * Pi * u[1] + 0.5f));
     if (u[1] > 0.5f) phi += Pi;
-    auto sinPhi = std::sin(phi);
-    auto cosPhi = std::cos(phi);
-    auto alphaX2 = alphaX * alphaX;
-    auto alphaY2 = alphaY * alphaY;
-    auto alpha2 = 1.0f / (cosPhi * cosPhi / alphaX2 + sinPhi * sinPhi / alphaY2);
-    auto tan2Theta = alpha2 * u[0] / (1 - u[0]);
-    cosTheta = 1.0f / std::sqrt(1 + tan2Theta);
+    sincos(phi, sinPhi, cosPhi);
+    auto u = cosPhi / alphaU;
+    auto v = sinPhi / alphaV;
+    alpha2 = 1.0f / (u * u + v * v);
   }
-  auto sinTheta = std::sqrt(std::max(0.0f, 1.0f - cosTheta * cosTheta));
-  return sphericalDirection(sinTheta, cosTheta, phi);
+
+  auto tanTheta2 = alpha2 * u[0] / (1.0f - u[0]);
+  auto cosTheta = 1.0f / std::sqrt(1.0f + tanTheta2);
+  auto sinTheta = safe_sqrt(1.0f - cosTheta * cosTheta);
+
+  if (pdf) {
+    auto temp = 1 + tanTheta2 / alpha2;
+    *pdf = InvPi / (alphaU * alphaV * cosTheta * cosTheta * cosTheta * temp * temp);
+    if (*pdf < 1e-20f)
+      *pdf = 0.0f;
+  }
+
+  return Vector3f(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta);
 }
 
 }

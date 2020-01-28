@@ -11,15 +11,16 @@ Plastic::Plastic(const PropertyList& props)
     , ks(props.getFloat("ks", 1.0f - kd.maxComponent())) {
 
   auto alpha = remapRoughness ? TrowbridgeReitzDistribution::roughnessToAlpha(roughness) : roughness;
-  distrib.alphaX = distrib.alphaY = alpha;
+  distrib.alphaU = distrib.alphaV = alpha;
 }
 
 Color3f Plastic::f(const BSDFQueryRecord& bRec) const {
   if (!sameHemisphere(bRec.wo, bRec.wi))
     return Color3f(0.0f);
   auto wh = normalize(bRec.wo + bRec.wi);
+  if (wh.z < 0) wh = -wh;
   auto d = distrib.d(wh);
-  auto g = distrib.g(bRec.wo, bRec.wi);
+  auto g = distrib.g(bRec.wo, bRec.wi, wh);
   auto f = fr(dot(bRec.wo, wh), eta);
   return kd * InvPi + Color3f(d * g * f * ks / (4 * cosTheta(bRec.wo) * cosTheta(bRec.wi)));
 }

@@ -15,7 +15,8 @@ public:
     if (!sameHemisphere(bRec.wo, bRec.wi))
       return 0.0f;
     auto wh = normalize(bRec.wo + bRec.wi);
-    return ks * distrib.pdf(wh) / (4.0f * dot(wh, bRec.wo)) + (1.0f - ks) * absCosTheta(bRec.wi) * InvPi;
+    if (wh.z < 0) wh = -wh;
+    return ks * distrib.pdf(wh) / (4.0f * absdot(wh, bRec.wo)) + (1.0f - ks) * absCosTheta(bRec.wi) * InvPi;
   }
 
   Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override;

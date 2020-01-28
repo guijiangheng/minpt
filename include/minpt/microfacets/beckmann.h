@@ -6,11 +6,6 @@ namespace minpt {
 
 class BeckmannDistribution : public MicrofacetDistribution {
 public:
-  BeckmannDistribution() noexcept = default;
-
-  BeckmannDistribution(float alphaX, float alphaY) : alphaX(alphaX), alphaY(alphaY)
-  { }
-
   static float roughnessToAlpha(float roughness) {
     roughness = std::max(roughness, 0.001f);
     auto x = std::log(roughness);
@@ -19,18 +14,20 @@ public:
            0.0171201f * x * x2 + 0.000640711f * x2* x2;
   }
 
-  float lambda(const Vector3f& w) const override;
+  BeckmannDistribution() noexcept = default;
+
+  BeckmannDistribution(float alphaU, float alphaV) : MicrofacetDistribution(alphaU, alphaV)
+  { }
+
+  float smithG1(const Vector3f& w, const Vector3f& wh) const override;
 
   float d(const Vector3f& wh) const override;
 
-  Vector3f sample(const Vector2f& u) const override;
+  Vector3f sample(const Vector2f& u, float* pdf = nullptr) const override;
 
   std::string toString() const override {
-    return tfm::format("BeckmannDistribution[alphaX = %f, alphaY = %f]", alphaX, alphaY);
+    return tfm::format("BeckmannDistribution[alphaU = %f, alphaV = %f]", alphaU, alphaV);
   }
-
-public:
-  float alphaX, alphaY;
 };
 
 }

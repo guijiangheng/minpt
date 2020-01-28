@@ -250,7 +250,7 @@ public:
         minpt::BSDFQueryRecord bRec(wo);
         auto f = brdf->sample(bRec, u, pdf);
         result << bRec.wi.x, bRec.wi.y, bRec.wi.z;
-        return std::make_pair(result, f.isBlack() ? 0.0f : f[0]);
+        return std::make_pair(result, f.isBlack() ? 0.0f : brdf->f(bRec)[0]);
       }
       break;
     }

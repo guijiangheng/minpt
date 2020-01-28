@@ -21,6 +21,74 @@ constexpr float degrees(float rad) {
   return 180 / Pi * rad;
 }
 
+#if defined(_GNU_SOURCE)
+  inline void sincos(float theta, float& sin, float& cos) {
+    ::sincosf(theta, &sin, &cos);
+  }
+
+  inline void sincos(double theta, double& sin, double& cos) {
+    ::sincos(theta, &sin, &cos);
+  }
+#else
+  inline void sincos(float theta, float& sin, float& cos) {
+    sin = sinf(theta);
+    cos = cosf(theta);
+  }
+
+  inline void sincos(double theta, double& sin, double& cos) {
+    sin = ::sin(theta);
+    cos = ::cos(theta);
+  }
+#endif
+
+inline float safe_asin(float value) {
+  return std::asin(std::min(1.0f, std::max(-1.0f, value)));
+}
+
+inline double safe_asin(double value) {
+  return std::asin(std::min(1.0, std::max(-1.0, value)));
+}
+
+inline float safe_acos(float value) {
+  return std::acos(std::min(1.0f, std::max(-1.0f, value)));
+}
+
+inline double safe_acos(double value) {
+  return std::acos(std::min(1.0, std::max(-1.0, value)));
+}
+
+inline float safe_sqrt(float value) {
+  return std::sqrt(std::max(0.0f, value));
+}
+
+inline double safe_sqrt(double value) {
+  return std::sqrt(std::max(0.0, value));
+}
+
+inline float hypot2(float a, float b) {
+  if (std::abs(a) > std::abs(b)) {
+    auto r = b / a;
+    return std::abs(a) * std::sqrt(1.0f + r * r);
+  }
+  if (b != 0.0f) {
+    auto r = a / b;
+    return std::abs(b) * std::sqrt(1.0f + r * r);
+  }
+  return 0.0f;
+}
+
+inline double hypot2(double a, double b) {
+  if (std::abs(a) > std::abs(b)) {
+    auto r = b / a;
+    return std::abs(a) * std::sqrt(1.0 + r * r);
+  }
+  if (b != 0.0) {
+    auto r = a / b;
+    return std::abs(b) * std::sqrt(1.0 + r * r);
+  }
+  return 0.0;
+}
+
 template <typename T>
 inline T mod(T a, T b) {
   auto val = a % b;
