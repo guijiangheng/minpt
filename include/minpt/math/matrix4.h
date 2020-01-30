@@ -142,8 +142,8 @@ public:
   }
 
   static Matrix4f rotateX(float angle) {
-    auto s = std::sin(radians(angle));
-    auto c = std::cos(radians(angle));
+    float s, c, radian = radians(angle);
+    sincos(radian, s, c);
     return Matrix4f(
       1,  0, 0, 0,
       0,  c, s, 0,
@@ -153,8 +153,8 @@ public:
   }
 
   static Matrix4f rotateY(float angle) {
-    auto s = std::sin(radians(angle));
-    auto c = std::cos(radians(angle));
+    float s, c, radian = radians(angle);
+    sincos(radian, s, c);
     return Matrix4f(
       c, 0, -s, 0,
       0, 1,  0, 0,
@@ -164,8 +164,8 @@ public:
   }
 
   static Matrix4f rotateZ(float angle) {
-    auto s = std::sin(radians(angle));
-    auto c = std::cos(radians(angle));
+    float s, c, radian = radians(angle);
+    sincos(radian, s, c);
     return Matrix4f(
        c, s, 0, 0,
       -s, c, 0, 0,
@@ -175,8 +175,8 @@ public:
   }
 
   static Matrix4f rotate(const Vector3f& axis, float angle) {
-    auto s = std::sin(radians(angle));
-    auto c = std::cos(radians(angle));
+    float s, c, radian = radians(angle);
+    sincos(radian, s, c);
     auto x = axis.x, y = axis.y, z = axis.z;
     auto xx = x * x, xy = x * y, xz = x * z, yy = y * y, yz = y * z, zz = z * z;
     return Matrix4f(

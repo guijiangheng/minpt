@@ -12,19 +12,23 @@ inline Vector2f uniformSampleTriangle(const Vector2f& u) {
 inline Vector2f uniformSampleDisk(const Vector2f& u) {
   auto r = std::sqrt(u[0]);
   auto theta = 2 * Pi * u[1];
-  return Vector2f(r * std::cos(theta), r * std::sin(theta));
+  float sinTheta, cosTheta;
+  sincos(theta, sinTheta, cosTheta);
+  return Vector2f(r * sinTheta, r * cosTheta);
 }
 
 inline Vector3f uniformSampleHemisphere(const Vector2f& u) {
   auto z = u[0];
-  auto r = std::sqrt(std::max(0.0f, 1 - z * z));
+  auto r = std::sqrt(1.0f - z * z);
   auto phi = 2 * Pi * u[1];
-  return Vector3f(r * std::cos(phi), r * std::sin(phi), z);
+  float sinPhi, cosPhi;
+  sincos(phi, sinPhi, cosPhi);
+  return Vector3f(r * cosPhi, r * sinPhi, z);
 }
 
 inline Vector3f cosineSampleHemisphere(const Vector2f& u) {
   auto p = uniformSampleDisk(u);
-  return Vector3f(p.x, p.y, std::sqrt(std::max(0.0f, 1 - p.lengthSquared())));
+  return Vector3f(p.x, p.y, std::sqrt(1 - p.lengthSquared()));
 }
 
 inline Vector3f uniformSampleSphere(const Vector2f& u) {

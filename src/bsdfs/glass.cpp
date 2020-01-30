@@ -13,7 +13,7 @@ Color3f Glass::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) cons
     cosThetaI = -cosThetaI;
   }
 
-  auto sinThetaI = std::sqrt(std::max(0.0f, 1.0f - cosThetaI * cosThetaI));
+  auto sinThetaI = safe_sqrt(1.0f - cosThetaI * cosThetaI);
   auto sinThetaT = sinThetaI / eta;
 
   float fr;
@@ -22,7 +22,7 @@ Color3f Glass::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) cons
   if (sinThetaT >= 1.0f)
     fr = 1.0f;
   else {
-    cosThetaT = std::sqrt(std::max(0.0f, 1.0f - sinThetaT * sinThetaT));
+    cosThetaT = safe_sqrt(1.0f - sinThetaT * sinThetaT);
     auto rs = (eta * cosThetaI - cosThetaT) / (eta * cosThetaI + cosThetaT);
     auto rp = (cosThetaI - eta * cosThetaT) / (cosThetaI + eta * cosThetaT);
     fr = (rs * rs + rp * rp) / 2.0f;

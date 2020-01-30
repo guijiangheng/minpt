@@ -118,8 +118,8 @@ inline Vector3f sphericalDirection(float sinTheta, float cosTheta, float phi) {
 }
 
 inline Vector3f sphericalDirection(float theta, float phi) {
-  auto sinTheta = std::sin(theta);
-  auto cosTheta = std::cos(theta);
+  float sinTheta, cosTheta;
+  sincos(theta, sinTheta, cosTheta);
   return sphericalDirection(sinTheta, cosTheta, phi);
 }
 

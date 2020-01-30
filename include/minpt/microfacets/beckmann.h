@@ -23,7 +23,9 @@ public:
 
   float d(const Vector3f& wh) const override;
 
-  Vector3f sample(const Vector2f& u, float* pdf = nullptr) const override;
+  Vector3f sample(const Vector2f& u) const override;
+
+  Vector3f sample(const Vector2f& u, float& pdf) const override;
 
   std::string toString() const override {
     return tfm::format("BeckmannDistribution[alphaU = %f, alphaV = %f]", alphaU, alphaV);

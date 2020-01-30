@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cmath>
 #include <limits>
+#include <minpt/math/vector2.h>
 
 namespace minpt {
 
