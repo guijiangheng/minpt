@@ -2,15 +2,15 @@
 
 namespace minpt {
 
-Color3f DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler) const {
+Spectrum DirectIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler) const {
   Interaction isect;
   if (!scene.intersect(ray, isect))
-    return Color3f(0.0f);
+    return Spectrum(0.0f);
 
   if (isect.isLight())
     return isect.le(-ray.d);
 
-  Color3f l(0.0f);
+  Spectrum l(0.0f);
 
   float pdf;
   auto& light = scene.sampleOneLight(sampler, pdf);

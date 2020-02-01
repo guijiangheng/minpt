@@ -17,18 +17,18 @@ public:
       rayLength = scene.getBoundingBox().diag().length() * 0.5f;
   }
 
-  Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override {
+  Spectrum li(const Ray& ray, const Scene& scene, Sampler& sampler) const override {
     Interaction isect;
     auto ret = 0.0f;
     if (!scene.intersect(ray, isect))
-      return Color3f(ret);
+      return Spectrum(ret);
     for (auto i = 0; i < shadingSamples; ++i) {
       auto w = isect.toWorld(cosineSampleHemisphere(sampler.get2D()));
       auto shadowRay = isect.spawnRay(w, rayLength);
       if (!scene.intersect(shadowRay))
         ret += 1.0f;
     }
-    return Color3f(ret / shadingSamples);
+    return Spectrum(ret / shadingSamples);
   }
 
   std::string toString() const override {

@@ -61,7 +61,7 @@ ImageTexture<float>::ImageTexture(const PropertyList& props)
 }
 
 template <>
-ImageTexture<Color3f>::ImageTexture(const PropertyList& props)
+ImageTexture<Spectrum>::ImageTexture(const PropertyList& props)
     : filename(getFileResolver()->resolve(props.getString("filename")).str())
     , scale(props.getFloat("color_scale", 1.0f))
     , mapping(
@@ -72,7 +72,7 @@ ImageTexture<Color3f>::ImageTexture(const PropertyList& props)
   auto width = bitmap.cols();
   auto height = bitmap.rows();
   auto wrapMode = toImageWrap(props.getString("wrapMode", "Repeat"));
-  mipmap.reset(new MIPMap<Color3f>(Vector2i(width, height), wrapMode));
+  mipmap.reset(new MIPMap<Spectrum>(Vector2i(width, height), wrapMode));
   auto data = mipmap->data.get();
 
   auto i = 0;

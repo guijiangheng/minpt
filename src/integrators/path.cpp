@@ -2,10 +2,10 @@
 
 namespace minpt {
 
-Color3f PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler) const {
+Spectrum PathIntegrator::li(const Ray& ray, const Scene& scene, Sampler& sampler) const {
   Ray r(ray);
   auto etaScaleFix = 1.0f;
-  Color3f l(0.0f), t(1.0f), albedo(1.0f);
+  Spectrum l(0.0f), t(1.0f), albedo(1.0f);
 
   auto isDeltaBSDF = false;
   auto isDeltaLight = false;

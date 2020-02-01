@@ -12,7 +12,7 @@ public:
   virtual void preprocess(const Scene& scene)
   { }
 
-  virtual Color3f li(const Ray& ray, const Scene&, Sampler& sampler) const = 0;
+  virtual Spectrum li(const Ray& ray, const Scene&, Sampler& sampler) const = 0;
 
   static float weight(float a, float b) {
     return a / (a + b);

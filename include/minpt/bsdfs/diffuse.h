@@ -13,13 +13,9 @@ public:
   Diffuse(const PropertyList& _props) : albedo(nullptr) {
     if (_props.has("albedo")) {
       PropertyList props;
-      props.setColor3f("value", _props.getColor3f("albedo"));
-      albedo = static_cast<Texture<Color3f>*>(ObjectFactory::createInstance("constant_color", props));
+      props.setRGBSpectrum("value", _props.getRGBSpectrum("albedo"));
+      albedo.reset(static_cast<Texture<Spectrum>*>(ObjectFactory::createInstance("constant_color", props)));
     }
-  }
-
-  ~Diffuse() {
-    delete albedo;
   }
 
   void addChild(Object* object) override {
@@ -28,7 +24,7 @@ public:
         if (object->getName() == "albedo") {
           if (albedo)
             throw Exception("There is already an albedo defined!");
-          albedo = static_cast<Texture<Color3f>*>(object);
+          albedo.reset(static_cast<Texture<Spectrum>*>(object));
         } else {
           throw Exception("The name of this texture does not match any field!");
         }
@@ -44,14 +40,14 @@ public:
   void activate() override {
     if (!albedo) {
       PropertyList props;
-      props.setColor3f("value", Color3f(0.0f));
-      albedo = static_cast<Texture<Color3f>*>(ObjectFactory::createInstance("constant_color", props));
+      props.setRGBSpectrum("value", Spectrum(0.0f));
+      albedo.reset(static_cast<Texture<Spectrum>*>(ObjectFactory::createInstance("constant_color", props)));
     }
   }
 
-  Color3f f(const BSDFQueryRecord& bRec) const override {
+  Spectrum f(const BSDFQueryRecord& bRec) const override {
     if (!sameHemisphere(bRec.wo, bRec.wi))
-      return Color3f(0.0f);
+      return Spectrum(0.0f);
     return albedo->eval(bRec.uv) * InvPi;
   }
 
@@ -59,7 +55,7 @@ public:
     return sameHemisphere(bRec.wo, bRec.wi) ? absCosTheta(bRec.wi) * InvPi : 0;
   }
 
-  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override {
+  Spectrum sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override {
     bRec.wi = cosineSampleHemisphere(u);
     pdf = bRec.wi.z * InvPi;
     if (bRec.wo.z < 0.0f) bRec.wi.z = -bRec.wi.z;
@@ -76,7 +72,7 @@ public:
   }
 
 private:
-  Texture<Color3f>* albedo;
+  std::unique_ptr<Texture<Spectrum>> albedo;
 };
 
 }

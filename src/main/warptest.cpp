@@ -321,7 +321,7 @@ public:
       wo = minpt::Vector3f(std::sin(angle), 0.0f, std::max(std::cos(angle), 0.0001f));
       minpt::PropertyList props;
       props.setFloat("roughness", parameterValue);
-      props.setColor3f("kd", minpt::Color3f(0.0f));
+      props.setRGBSpectrum("kd", minpt::Spectrum(0.0f));
       props.setBoolean("remapRoughness", false);
       brdf = std::unique_ptr<minpt::BSDF>((minpt::BSDF*)minpt::ObjectFactory::createInstance("plastic", props));
     }

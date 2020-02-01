@@ -1,13 +1,13 @@
 #pragma once
 
 #include <Eigen/Core>
-#include <minpt/math/color3.h>
+#include <minpt/core/spectrum.h>
 
 namespace minpt {
 
-class Bitmap : public Eigen::Array<Color3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> {
+class Bitmap : public Eigen::Array<Spectrum, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> {
 public:
-  using Base = Eigen::Array<Color3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+  using Base = Eigen::Array<Spectrum, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
   /**
    * \brief Allocate a new bitmap of the specified size

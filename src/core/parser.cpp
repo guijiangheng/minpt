@@ -30,7 +30,7 @@ enum ETag {
   EVector2i,
   EVector2f,
   EVector3f,
-  EColor3f,
+  ERGBSpectrum,
   EBounds2f,
   ETransform,
   EMatrix,
@@ -60,7 +60,7 @@ static std::map<std::string, ETag> tags = {
   { "vector2i",   EVector2i },
   { "vector2f",   EVector2f },
   { "vector3f",   EVector3f },
-  { "color3f",    EColor3f },
+  { "rgb",        ERGBSpectrum },
   { "bounds2f",   EBounds2f },
   { "transform",  ETransform },
   { "matrix",     EMatrix },
@@ -234,11 +234,11 @@ Object* loadFromXML(const Options& options) {
               node.attribute("name").value(),
               toVector3f(node.attribute("value").value()));
             break;
-          case EColor3f:
+          case ERGBSpectrum:
             checkAttributes(node, { "name", "value" });
-            parentProps.setColor3f(
+            parentProps.setRGBSpectrum(
               node.attribute("name").value(),
-              toColor3f(node.attribute("value").value()));
+              toRGBSpectrum(node.attribute("value").value()));
             break;
           case EBounds2f:
             checkAttributes(node, { "name", "min", "max" });

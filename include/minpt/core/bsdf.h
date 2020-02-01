@@ -27,11 +27,11 @@ public:
     return false;
   }
 
-  virtual Color3f f(const BSDFQueryRecord& bRec) const = 0;
+  virtual Spectrum f(const BSDFQueryRecord& bRec) const = 0;
 
   virtual float pdf(const BSDFQueryRecord& bRec) const = 0;
 
-  virtual Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const = 0;
+  virtual Spectrum sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const = 0;
 
   EClassType getClassType() const override {
     return EBSDF;

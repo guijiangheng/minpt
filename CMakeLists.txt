@@ -53,6 +53,7 @@ set(MINPT_HEADERS
   include/minpt/core/bsdf.h
   include/minpt/core/interaction.h
   include/minpt/core/mesh.h
+  include/minpt/core/spectrum.h
   include/minpt/core/sampler.h
   include/minpt/core/sampling.h
   include/minpt/core/camera.h
@@ -69,8 +70,6 @@ set(MINPT_HEADERS
   include/minpt/math/common.h
   include/minpt/math/bounds2.h
   include/minpt/math/bounds3.h
-  include/minpt/math/color3.h
-  include/minpt/math/color4.h
   include/minpt/math/vector2.h
   include/minpt/math/vector3.h
   include/minpt/math/matrix4.h
@@ -124,6 +123,7 @@ set(MINPT_SRCS
 
   src/core/bsdf.cpp
   src/core/scene.cpp
+  src/core/spectrum.cpp
   src/core/mesh.cpp
   src/core/parser.cpp
   src/core/object.cpp

@@ -104,6 +104,10 @@ constexpr T clamp(T val, U low, V high) {
   return val;
 }
 
+inline float lerp(float a, float b, float t) {
+  return a + (b - a) * t;
+}
+
 template <typename Vector>
 Vector lerp(const Vector& a, const Vector& b, typename Vector::Scalar t) {
   return a + (b - a) * t;

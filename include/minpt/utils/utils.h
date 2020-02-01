@@ -3,8 +3,10 @@
 #include <string>
 #include <vector>
 #include <filesystem/resolver.h>
+
 #include <minpt/core/exception.h>
 #include <minpt/math/math.h>
+#include <minpt/core/spectrum.h>
 
 namespace minpt {
 
@@ -22,15 +24,17 @@ Vector2f toVector2f(const std::string& string);
 
 Vector3f toVector3f(const std::string& string);
 
-Color3f toColor3f(const std::string& string);
+RGBSpectrum toRGBSpectrum(const std::string& string);
 
-std::string toLower(const std::string& value);
+std::string trim(const std::string& string);
+
+std::string toLower(const std::string& string);
 
 std::string indent(const std::string& string, int amount = 2);
 
 std::vector<std::string> tokenize(const std::string& string, const std::string& delim = ", ", bool includeEmpty = false);
 
-bool endsWith(const std::string& value, const std::string& ending);
+bool endsWith(const std::string& string, const std::string& ending);
 
 std::string timeString(double time, bool precise = false);
 

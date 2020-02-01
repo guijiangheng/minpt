@@ -25,8 +25,8 @@ ConstantTexture<float>::ConstantTexture(const PropertyList& props)
 { }
 
 template <>
-ConstantTexture<Color3f>::ConstantTexture(const PropertyList& props)
-  : value(props.getColor3f("value", Color3f(0.0f)))
+ConstantTexture<Spectrum>::ConstantTexture(const PropertyList& props)
+  : value(props.getRGBSpectrum("value", Spectrum(0.0f)))
 { }
 
 template <>
@@ -35,7 +35,7 @@ std::string ConstantTexture<float>::toString() const {
 }
 
 template <>
-std::string ConstantTexture<Color3f>::toString() const {
+std::string ConstantTexture<Spectrum>::toString() const {
   return tfm::format("ConstantTexture[value = %s]", value.toString());
 }
 

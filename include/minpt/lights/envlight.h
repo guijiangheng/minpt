@@ -19,7 +19,7 @@ public:
     Bitmap bitmap(filename);
     int width = bitmap.cols();
     int height = bitmap.rows();
-    mipmap.reset(new MIPMap<Color3f>(Vector2i(width, height)));
+    mipmap.reset(new MIPMap<Spectrum>(Vector2i(width, height)));
     auto texels = mipmap->data.get();
 
     for (auto y = 0; y < height; ++y)
@@ -43,12 +43,12 @@ public:
     worldDiameter = scene.getBoundingBox().diag().length();
   }
 
-  Color3f le(const Ray& ray) const override {
+  Spectrum le(const Ray& ray) const override {
     auto w = toLocal.applyV(ray.d);
     return mipmap->lookup(Vector2f(sphericalPhi(w) * Inv2Pi, sphericalTheta(w) * InvPi));
   }
 
-  Color3f sample(
+  Spectrum sample(
       const Interaction& ref,
       const Vector2f& u,
       Vector3f& wi,
@@ -62,7 +62,7 @@ public:
     auto theta = uv.y * Pi;
     auto cosTheta = std::cos(theta);
     auto sinTheta = std::sin(theta);
-    if (sinTheta == 0.0f) return Color3f(0.0f);
+    if (sinTheta == 0.0f) return Spectrum(0.0f);
 
     wi = toWorld.applyV(sphericalDirection(sinTheta, cosTheta, phi));
     pdf = mapPdf / (2 * Pi * Pi * sinTheta);
@@ -96,7 +96,7 @@ private:
   float worldDiameter;
   Matrix4f toWorld, toLocal;
   Distribution2D distrib;
-  std::unique_ptr<MIPMap<Color3f>> mipmap;
+  std::unique_ptr<MIPMap<Spectrum>> mipmap;
 };
 
 }

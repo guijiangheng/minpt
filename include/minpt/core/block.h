@@ -1,7 +1,7 @@
 #pragma once
 
 #include <tbb/mutex.h>
-#include <minpt/math/color4.h>
+#include <minpt/core/spectrum.h>
 #include <minpt/core/filter.h>
 #include <minpt/utils/bitmap.h>
 
@@ -37,7 +37,7 @@ public:
     return result;
   }
 
-  void put(const Vector2f& pos, const Color3f& value);
+  void put(const Vector2f& pos, const Spectrum& value);
 
   void put(const ImageBlock& block);
 

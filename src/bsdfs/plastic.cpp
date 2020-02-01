@@ -7,31 +7,31 @@ Plastic::Plastic(const PropertyList& props)
     : remapRoughness(props.getBoolean("remapRoughness", true))
     , roughness(props.getFloat("roughness", 0.1f))
     , eta(props.getFloat("eta", 1.504183f))
-    , kd(props.getColor3f("kd", Color3f(0.5f)))
+    , kd(props.getRGBSpectrum("kd", Spectrum(0.5f)))
     , ks(props.getFloat("ks", 1.0f - kd.maxComponent())) {
 
   auto alpha = remapRoughness ? TrowbridgeReitzDistribution::roughnessToAlpha(roughness) : roughness;
   distrib.alphaU = distrib.alphaV = alpha;
 }
 
-Color3f Plastic::f(const BSDFQueryRecord& bRec) const {
+Spectrum Plastic::f(const BSDFQueryRecord& bRec) const {
   if (!sameHemisphere(bRec.wo, bRec.wi))
-    return Color3f(0.0f);
+    return Spectrum(0.0f);
   auto wh = normalize(bRec.wo + bRec.wi);
   if (wh.z < 0) wh = -wh;
   auto d = distrib.d(wh);
   auto g = distrib.g(bRec.wo, bRec.wi, wh);
   auto f = fr(dot(bRec.wo, wh), eta);
-  return kd * InvPi + Color3f(d * g * f * ks / (4 * cosTheta(bRec.wo) * cosTheta(bRec.wi)));
+  return kd * InvPi + Spectrum(d * g * f * ks / (4 * cosTheta(bRec.wo) * cosTheta(bRec.wi)));
 }
 
-Color3f Plastic::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
+Spectrum Plastic::sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const {
   if (u.x < ks) {
     auto uRemapped = Vector2f(u.x / ks, u.y);
     auto wh = distrib.sample(uRemapped);
     bRec.wi = reflect(bRec.wo, wh);
     if (!sameHemisphere(bRec.wo, bRec.wi))
-      return Color3f(0.0f);
+      return Spectrum(0.0f);
   } else {
     auto uRemapped = Vector2f((u.x - ks) / (1.0f - ks), u.y);
     bRec.wi = cosineSampleHemisphere(uRemapped);

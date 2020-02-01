@@ -9,18 +9,18 @@ namespace minpt {
 class ConstantEnvLight : public InfiniteLight {
 public:
   ConstantEnvLight(const PropertyList& props)
-    : radiance(props.getColor3f("radiance", Color3f(1.0f)))
+    : radiance(props.getRGBSpectrum("radiance", Spectrum(1.0f)))
   { }
 
   void preprocess(const Scene& scene) override {
     worldDiameter = scene.getBoundingBox().diag().length();
   }
 
-  Color3f le(const Ray& ray) const override {
+  Spectrum le(const Ray& ray) const override {
     return radiance;
   }
 
-  Color3f sample(
+  Spectrum sample(
       const Interaction& ref,
       const Vector2f& u,
       Vector3f& wi,
@@ -43,7 +43,7 @@ public:
   }
 
 private:
-  Color3f radiance;
+  Spectrum radiance;
   float worldDiameter;
 };
 

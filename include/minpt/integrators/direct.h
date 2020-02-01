@@ -17,7 +17,7 @@ public:
     return *scene.lights[index];
   }
 
-  Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override;
+  Spectrum li(const Ray& ray, const Scene& scene, Sampler& sampler) const override;
 
   std::string toString() const override {
     return "DirectIntegrator[]";

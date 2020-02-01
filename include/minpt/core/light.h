@@ -15,7 +15,7 @@ public:
     return false;
   }
 
-  virtual Color3f sample(
+  virtual Spectrum sample(
     const Interaction& ref,
     const Vector2f& u,
     Vector3f& wi,
@@ -35,7 +35,7 @@ public:
 
   virtual void preprocess(const Scene& scene) = 0;
 
-  virtual Color3f le(const Ray& ray) const = 0;
+  virtual Spectrum le(const Ray& ray) const = 0;
 
   virtual float pdf(const Vector3f& w) const = 0;
 };

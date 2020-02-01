@@ -32,9 +32,9 @@ CheckerboardTexture<float>::CheckerboardTexture(const PropertyList& props)
 { }
 
 template <>
-CheckerboardTexture<Color3f>::CheckerboardTexture(const PropertyList& props)
-  : value1(props.getColor3f("value1", Color3f(0.0f)))
-  , value2(props.getColor3f("value2", Color3f(1.0f)))
+CheckerboardTexture<Spectrum>::CheckerboardTexture(const PropertyList& props)
+  : value1(props.getRGBSpectrum("value1", Spectrum(0.0f)))
+  , value2(props.getRGBSpectrum("value2", Spectrum(1.0f)))
   , mapping(
         props.getVector2f("scale", Vector2f(1.0f)),
         props.getVector2f("delta", Vector2f(0.0f)))
@@ -53,7 +53,7 @@ std::string CheckerboardTexture<float>::toString() const {
 }
 
 template <>
-std::string CheckerboardTexture<Color3f>::toString() const {
+std::string CheckerboardTexture<Spectrum>::toString() const {
   return tfm::format(
     "CheckboardTexture[\n"
     "  value1 = %s,\n"

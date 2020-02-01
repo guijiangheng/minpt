@@ -9,14 +9,14 @@ class PointLight : public Light {
 public:
   PointLight(const PropertyList& props)
     : pLight(props.getVector3f("pLight"))
-    , intensity(props.getColor3f("intensity"))
+    , intensity(props.getRGBSpectrum("intensity"))
   { }
 
   bool isDelta() const override {
     return true;
   }
 
-  Color3f sample(
+  Spectrum sample(
       const Interaction& ref,
       const Vector2f& u,
       Vector3f& wi,
@@ -42,7 +42,7 @@ public:
 
 public:
   Vector3f pLight;
-  Color3f intensity;
+  Spectrum intensity;
 };
 
 }

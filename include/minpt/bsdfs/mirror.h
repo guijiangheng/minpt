@@ -4,22 +4,22 @@ namespace minpt {
 
 class Mirror : public BSDF {
 public:
-  Mirror(const PropertyList& props) : kr(props.getColor3f("kr", Color3f(1.0f)))
+  Mirror(const PropertyList& props) : kr(props.getRGBSpectrum("kr", Spectrum(1.0f)))
   { }
 
   bool isDelta() const override {
     return true;
   }
 
-  Color3f f(const BSDFQueryRecord& bRec) const override {
-    return Color3f(0.0f);
+  Spectrum f(const BSDFQueryRecord& bRec) const override {
+    return Spectrum(0.0f);
   }
 
   float pdf(const BSDFQueryRecord& bRec) const override {
     return 0;
   }
 
-  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override {
+  Spectrum sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override {
     pdf = 1.0f;
     bRec.wi = Vector3f(-bRec.wo.x, -bRec.wo.y, bRec.wo.z);
     return kr;
@@ -30,7 +30,7 @@ public:
   }
 
 public:
-  Color3f kr;
+  Spectrum kr;
 };
 
 }

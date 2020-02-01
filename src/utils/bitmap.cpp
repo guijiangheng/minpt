@@ -41,7 +41,7 @@ void Bitmap::readImagePNG(const std::string& filename) {
   auto offset = 0;
   for (auto y = 0u; y < height; ++y)
     for (auto x = 0u; x < width; ++x) {
-      coeffRef(y, x) = Color3f(
+      coeffRef(y, x) = Spectrum(
         inverseGammaCorrect(bytes[offset]     / 255.0f),
         inverseGammaCorrect(bytes[offset + 1] / 255.0f),
         inverseGammaCorrect(bytes[offset + 2] / 255.0f)
@@ -107,7 +107,7 @@ void Bitmap::writeImagePNG(const std::string& filename) const {
   auto offset = 0;
   for (auto y = 0u; y < height; ++y)
     for (auto x = 0u; x < width; ++x) {
-      Color3f color = gammaCorrect(operator()(y, x));
+      auto color = coeffRef(y, x).gammaCorrect();
       bytes[offset]     = (std::uint8_t)(std::min(color[0] * 255, 255.0f));
       bytes[offset + 1] = (std::uint8_t)(std::min(color[1] * 255, 255.0f));
       bytes[offset + 2] = (std::uint8_t)(std::min(color[2] * 255, 255.0f));

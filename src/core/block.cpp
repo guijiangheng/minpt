@@ -21,7 +21,7 @@ ImageBlock::ImageBlock(const Vector2i& size, const Filter* filter)
   resize(size.y + 2 * borderSize, size.x + 2 * borderSize);
 }
 
-void ImageBlock::put(const Vector2f& pos, const Color3f& value) {
+void ImageBlock::put(const Vector2f& pos, const Spectrum& value) {
   if (!value.isValid()) {
     std::cerr << "Integrator: computed a invalid radiance value: " << value.toString() << std::endl;
     return;

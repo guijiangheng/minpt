@@ -4,6 +4,14 @@
 
 namespace minpt {
 
+std::string trim(const std::string& string) {
+  auto beg = string.find_first_not_of(" \t\r\n");
+  auto end = string.find_last_not_of(" \t\r\n");
+  return string.substr(
+    beg == std::string::npos ? 0 : beg,
+    end == std::string::npos ? string.length() - 1: end - beg + 1);
+}
+
 std::string indent(const std::string& string, int amount) {
   std::istringstream iss(string);
   std::ostringstream oss;
@@ -81,11 +89,11 @@ Vector3f toVector3f(const std::string& string) {
   return Vector3f(toFloat(tokens[0]), toFloat(tokens[1]), toFloat(tokens[2]));
 }
 
-Color3f toColor3f(const std::string& string) {
+RGBSpectrum toRGBSpectrum(const std::string& string) {
   auto tokens = tokenize(string);
   if (tokens.size() != 3)
     throw Exception("Expected 3 values");
-  return Color3f(toFloat(tokens[0]), toFloat(tokens[1]), toFloat(tokens[2]));
+  return RGBSpectrum(toFloat(tokens[0]), toFloat(tokens[1]), toFloat(tokens[2]));
 }
 
 bool endsWith(const std::string& value, const std::string& ending) {

@@ -62,10 +62,10 @@ MINPT_REGISTER_CLASS(ConstantEnvLight, "constant_env");
 MINPT_REGISTER_CLASS(EnvironmentLight, "envmap");
 
 MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, float, "constant_float");
-MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, Color3f, "constant_color");
+MINPT_REGISTER_TEMPLATED_CLASS(ConstantTexture, RGBSpectrum, "constant_color");
 MINPT_REGISTER_TEMPLATED_CLASS(CheckerboardTexture, float, "checkerboard_float");
-MINPT_REGISTER_TEMPLATED_CLASS(CheckerboardTexture, Color3f, "checkerboard_color");
+MINPT_REGISTER_TEMPLATED_CLASS(CheckerboardTexture, RGBSpectrum, "checkerboard_color");
 MINPT_REGISTER_TEMPLATED_CLASS(ImageTexture, float, "image_float");
-MINPT_REGISTER_TEMPLATED_CLASS(ImageTexture, Color3f, "image_color");
+MINPT_REGISTER_TEMPLATED_CLASS(ImageTexture, RGBSpectrum, "image_color");
 
 }

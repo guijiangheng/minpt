@@ -4,6 +4,7 @@
 #include <map>
 #include <minpt/math/math.h>
 #include <minpt/core/exception.h>
+#include <minpt/core/spectrum.h>
 
 namespace minpt {
 
@@ -43,7 +44,7 @@ public:
   DEFINE_PROPERTY_ACCESSOR(std::string, String);
   DEFINE_PROPERTY_ACCESSOR(Vector2i, Vector2i);
   DEFINE_PROPERTY_ACCESSOR(Vector2f, Vector2f);
-  DEFINE_PROPERTY_ACCESSOR(Color3f, Color3f);
+  DEFINE_PROPERTY_ACCESSOR(RGBSpectrum, RGBSpectrum);
   DEFINE_PROPERTY_ACCESSOR(Vector3f, Vector3f);
   DEFINE_PROPERTY_ACCESSOR(Bounds2f, Bounds2f);
   DEFINE_PROPERTY_ACCESSOR(Matrix4f, Transform);

@@ -23,15 +23,15 @@ public:
     return p + faceForward(n, w) * RayOriginOffsetEpsilon;
   }
 
-  Color3f le(const Vector3f& w) const;
+  Spectrum le(const Vector3f& w) const;
 
-  Color3f f(const BSDFQueryRecord& bRec) const;
+  Spectrum f(const BSDFQueryRecord& bRec) const;
 
   float lightPdf(const Vector3f& ref) const;
 
   float scatteringPdf(const BSDFQueryRecord& bRec) const;
 
-  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const;
+  Spectrum sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const;
 
   Ray spawnRay(const Vector3f& w, float tMax = Infinity) const {
     return Ray(offsetRayOrigin(w), w, tMax);

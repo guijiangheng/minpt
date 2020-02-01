@@ -9,7 +9,7 @@ class Plastic : public BSDF {
 public:
   Plastic(const PropertyList& props);
 
-  Color3f f(const BSDFQueryRecord& bRec) const override;
+  Spectrum f(const BSDFQueryRecord& bRec) const override;
 
   float pdf(const BSDFQueryRecord& bRec) const override {
     if (!sameHemisphere(bRec.wo, bRec.wi))
@@ -19,7 +19,7 @@ public:
     return ks * distrib.pdf(wh) / (4.0f * absdot(wh, bRec.wo)) + (1.0f - ks) * absCosTheta(bRec.wi) * InvPi;
   }
 
-  Color3f sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override;
+  Spectrum sample(BSDFQueryRecord& bRec, const Vector2f& u, float& pdf) const override;
 
   std::string toString() const override;
 
@@ -27,7 +27,7 @@ private:
   bool remapRoughness;
   float roughness;
   float eta;
-  Color3f kd;
+  Spectrum kd;
   float ks;
   TrowbridgeReitzDistribution distrib;
 };

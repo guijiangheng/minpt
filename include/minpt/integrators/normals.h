@@ -9,11 +9,13 @@ public:
   NormalIntegrator(const PropertyList& props)
   { }
 
-  Color3f li(const Ray& ray, const Scene& scene, Sampler& sampler) const override {
+  Spectrum li(const Ray& ray, const Scene& scene, Sampler& sampler) const override {
     Interaction isect;
-    if (scene.intersect(ray, isect))
-      return Color3f(abs(isect.shFrame.n));
-    return Color3f(0.0f);
+    if (scene.intersect(ray, isect)) {
+      auto n = abs(isect.shFrame.n);
+      return Spectrum(n.x, n.y, n.z);
+    }
+    return Spectrum(0.0f);
   }
 
   std::string toString() const override {
