@@ -1,3 +1,5 @@
+#pragma once
+
 #include <minpt/core/bsdf.h>
 
 namespace minpt {

@@ -127,6 +127,19 @@ public:
     return *this;
   }
 
+  CoefficientSpectrum operator/(const CoefficientSpectrum& s) const {
+    auto ret = *this;
+    for (auto i = 0; i < nSpectrumSamples; ++i)
+      ret[i] /= s[i];
+    return ret;
+  }
+
+  CoefficientSpectrum& operator/(const CoefficientSpectrum& s) {
+    for (auto i = 0; i < nSpectrumSamples; ++i)
+      c[i] /= s[i];
+    return *this;
+  }
+
   CoefficientSpectrum operator/(float k) const {
     auto ret = *this;
     auto invK = 1.0f / k;
@@ -203,6 +216,14 @@ CoefficientSpectrum<N> sqrt(const CoefficientSpectrum<N>& s) {
 }
 
 template <int N>
+CoefficientSpectrum<N> safe_sqrt(const CoefficientSpectrum<N>& s) {
+  CoefficientSpectrum<N> ret;
+  for (auto i = 0; i < N; ++i)
+    ret[i] = safe_sqrt(s[i]);
+  return ret;
+}
+
+template <int N>
 CoefficientSpectrum<N> exp(const CoefficientSpectrum<N>& s) {
   CoefficientSpectrum<N> ret;
   for (auto i = 0; i < N; ++i)
@@ -231,12 +252,13 @@ public:
   SampledSpectrum(const Base& base) : Base(base)
   { }
 
-  SampledSpectrum(const InterpolatedSpectrum& spectrum) {
+  SampledSpectrum& fromSpectrum(const InterpolatedSpectrum& spectrum) {
     for (auto i = 0; i < nSpectrumSamples; ++i) {
       auto lambda0 = lerp(SampledLambdaStart, SampledLambdaEnd, i / (float)nSpectrumSamples);
       auto lambda1 = lerp(SampledLambdaStart, SampledLambdaEnd, (i + 1) / (float)nSpectrumSamples);
       c[i] = spectrum.average(lambda0, lambda1);
     }
+    return *this;
   }
 
   float y() const {
@@ -281,6 +303,23 @@ public:
     c[0] = r;
     c[1] = g;
     c[2] = b;
+  }
+
+  RGBSpectrum& fromSpectrum(const InterpolatedSpectrum& spectrum) {
+    float xyz[3] = { 0.0f, 0.0f, 0.0f };
+    for (auto i = 0; i < CIE_samples; ++i) {
+      auto val = spectrum.eval(CIE_lambda[i]);
+      xyz[0] += val * CIE_X[i];
+      xyz[1] += val * CIE_X[i];
+      xyz[2] += val * CIE_X[i];
+    }
+    auto scale = (CIE_lambda[CIE_samples - 1] - CIE_lambda[0]) /
+                 (CIE_Y_integral * CIE_samples);
+    xyz[0] *= scale;
+    xyz[1] *= scale;
+    xyz[2] *= scale;
+    XYZToRGB(xyz, c);
+    return *this;
   }
 
   void toXYZ(float xyz[3]) const {

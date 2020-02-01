@@ -87,7 +87,7 @@ std::string Scene::toString() const {
     "  camera = %s,\n"
     "  meshes = %s,\n"
     "  lights = %s,\n"
-    "  outputName=\"%s\"\n"
+    "  outputName = \"%s\"\n"
     "]",
     indent(integrator->toString()),
     indent(accel->toString()),

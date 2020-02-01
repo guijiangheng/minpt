@@ -77,6 +77,7 @@ set(MINPT_HEADERS
 
   include/minpt/accels/bvh.h
 
+  include/minpt/bsdfs/metal.h
   include/minpt/bsdfs/glass.h
   include/minpt/bsdfs/mirror.h
   include/minpt/bsdfs/diffuse.h

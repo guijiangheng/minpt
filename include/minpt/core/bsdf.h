@@ -6,6 +6,8 @@ namespace minpt {
 
 float fr(float cosThetaI, float eta);
 
+Spectrum frConductor(float cosThetaI, const Spectrum& eta, const Spectrum& k);
+
 struct BSDFQueryRecord {
   Vector3f wo;
   Vector3f wi;
