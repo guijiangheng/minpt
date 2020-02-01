@@ -21,7 +21,7 @@ Spectrum Plastic::f(const BSDFQueryRecord& bRec) const {
   if (wh.z < 0) wh = -wh;
   auto d = distrib.d(wh);
   auto g = distrib.g(bRec.wo, bRec.wi, wh);
-  auto f = fr(dot(bRec.wo, wh), eta);
+  auto f = fr(absdot(bRec.wo, wh), eta);
   return kd * InvPi + Spectrum(d * g * f * ks / (4 * cosTheta(bRec.wo) * cosTheta(bRec.wi)));
 }
 

@@ -6,6 +6,7 @@
 #include <minpt/bsdfs/metal.h>
 #include <minpt/bsdfs/mirror.h>
 #include <minpt/bsdfs/plastic.h>
+#include <minpt/bsdfs/roughconductor.h>
 #include <minpt/bsdfs/roughdielectric.h>
 
 #include <minpt/filters/box.h>
@@ -47,6 +48,7 @@ MINPT_REGISTER_CLASS(Glass, "glass");
 MINPT_REGISTER_CLASS(Metal, "metal");
 MINPT_REGISTER_CLASS(Mirror, "mirror");
 MINPT_REGISTER_CLASS(Plastic, "plastic");
+MINPT_REGISTER_CLASS(RoughConductor, "roughconductor");
 MINPT_REGISTER_CLASS(RoughDielectric, "roughdielectric");
 
 MINPT_REGISTER_CLASS(BoxFilter, "box");

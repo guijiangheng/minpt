@@ -82,6 +82,7 @@ set(MINPT_HEADERS
   include/minpt/bsdfs/mirror.h
   include/minpt/bsdfs/diffuse.h
   include/minpt/bsdfs/plastic.h
+  include/minpt/bsdfs/roughconductor.h
   include/minpt/bsdfs/roughdielectric.h
 
   include/minpt/cameras/perspective.h
@@ -149,6 +150,7 @@ set(MINPT_SRCS
 
   src/bsdfs/glass.cpp
   src/bsdfs/plastic.cpp
+  src/bsdfs/roughconductor.cpp
   src/bsdfs/roughdielectric.cpp
 )
 

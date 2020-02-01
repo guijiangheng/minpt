@@ -310,8 +310,8 @@ public:
     for (auto i = 0; i < CIE_samples; ++i) {
       auto val = spectrum.eval(CIE_lambda[i]);
       xyz[0] += val * CIE_X[i];
-      xyz[1] += val * CIE_X[i];
-      xyz[2] += val * CIE_X[i];
+      xyz[1] += val * CIE_Y[i];
+      xyz[2] += val * CIE_Z[i];
     }
     auto scale = (CIE_lambda[CIE_samples - 1] - CIE_lambda[0]) /
                  (CIE_Y_integral * CIE_samples);
