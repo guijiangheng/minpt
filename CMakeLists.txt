@@ -157,6 +157,7 @@ set(MINPT_SRCS
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})
 target_compile_features(minpt PUBLIC cxx_std_17)
 target_include_directories(minpt PUBLIC ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_compile_definitions(minpt PUBLIC NOMINMAX)
 
 if(WIN32)
   target_link_libraries(minpt PUBLIC tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng zlibstatic)
@@ -170,3 +171,4 @@ set_target_properties(main PROPERTIES OUTPUT_NAME minpt)
 
 add_executable(warptest src/main/warptest.cpp)
 target_link_libraries(warptest minpt)
+target_compile_definitions(warptest PUBLIC NOMINMAX)

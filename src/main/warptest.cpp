@@ -317,7 +317,7 @@ public:
     if (warpType == Trowbridge) {
       trowbridgeDistrib = std::make_unique<minpt::TrowbridgeReitzDistribution>(parameterValue, parameterValue);
     } else if (warpType == MicrofacetBRDF) {
-      float angle = (angleSlider->value() - 0.5f) * M_PI;
+      float angle = (angleSlider->value() - 0.5f) * minpt::Pi;
       wo = minpt::Vector3f(std::sin(angle), 0.0f, std::max(std::cos(angle), 0.0001f));
       minpt::PropertyList props;
       props.setFloat("roughness", parameterValue);
@@ -400,8 +400,8 @@ public:
     auto index = 0;
     positions.resize(3, 106);
     for (auto i = 0; i <= 50; ++i) {
-      auto angle1 = i * 2.0f * M_PI / 50.0f;
-      auto angle2 = (i + 1) * 2.0f * M_PI / 50.0f;
+      auto angle1 = i * 2.0f * minpt::Pi / 50.0f;
+      auto angle2 = (i + 1) * 2.0f * minpt::Pi / 50.0f;
       positions.col(index++) << std::cos(angle1) * 0.5f + 0.5f, std::sin(angle1) * 0.5f + 0.5f, 0.0f;
       positions.col(index++) << std::cos(angle2) * 0.5f + 0.5f, std::sin(angle2) * 0.5f + 0.5f, 0.0f;
     }
@@ -499,11 +499,11 @@ public:
         glEnable(GL_DEPTH_TEST);
       }
 
-      constexpr float viewAngle = 30.0f, near = 0.01f, far = 100.0f;
-      auto fH = std::tan(viewAngle / 360.0f * M_PI) * near;
+      constexpr float viewAngle = 30.0f, near_ = 0.01f, far_ = 100.0f;
+      auto fH = std::tan(viewAngle / 360.0f * minpt::Pi) * near_;
       auto fW = fH * mSize.x() / mSize.y();
       Matrix4f view = lookAt(Vector3f(0, 0, 2), Vector3f(0, 0, 0), Vector3f(0, 1, 0));
-      Matrix4f project = frustum(-fW, fW, -fH, fH, near, far);
+      Matrix4f project = frustum(-fW, fW, -fH, fH, near_, far_);
       Matrix4f model = arcball.matrix() * translate(Vector3f(-0.5f, -0.5f, 0.0f));
       Matrix4f mvp = project * view * model;
 

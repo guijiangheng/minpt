@@ -30,7 +30,7 @@ struct Vertex {
   std::uint32_t p, n, uv;
 };
 
-struct VertexHash : public std::unary_function<Vertex, std::size_t> {
+struct VertexHash {
   std::size_t operator()(const Vertex& v) const {
     auto hash = std::hash<std::uint32_t>()(v.p);
     hash = hash * 37 + std::hash<std::uint32_t>()(v.uv);

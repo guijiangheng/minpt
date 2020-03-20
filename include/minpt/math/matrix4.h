@@ -199,13 +199,13 @@ public:
     );
   }
 
-  static Matrix4f perspective(float fov, float near, float far) {
-    auto inv = 1 / (far - near);
+  static Matrix4f perspective(float fov, float n, float f) {
+    auto inv = 1 / (f - n);
     auto d = 1 / std::tan(radians(fov / 2));
     return Matrix4f(
       d, 0, 0, 0,
       0, d, 0, 0,
-      0, 0, far * inv, -near * far * inv,
+      0, 0, f * inv, -n * f * inv,
       0, 0, 1, 0
     );
   }
