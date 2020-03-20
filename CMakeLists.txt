@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.2)
 project(minpt LANGUAGES CXX)
 
 add_subdirectory(ext ext_build)
@@ -157,7 +157,12 @@ set(MINPT_SRCS
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})
 target_compile_features(minpt PUBLIC cxx_std_17)
 target_include_directories(minpt PUBLIC ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_link_libraries(minpt PUBLIC tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng)
+
+if(WIN32)
+  target_link_libraries(minpt PUBLIC tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng zlibstatic)
+  else()
+  target_link_libraries(minpt PUBLIC tbb_static pugixml IlmImf nanogui ${NANOGUI_EXTRA_LIBS} lodepng)
+endif()
 
 add_executable(main src/main/main.cpp)
 target_link_libraries(main minpt)
