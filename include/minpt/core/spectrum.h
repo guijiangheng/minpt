@@ -373,7 +373,7 @@ public:
     c[0] = 0.0f;
     c[1] = 0.0f;
     c[2] = 0.0f;
-    c[3] = 1.0f;
+    c[3] = 0.0f;
   }
 
   Color4f(const RGBSpectrum& spectrum) noexcept {
