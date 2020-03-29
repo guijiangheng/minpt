@@ -141,7 +141,7 @@ set(MINPT_SRCS
   src/meshes/obj.cpp
   src/meshes/ply.cpp
 
-  src/accelerators/bvh.cpp
+  src/accels/bvh.cpp
 
   src/cameras/perspective.cpp
 

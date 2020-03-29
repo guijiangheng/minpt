@@ -25,6 +25,7 @@ public:
   void save(const std::string& filename);
 
 private:
+  void readImagePFM(const std::string& filename);
   void readImagePNG(const std::string& filename);
   void readImageEXR(const std::string& filename);
   void writeImagePNG(const std::string& filename) const;

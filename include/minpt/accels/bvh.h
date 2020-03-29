@@ -15,10 +15,12 @@ struct BVHNode {
 
   BVHNode() = default;
 
+  // leaf node
   BVHNode(const Bounds3f& bounds, std::uint32_t primsOffset, std::uint16_t nPrims)
     : bounds(bounds), nPrims(nPrims), primsOffset(primsOffset)
   { }
 
+  // interior node
   BVHNode(const Bounds3f& bounds, std::uint16_t splitAxis, std::uint32_t rightChild)
     : bounds(bounds), nPrims(0), splitAxis(splitAxis), rightChild(rightChild)
   { }

@@ -40,7 +40,7 @@ public:
   void activate() override {
     if (!albedo) {
       PropertyList props;
-      props.setRGBSpectrum("value", Spectrum(0.0f));
+      props.setRGBSpectrum("value", Spectrum(1.0f));
       albedo.reset(static_cast<Texture<Spectrum>*>(ObjectFactory::createInstance("constant_color", props)));
     }
   }

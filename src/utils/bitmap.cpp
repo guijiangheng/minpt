@@ -19,13 +19,39 @@ Bitmap::Bitmap(const std::string& filename) {
   auto extension = path.extension();
   if (extension == "exr")
     readImageEXR(filename);
-  else if (extension == "png" || extension == "jpg")
+  else if (extension == "png")
     readImagePNG(filename);
+  else if (extension == "pfm")
+    readImagePFM(filename);
   else
     throw Exception(
       "Unable to read image file \"%s\", image format \"%s\" not supported!",
       filename, extension
     );
+}
+
+void Bitmap::readImagePFM(const std::string& filename) {
+  std::fstream file(filename.c_str(), std::ios::in | std::ios::binary);
+  std::string type;
+  int width, height;
+  float scale;
+  file >> type >> width >> height >> scale;
+  if (type != "PF") throw Exception("Failed to load pfm file \"%s\", only PF format supported!", filename.c_str());
+  if (scale > 0) throw Exception("Failed to load pfm file \"%s\", only little endian supported!", filename.c_str());
+  resize(height, width);
+  // skip new line character
+  file.get();
+  auto pixels = std::make_unique<float[]>(3 * width * height);
+  file.read((char*)pixels.get(), width * height * 3 * sizeof(float));
+  for (auto y = 0; y < height; ++y)
+    for (auto x = 0; x < width; ++x) {
+      auto offset = ((height - y - 1) * width + x) * 3;
+      coeffRef(y, x) = Spectrum(
+        pixels[offset    ] * -scale,
+        pixels[offset + 1] * -scale,
+        pixels[offset + 2] * -scale
+      );
+    }
 }
 
 void Bitmap::readImagePNG(const std::string& filename) {
@@ -91,7 +117,7 @@ void Bitmap::save(const std::string& filename) {
   auto extension = path.extension();
   if (extension == "exr")
     writeImageEXR(filename);
-  else if (extension == "png" || extension == "jpg")
+  else if (extension == "png")
     writeImagePNG(filename);
   else
     throw Exception(
