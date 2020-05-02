@@ -237,6 +237,23 @@ PLY::PLY(const PropertyList& props) {
     bounds.merge(p[i]);
   }
 
+  if (vertex->getProperty("nx")) {
+    auto nx = (TypedProperty<float>*)vertex->getProperty("nx");
+    auto ny = (TypedProperty<float>*)vertex->getProperty("ny");
+    auto nz = (TypedProperty<float>*)vertex->getProperty("nz");
+    n.reset(new Vector3f[nVertices]);
+    for (auto i = 0u; i < nVertices; ++i)
+      n[i] = normalize(mat.applyN(Vector3f(nx->data[i], ny->data[i], nz->data[i])));
+  }
+
+  if (vertex->getProperty("u")) {
+    auto u = (TypedProperty<float>*)vertex->getProperty("u");
+    auto v = (TypedProperty<float>*)vertex->getProperty("v");
+    uv.reset(new Vector2f[nVertices]);
+    for (auto i = 0u; i < nVertices; ++i)
+      uv[i] = Vector2f(u->data[i], v->data[i]);
+  }
+
   auto faces = (TypedListProperty<int>*)ply.getElement("face")->getProperty("vertex_indices");
   std::vector<int> indices;
   indices.reserve(faces->data.size() * 6);
