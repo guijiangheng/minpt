@@ -38,10 +38,7 @@ Or you can open repository root folder directly with visual studio 2019.
 ![dragon-rough-metal](./gallery/dragon-rough-metal.png)
 ![f8-24](./gallery/f8-24.png)
 
-
-<video width="800" controls>
-  <source src="./gallery/metal-material.webm.mov" type="video/webm">
-</video>
+https://github.com/guijiangheng/minpt/assets/24951305/49134beb-f078-4533-bad5-8352ab05b902
 
 ## Demo Scene
 
