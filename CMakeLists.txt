@@ -155,7 +155,7 @@ set(MINPT_SRCS
 )
 
 add_library(minpt STATIC ${MINPT_HEADERS} ${MINPT_SRCS})
-target_compile_features(minpt PUBLIC cxx_std_17)
+target_compile_features(minpt PUBLIC cxx_std_20)
 target_include_directories(minpt PUBLIC ${MINPT_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_compile_definitions(minpt PUBLIC NOMINMAX)
 

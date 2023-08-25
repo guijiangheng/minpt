@@ -28,6 +28,21 @@ make -j4
 ```
 Or you can open repository root folder directly with visual studio 2019.
 
+## Gallery
+
+![dragon-rough-glass](./gallery/dragon-rough-glass.png)
+![f8-14b](./gallery/f8-14b.png)
+![f8-14a](./gallery/f8-14a.png)
+![dragon-plastic-minpt](./gallery/dragon-plastic-minpt.png)
+![cu](./gallery/cu.png)
+![dragon-rough-metal](./gallery/dragon-rough-metal.png)
+![f8-24](./gallery/f8-24.png)
+
+
+<video width="800" controls>
+  <source src="./gallery/metal-material.webm.mov" type="video/webm">
+</video>
+
 ## Demo Scene
 
 Example scenes can be obtained from [Morgan McGuire's Computer Graphics Archive](http://casual-effects.com/data/).
